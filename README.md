@@ -1,100 +1,100 @@
-<div align=center>
+# OBFUSCII
 
-  ![Logo](./images/logo.svg)
+ASCII video codec for temporal portraits and responsive branding.
 
-<p>
+## WTF is OBFUSCII?
 
-  It's a simple python package to play videos in a terminal using [ASCII](https://en.wikipedia.org/wiki/ASCII) characters.
+OBFUSCII converts video into compressed ASCII animations that scale infinitely, load instantly, and adapt to any visual context. Responsive logos that move, breathe, and exist as pure text.
 
-  [![Financial Contributors on Open Collective](https://opencollective.com/video-to-ascii/all/badge.svg?label=financial+contributors)](https://opencollective.com/video-to-ascii) [![PyPI version](https://badge.fury.io/py/video-to-ascii.svg)](https://badge.fury.io/py/video-to-ascii)
-  [![Maintainability](https://api.codeclimate.com/v1/badges/3108b26a0bcfffd4b4fe/maintainability)](https://codeclimate.com/github/joelibaceta/video-to-ascii/maintainability)
-  [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/joelibaceta/video-to-ascii)
+**Key Innovation:** Temporal portraits as ASCII loops—faces scanning left to right, subtle movements, living branding that works from mobile headers to desktop displays through CSS scaling.
 
-</p>
+## Core Features
 
-![Screenshot](./images/Simpsons.apng)
+- **Delta Compression:** Custom algo aiming to achieve 10:1 compression ratios vs raw ASCII video
+- **Infinite Scaling:** CSS responsive from tiny mobile headers to full desktop displays
+- **Context Adaptation:** "Transparent" backgrounds through character substitution
+- **Copy/Paste Distribution:** Text-based format enables viral sharing
+- **Web Native:** No special software required, works in any browser
+- **Audio Sync:** Frame-perfect synchronisation for full cinematic experiences
 
-</div>
+## File Format
 
-<details><summary><b>Translations</b></summary>
-<p>
+`.txv` (Text Video) files contain:
+- I-frames: Full ASCII grids every 2-5 seconds
+- P-frames: Delta changes for efficient motion encoding
+- LZMA compression on delta patterns
+- Optional audio synchronisation data
 
-- [🇺🇸 English](./README.md)
-- [🇪🇸 Español](./translations/README_es.md)
-- [🇹🇼 繁體中文](./translations/README_zh-TW.md)
+## Use Cases
 
-<p>
-</details>
+### Personal Branding
+```
+Portrait scanning: looking left → centre → right → centre
+140x80 character resolution, 3-4 frame loop
+Website headers, business cards, social media
+```
 
-## Requirements
+### ASCII Cinema
+Convert full-length films to text-based video with audio synchronisation. Export to social media or embed as web experiences.
 
-- Python3
-- PortAudio (_Only required for installation with audio support_)
-- FFmpeg (_Only required for installation with audio support_)
-- Linux or MacOS ... for now
+### Temporal Logos
+Moving company branding that exists as behaviour rather than static imagery. Copying becomes viral distribution since personalised content is worthless to steal.
+
+## Resolution Targets
+
+- **Portraits/Logos:** 120x70, 140x80 (facial detail recognition)
+- **Terminal:** 80x24, 120x30, 132x43 (classic sizes)  
+- **Web Cinema:** 160x45, 200x60 (film display)
+- **Social Media:** Platform-specific aspect ratios
+
+## Technical Foundation
+
+Built on [joelibaceta/video-to-ascii](https://github.com/joelibaceta/video-to-ascii) with:
+- Resolution override capabilities (bypass terminal size limits)
+- Custom delta compression pipeline
+- Web player with responsive CSS scaling
+- Social media export functionality
+
+## Development Status
+
+🚧 **Phase 1 (Current):** Core compression algorithm and .txv format
+🔜 **Phase 2:** Web player and responsive scaling
+🔜 **Phase 3:** Social media export and distribution tools
+
+## Philosophy
+
+Traditional media is fixed and static, requiring multiple versions for different contexts. OBFUSCII media is temporal, scalable, and context-adaptive. Copying becomes promotion when content is personalised but format is universal.
+
+ASCII video works best through stylisation rather than photorealistic conversion. We target specific resolution sweet spots that preserve recognition while maintaining practical file sizes.
 
 ## Installation
 
-Standard installation
-
 ```bash
-$ pip3 install video-to-ascii
+# Clone repository
+git clone https://github.com/yourusername/obfuscii.git
+cd obfuscii
+
+# Install dependencies
+npm install
+
+# Convert video to .txv
+./obfuscii input.mp4 --resolution 140x80 --output portrait.txv
+
+# Play .txv file
+./obfuscii --play portrait.txv
 ```
 
-With audio support installation
+## Contributing
 
-```bash
-$ pip3 install video-to-ascii --install-option="--with-audio"
-```
+Early development phase. Core compression algorithm takes priority, followed by web player implementation.
 
-## How to use
+## License
 
-Just run `video-to-ascii` in your terminal
+MIT
 
-```bash
-$ video-to-ascii -f myvideo.mp4
-```
+---
 
-### Options
-
-**`--strategy`**
-Allow to choose a strategy to render the output.
-
-![Render Strategies](./images/Strategies.png)
-
-**`-o --output`**
-Export the rendering output to a bash file to share with someone.
-
-![Exporting](./images/export.png)
-
-**`-a --with-audio`**
-If an installation with audio support was made, you can use this option to play the audio track while rendering the video ascii characters.
-
-## How it works
-
-Every video is composed by a set of frames that are played at a certain frame rate.
-
-![Video Frames](./images/imgVideoFrames.png)
-
-Since a terminal has a specific number of rows and columns, we have to resize our video to adjust to the terminal size limitations.
-
-![Terminal](./images/imgTerminal.png)
-
-To reach a correct visualization of an entire frame we need to adjust the _frame height_ to match the _terminal rows_, avoiding using more _characters_ than the number of _terminal columns_.
-
-![Resizing](./images/imgResizing.png)
-
-When picking a character to represent a pixel we need to measure the relevance of that pixel's color in the frame, based on that we can then select the most appropriate character based on the [relative luminance](https://en.wikipedia.org/wiki/Relative_luminance) in colorimetric spaces, using a simplified version of the luminosity function.
-
-<p align="center">
-  <img src="./images/Luminosity.svg">
-</p>
-
-> Green light contributes the most to the intensity perceived by humans, and blue light the least.
-
-This function returns an integer in the range from 0 to 255, we assign a character according to density to show more colored surface for areas with more intense color (highest values).
-
-```python
+*"Temporal logos that exist as behavioral systems rather than static symbols."*
 CHARS_LIGHT 	= [' ', ' ', '.', ':', '!', '+', '*', 'e', '$', '@', '8']
 CHARS_COLOR 	= ['.', '*', 'e', 's', '@']
 CHARS_FILLED    = ['░', '▒', '▓', '█']
