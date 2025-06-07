@@ -4,7 +4,7 @@ import colorsys
 from xtermcolor import colorize
 
 CHARS_OBFUSCII = [' ', '-', '#', '=', '+', '*', '%', '@']
-CHARS_LIGHT = CHARS_OBFUSCII
+CHARS_LIGHT = [' ', ' ', '.', ':', '!', '+', '*', 'e', '$', '@', '8']
 CHARS_COLOR = ['.', '*', 'e', 's', '◍']
 CHARS_FILLED = ['░', '▒', '▓', '█']
 
