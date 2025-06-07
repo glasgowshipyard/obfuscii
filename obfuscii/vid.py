@@ -192,13 +192,13 @@ def print_ascii_frame(ascii_frame: List[List[str]]) -> None:
 
 def play_ascii_video(ascii_frames: List[List[List[str]]], fps: float = 30.0) -> None:
     """
-    Play ASCII video using video-to-ascii's proven approach
+    Play ASCII video using exact video-to-ascii approach
     """
     
     if not ascii_frames:
         return
         
-    frame_delay = 1.0 / fps
+    time_delta = 1.0 / fps
     
     print("Press Ctrl+C to stop")
     input("Press Enter to start playback...")
@@ -209,26 +209,85 @@ def play_ascii_video(ascii_frames: List[List[List[str]]], fps: float = 30.0) -> 
     
     try:
         for frame_idx, ascii_frame in enumerate(ascii_frames):
+            t0 = time.process_time()
             
-            # Move cursor to home position (0,0) - video-to-ascii method
-            sys.stdout.write('\033[0;0H')
+            # Get terminal size every frame (video-to-ascii approach)
+            try:
+                rows, cols = os.popen('stty size', 'r').read().split()
+                cols, rows = int(cols), int(rows)
+            except:
+                cols, rows = 80, 24  # Fallback
             
-            # Build entire frame as single string (like video-to-ascii)
-            frame_msg = f"Frame {frame_idx + 1}/{len(ascii_frames)} | FPS: {fps:.1f}\n"
-            frame_msg += "-" * 60 + "\n"
+            # Move cursor to home position (video-to-ascii method)
+            sys.stdout.write('\u001b[0;0H')
             
-            for row in ascii_frame:
-                frame_msg += ''.join(row) + "\n"
+            # Resize frame to fit terminal (video-to-ascii approach)
+            resized_frame = resize_frame_to_terminal(ascii_frame, (cols, rows))
             
-            # Write entire frame at once (video-to-ascii approach)
-            sys.stdout.write(frame_msg)
+            # Convert to string without headers (pure ASCII like video-to-ascii)
+            msg = ''
+            for row in resized_frame:
+                for char in row:
+                    msg += char
+                msg += '\r\n'  # Use \r\n like video-to-ascii
+            
+            # Frame rate limiting (video-to-ascii timing)
+            t1 = time.process_time()
+            delta = time_delta - (t1 - t0)
+            if delta > 0:
+                time.sleep(delta)
+                
+            # Write the frame (video-to-ascii approach)
+            sys.stdout.write(msg)
             sys.stdout.flush()
-            
-            time.sleep(frame_delay)
             
     except KeyboardInterrupt:
         print("\n\nPlayback stopped")
         sys.stdout.flush()
+
+
+def resize_frame_to_terminal(ascii_frame: List[List[str]], dimensions: Tuple[int, int]) -> List[List[str]]:
+    """
+    Resize ASCII frame to fit terminal dimensions (proportional scaling like video-to-ascii)
+    """
+    cols, rows = dimensions
+    frame_height = len(ascii_frame)
+    frame_width = len(ascii_frame[0]) if ascii_frame else 0
+    
+    if frame_height == 0 or frame_width == 0:
+        return ascii_frame
+    
+    # Calculate scaling to fit both width and height (like video-to-ascii resize_frame)
+    height_ratio = (rows - 1) / frame_height  # -1 for safety margin
+    width_ratio = cols / frame_width
+    
+    # Use smaller ratio to ensure both dimensions fit
+    scale_factor = min(height_ratio, width_ratio)
+    
+    # Calculate new dimensions
+    new_height = int(frame_height * scale_factor)
+    new_width = int(frame_width * scale_factor)
+    
+    # Sample the original frame at scaled intervals
+    resized = []
+    for new_row in range(new_height):
+        # Map new row back to original frame
+        orig_row = int(new_row / scale_factor)
+        if orig_row >= len(ascii_frame):
+            break
+            
+        row_chars = []
+        for new_col in range(new_width):
+            # Map new column back to original frame  
+            orig_col = int(new_col / scale_factor)
+            if orig_col < len(ascii_frame[orig_row]):
+                row_chars.append(ascii_frame[orig_row][orig_col])
+            else:
+                row_chars.append(' ')
+        
+        resized.append(row_chars)
+    
+    return resized
 
 
 # Test function for development
