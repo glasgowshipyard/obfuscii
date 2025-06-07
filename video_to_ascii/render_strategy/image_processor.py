@@ -3,7 +3,8 @@
 import colorsys
 from xtermcolor import colorize
 
-CHARS_LIGHT = [' ', ' ', '.', ':', '!', '+', '*', 'e', '$', '@', '8']
+CHARS_OBFUSCII = [' ', '-', '#', '=', '+', '*', '%', '@']
+CHARS_LIGHT = CHARS_OBFUSCII
 CHARS_COLOR = ['.', '*', 'e', 's', '◍']
 CHARS_FILLED = ['░', '▒', '▓', '█']
 
@@ -25,7 +26,7 @@ def colorize_char(char, ansi_color):
     str_colorized = colorize(char, ansi=ansi_color)
     return str_colorized
 
-def pixel_to_ascii(pixel, colored=True, density=0):
+def pixel_to_ascii(pixel, colored=False, density=0):
     """
     Convert a pixel to char
     """
