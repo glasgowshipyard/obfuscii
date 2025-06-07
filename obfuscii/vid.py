@@ -8,13 +8,17 @@ video-to-ASCII conversion optimized for middle-out compression.
 
 import cv2
 import numpy as np
+import time
+import os
+import sys
 from typing import List, Tuple, Optional
+from . import moc
 
-# OBFUSCII 8-character set optimized for compression
-ASCII_CHARS = [' ', '-', '#', '=', '+', '*', '%', '@']
+# GPT's proven character set - dark to light progression
+ASCII_CHARS = [' ', '.', ':', '-', '=', '+', '*', '#', '%', '@']
 
 def process_video(input_file: str, output_file: str, resolution: Optional[str] = None, 
-                 preview: bool = False, verbose: bool = False) -> None:
+                 preview_mode: bool = False, verbose: bool = False) -> None:
     """
     Main video processing function
     
@@ -22,8 +26,8 @@ def process_video(input_file: str, output_file: str, resolution: Optional[str] =
         input_file: Path to input video file
         output_file: Path to output .txv file  
         resolution: Optional resolution override (e.g. "140x80")
-        preview: Show ASCII output in terminal
-        verbose: Print detailed progress
+        preview_mode: True = short clip (30 frames), False = full video
+        verbose: Print compression stats and detailed progress
     """
     
     if verbose:
@@ -50,12 +54,12 @@ def process_video(input_file: str, output_file: str, resolution: Optional[str] =
         if not ret:
             break
             
-        # Convert frame to ASCII using GPT's approach
+        # Convert frame to ASCII using GPT's proven approach
         ascii_frame = frame_to_ascii(frame, target_width, target_height)
         ascii_frames.append(ascii_frame)
         
-        # Show preview if requested
-        if preview and frame_index < 10:  # Only show first 10 frames to avoid spam
+        # Show text preview only in preview mode (first 10 frames)
+        if preview_mode and frame_index < 10:
             print(f"\n--- Frame {frame_index} ---")
             print_ascii_frame(ascii_frame)
         
@@ -68,6 +72,28 @@ def process_video(input_file: str, output_file: str, resolution: Optional[str] =
     
     if verbose:
         print(f"Conversion complete: {len(ascii_frames)} frames")
+    
+    # Play ASCII video - default behavior
+    if preview_mode:
+        # Preview mode: short clip (30 frames)
+        frame_count = min(30, len(ascii_frames))
+        print(f"\nPlaying ASCII preview ({frame_count} frames)...")
+        play_ascii_video(ascii_frames[:frame_count], fps)
+    else:
+        # Default: play full video
+        print(f"\nPlaying ASCII video ({len(ascii_frames)} frames)...")
+        play_ascii_video(ascii_frames, fps)
+    
+    # Compression analysis
+    if verbose:
+        print("\nStarting compression analysis...")
+        compressed = moc.compress_video(ascii_frames, fps=fps)
+        moc.test_compression(ascii_frames)
+    else:
+        # Still compress but don't show detailed stats
+        compressed = moc.compress_video(ascii_frames, fps=fps)
+    
+    if verbose:
         print(f"Output: {output_file}")
     
     # TODO: Save to .txv format (next module: txv.py)
@@ -113,7 +139,7 @@ def parse_resolution(resolution: Optional[str]) -> Tuple[Optional[int], Optional
 def frame_to_ascii(frame: np.ndarray, target_width: Optional[int] = None, 
                   target_height: Optional[int] = None) -> List[List[str]]:
     """
-    Convert video frame to ASCII using GPT's clean approach
+    Convert video frame to ASCII using GPT's proven approach
     
     Args:
         frame: OpenCV frame (BGR format)
@@ -127,26 +153,26 @@ def frame_to_ascii(frame: np.ndarray, target_width: Optional[int] = None,
     # Convert BGR to greyscale (GPT's approach)
     grey = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     
-    # Determine target dimensions
+    # Determine target dimensions using GPT's exact method
     if target_width and target_height:
         # Use specified resolution
         new_width, new_height = target_width, target_height
     else:
-        # Auto-size based on frame aspect ratio
+        # Auto-size using GPT's proven approach
         height, width = grey.shape
-        aspect_ratio = height / width
-        new_width = 120  # Default width
-        new_height = int(aspect_ratio * new_width * 0.55)  # Terminal aspect correction
+        aspect_ratio = height / width  # GPT's height/width ratio
+        new_width = 120  # GPT's default width
+        new_height = int(aspect_ratio * new_width * 0.55)  # GPT's terminal compensation
     
-    # Resize frame
+    # Resize frame (OpenCV uses width, height order)
     resized = cv2.resize(grey, (new_width, new_height), interpolation=cv2.INTER_LINEAR)
     
-    # Convert pixels to ASCII using GPT's direct mapping
+    # Convert pixels to ASCII using GPT's exact mapping
     ascii_frame = []
     for row in resized:
         ascii_row = []
         for pixel in row:
-            # GPT's simple mapping: pixel // (256 // len(chars))
+            # GPT's mapping: pixel // (256 // len(chars))
             char_index = min(pixel // (256 // len(ASCII_CHARS)), len(ASCII_CHARS) - 1)
             ascii_row.append(ASCII_CHARS[char_index])
         ascii_frame.append(ascii_row)
@@ -159,9 +185,50 @@ def print_ascii_frame(ascii_frame: List[List[str]]) -> None:
     Print ASCII frame to terminal for preview
     """
     for row in ascii_frame:
-        # Double each character for better aspect ratio in terminal
-        line = ''.join(char * 2 for char in row)
+        # Single character output (GPT's approach, no doubling)
+        line = ''.join(row)
         print(line)
+
+
+def play_ascii_video(ascii_frames: List[List[List[str]]], fps: float = 30.0) -> None:
+    """
+    Play ASCII video using video-to-ascii's proven approach
+    """
+    
+    if not ascii_frames:
+        return
+        
+    frame_delay = 1.0 / fps
+    
+    print("Press Ctrl+C to stop")
+    input("Press Enter to start playback...")
+    
+    # Clear screen once at start (video-to-ascii approach)
+    sys.stdout.write('\033[2J')
+    sys.stdout.flush()
+    
+    try:
+        for frame_idx, ascii_frame in enumerate(ascii_frames):
+            
+            # Move cursor to home position (0,0) - video-to-ascii method
+            sys.stdout.write('\033[0;0H')
+            
+            # Build entire frame as single string (like video-to-ascii)
+            frame_msg = f"Frame {frame_idx + 1}/{len(ascii_frames)} | FPS: {fps:.1f}\n"
+            frame_msg += "-" * 60 + "\n"
+            
+            for row in ascii_frame:
+                frame_msg += ''.join(row) + "\n"
+            
+            # Write entire frame at once (video-to-ascii approach)
+            sys.stdout.write(frame_msg)
+            sys.stdout.flush()
+            
+            time.sleep(frame_delay)
+            
+    except KeyboardInterrupt:
+        print("\n\nPlayback stopped")
+        sys.stdout.flush()
 
 
 # Test function for development
@@ -176,17 +243,37 @@ def test_single_frame(video_path: str) -> None:
         
     ret, frame = cap.read()
     if ret:
-        ascii_frame = frame_to_ascii(frame, 80, 40)  # Small test size
+        ascii_frame = frame_to_ascii(frame, 120, None)  # Use GPT's width, auto height
         print("First frame ASCII conversion:")
         print_ascii_frame(ascii_frame)
     
     cap.release()
 
 
+def test_image(image_path: str, width: int = 120) -> None:
+    """Test ASCII conversion on a single image using the same algorithm as video"""
+    import cv2
+    
+    # Load image
+    img = cv2.imread(image_path)
+    if img is None:
+        print(f"Cannot load image: {image_path}")
+        return
+    
+    # Use the exact same conversion as video frames
+    ascii_frame = frame_to_ascii(img, width, None)  # Let it auto-calculate height
+    
+    print("Image ASCII conversion:")
+    print_ascii_frame(ascii_frame)
+
+
 if __name__ == "__main__":
     # Quick test when run directly
     import sys
     if len(sys.argv) > 1:
-        test_single_frame(sys.argv[1])
+        if sys.argv[1].endswith(('.jpg', '.png', '.jpeg')):
+            test_image(sys.argv[1])
+        else:
+            test_single_frame(sys.argv[1])
     else:
-        print("Usage: python video.py <video_file>")
+        print("Usage: python vid.py <video_file_or_image>")
