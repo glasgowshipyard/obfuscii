@@ -9,3 +9,7 @@ video_to_ascii.egg-info
 build/
 test.py
 env/
+*.mp4
+*.mov
+*.avi
+*.mkv
