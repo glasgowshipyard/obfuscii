@@ -14,11 +14,12 @@ def main():
         choices=["ascii-color", "just-ascii", "filled-ascii"], help='choose an strategy to render the output', action='store')
     PARSER.add_argument('-o', '--output', type=str, dest='output', help='output file to export', action='store')
     PARSER.add_argument('-a','--with-audio', dest='with_audio', help='play audio track', action='store_true')
+    PARSER.add_argument('--resolution', type=str, dest='resolution', help='output resolution (WIDTHxHEIGHT, e.g. 140x80)', action='store')
 
     ARGS = PARSER.parse_args()
 
     try:
-        player.play(ARGS.file, strategy=ARGS.strategy, output=ARGS.output, play_audio=ARGS.with_audio)
+        player.play(ARGS.file, strategy=ARGS.strategy, output=ARGS.output, resolution=ARGS.resolution, play_audio=ARGS.with_audio)
     except (KeyboardInterrupt):
         pass
 
