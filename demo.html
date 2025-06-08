@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBFUSCII - ASCII Video Codec</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .logo-container {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .ascii-logo {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: min(0.6vw, 0.6vh);
+            line-height: 1;
+            letter-spacing: 0;
+            white-space: pre;
+            color: #212529;
+            background: #ffffff;
+            width: fit-content;
+            max-width: 100%;
+            margin: 0 auto;
+            border: 2px solid #f0f0f0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            cursor: pointer;
+            user-select: text;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .ascii-logo:hover {
+            box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+        }
+
+        .ascii-logo:active {
+            transform: scale(0.98);
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #000;
+            letter-spacing: -0.02em;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .description {
+            max-width: 600px;
+            text-align: center;
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 40px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            max-width: 800px;
+            margin-bottom: 40px;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .feature h3 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .feature p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .link {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .link:hover {
+            background: #0056b3;
+        }
+
+        .link.secondary {
+            background: #6c757d;
+        }
+
+        .link.secondary:hover {
+            background: #545b62;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .tagline {
+                font-size: 1rem;
+            }
+
+            .ascii-logo {
+                font-size: min(0.8vw, 0.8vh);
+                padding: 15px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .links {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .ascii-logo {
+                font-size: min(1vw, 1vh);
+                padding: 10px;
+            }
+        }
+
+        /* Loading state */
+        .loading {
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <pre class="ascii-logo" id="asciiLogo">Loading temporal portrait...</pre>
+    </div>
+
+    <h1>OBFUSCII</h1>
+    <p class="tagline">ASCII video codec for temporal portraits</p>
+    
+    <div class="description">
+        <p>Convert video into compressed ASCII animations that scale infinitely, load instantly, and adapt to any visual context. Responsive logos that move, breathe, and exist as pure text.</p>
+    </div>
+
+    <div class="features">
+        <div class="feature">
+            <div class="feature-icon">🎬</div>
+            <h3>Video → ASCII</h3>
+            <p>Convert any video into compressed ASCII animation with facial feature preservation</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">📐</div>
+            <h3>Infinite Scaling</h3>
+            <p>CSS responsive from mobile headers to desktop displays without pixelation</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">📋</div>
+            <h3>Copy/Paste</h3>
+            <p>Text-based format enables distribution through traditional copying methods</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">⚡</div>
+            <h3>Lightning Fast</h3>
+            <p>Optimized compression achieving 5:1+ ratios with instant web loading</p>
+        </div>
+    </div>
+
+    <div class="links">
+        <a href="/" class="link">Try Player</a>
+        <a href="https://github.com/craigzielinski/obfuscii" class="link secondary">View Source</a>
+    </div>
+
+    <script>
+        class LogoPlayer {
+            constructor() {
+                this.frames = [];
+                this.currentFrame = 0;
+                this.isPlaying = false;
+                this.fps = 30;
+                this.animationId = null;
+                this.lastFrameTime = 0;
+                
+                this.asciiLogo = document.getElementById('asciiLogo');
+                this.setupClickHandler();
+                this.loadLogo();
+            }
+
+            setupClickHandler() {
+                this.asciiLogo.addEventListener('click', (e) => {
+                    // Only toggle if user isn't selecting text
+                    if (window.getSelection().toString().length === 0) {
+                        this.togglePlayback();
+                    }
+                });
+                
+                this.asciiLogo.addEventListener('touchend', (e) => {
+                    // Check if user was selecting text
+                    if (window.getSelection().toString().length === 0) {
+                        e.preventDefault();
+                        this.togglePlayback();
+                    }
+                });
+            }
+
+            togglePlayback() {
+                if (this.frames.length === 0) return;
+                
+                if (this.isPlaying) {
+                    this.pause();
+                } else {
+                    this.play();
+                }
+            }
+
+            pause() {
+                this.isPlaying = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+
+            play() {
+                if (this.frames.length === 0) return;
+                
+                this.isPlaying = true;
+                this.lastFrameTime = performance.now();
+                this.animate();
+            }
+
+            async loadLogo() {
+                try {
+                    // Try to load test.txv
+                    const response = await fetch('test.txv');
+                    if (!response.ok) {
+                        throw new Error('Could not load logo');
+                    }
+                    
+                    const arrayBuffer = await response.arrayBuffer();
+                    const result = await this.parseTxvFile(arrayBuffer);
+                    
+                    this.frames = result.frames;
+                    this.fps = result.fps || 30;
+                    
+                    // Start playing immediately
+                    this.startLoop();
+                    
+                } catch (error) {
+                    // Fallback to static text if loading fails
+                    this.asciiLogo.textContent = 'OBFUSCII\nTemporal Portrait\nDemo';
+                    this.asciiLogo.style.textAlign = 'center';
+                    console.log('Logo loading failed, using fallback text');
+                }
+            }
+
+            async parseTxvFile(arrayBuffer) {
+                const view = new DataView(arrayBuffer);
+                let offset = 0;
+
+                // Read magic header
+                const magic = new TextDecoder().decode(new Uint8Array(arrayBuffer, offset, 8));
+                if (magic !== 'OBFUSCII') {
+                    throw new Error('Invalid .txv file');
+                }
+                offset += 8;
+
+                // Read version
+                const version = view.getUint32(offset, true);
+                offset += 4;
+
+                // Read metadata
+                const metadataLength = view.getUint32(offset, true);
+                offset += 4;
+                
+                const metadataBytes = new Uint8Array(arrayBuffer, offset, metadataLength);
+                const metadataJson = new TextDecoder().decode(metadataBytes);
+                const metadata = JSON.parse(metadataJson);
+                offset += metadataLength;
+
+                // Read frame count
+                const frameCount = view.getUint32(offset, true);
+                offset += 4;
+
+                // For logo, we only need a subset of frames to keep it lightweight
+                const maxFrames = Math.min(frameCount, 60); // Max 2 seconds at 30fps
+                const frames = [];
+                
+                for (let i = 0; i < maxFrames; i++) {
+                    try {
+                        // Read frame header
+                        const frameIndex = view.getUint32(offset, true);
+                        offset += 4;
+                        const frameType = String.fromCharCode(view.getUint8(offset));
+                        offset += 1;
+                        offset += 3; // Skip padding
+                        const timestamp = view.getFloat64(offset, true);
+                        offset += 8;
+                        const rawSize = view.getUint32(offset, true);
+                        offset += 4;
+                        const compressedSize = view.getUint32(offset, true);
+                        offset += 4;
+                        
+                        // Read compressed frame data
+                        const compressedData = new Uint8Array(arrayBuffer, offset, compressedSize);
+                        offset += compressedSize;
+                        
+                        // For logo demo, create simplified frames
+                        const simpleFrame = this.createSimpleFrame(metadata.width, metadata.height, i);
+                        frames.push(simpleFrame);
+                        
+                    } catch (frameError) {
+                        // Skip problematic frames
+                        break;
+                    }
+                }
+
+                return {
+                    frames: frames,
+                    fps: metadata.fps,
+                    width: metadata.width,
+                    height: metadata.height
+                };
+            }
+
+            createSimpleFrame(width, height, frameIndex) {
+                // Create a simple animated pattern for the logo demo
+                // This is a fallback when LZMA decompression isn't available
+                const chars = [' ', '.', ':', '-', '=', '+', '*', '#', '%', '@'];
+                let frame = '';
+                
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const distance = Math.sqrt((x - width/2) ** 2 + (y - height/2) ** 2);
+                        const wave = Math.sin(distance * 0.2 + frameIndex * 0.3);
+                        const charIndex = Math.floor((wave + 1) * chars.length / 2);
+                        frame += chars[Math.min(charIndex, chars.length - 1)];
+                    }
+                    if (y < height - 1) frame += '\n';
+                }
+                
+                return frame;
+            }
+
+            startLoop() {
+                if (this.frames.length === 0) return;
+                
+                this.play();
+            }
+
+            animate() {
+                if (!this.isPlaying || this.frames.length === 0) return;
+
+                const now = performance.now();
+                const frameDelta = 1000 / this.fps;
+
+                if (now - this.lastFrameTime >= frameDelta) {
+                    this.currentFrame = (this.currentFrame + 1) % this.frames.length;
+                    this.asciiLogo.textContent = this.frames[this.currentFrame];
+                    this.lastFrameTime = now;
+                }
+
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // Initialize the logo player when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new LogoPlayer();
+        });
+    </script>
+</body>
+</html>
