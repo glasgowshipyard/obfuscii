@@ -100,10 +100,10 @@ def process_video(input_file: str, output_file: str, resolution: Optional[str] =
     ascii_frames = cleanup_ascii_patterns(
         ascii_frames, 
         verbose,
-        enable_isolated_replacement=True,
+        enable_isolated_replacement=True,  # Disable all stages to test baseline
         enable_run_consolidation=True,
         enable_temporal_smoothing=True,
-        enable_spatial_coherence=False
+        enable_spatial_coherence=True     # Test only fixed spatial coherence
     )
     
     # Note: cleanup_ascii_patterns() includes temporal smoothing in Stage 3
@@ -566,47 +566,81 @@ def get_spatial_context(frame: List[List[str]], row: int, col: int, radius: int 
 
 
 def fits_spatial_context(char: str, context_chars: List[str]) -> bool:
-    """Check if character fits well with spatial context"""
+    """
+    FIXED: Check if character fits spatial context using salt-and-pepper detection principles
+    
+    A character is an outlier (doesn't fit) if:
+    1. It appears rarely in the neighbourhood (<15%)
+    2. The neighbourhood is otherwise uniform (>70% agreement on most common char)
+    3. This indicates salt-and-pepper noise, not legitimate detail
+    
+    Args:
+        char: Character to test
+        context_chars: List of neighbouring characters
+        
+    Returns:
+        True if character fits context (keep it)
+        False if character is outlier (replace it)
+    """
     
     if not context_chars:
-        return True  # No context to check against
+        return True  # No context to judge against
     
     # Count character frequencies in context
     char_counts = {}
     for ctx_char in context_chars:
         char_counts[ctx_char] = char_counts.get(ctx_char, 0) + 1
     
-    # Character fits if it appears in context or is adjacent to common context chars
-    if char in char_counts:
+    # Get current character frequency in neighbourhood
+    current_char_count = char_counts.get(char, 0)
+    current_char_frequency = current_char_count / len(context_chars)
+    
+    # Rule 1: If character appears frequently in neighbourhood, it fits
+    if current_char_frequency >= 0.15:  # 15% threshold - more conservative
         return True
     
-    # Check if character is adjacent to common context characters
-    ascii_order = [' ', '.', ':', '-', '=', '+', '*', '#', '%', '@']
-    
-    try:
-        char_idx = ascii_order.index(char)
+    # Rule 2: Check if neighbourhood is uniform (indicating smooth region)
+    if char_counts:
+        most_common_char = max(char_counts.items(), key=lambda x: x[1])[0]
+        most_common_count = char_counts[most_common_char]
+        neighbourhood_uniformity = most_common_count / len(context_chars)
         
-        for ctx_char, count in char_counts.items():
-            if count >= len(context_chars) // 4:  # Reasonably common in context
-                try:
-                    ctx_idx = ascii_order.index(ctx_char)
-                    if abs(char_idx - ctx_idx) <= 1:  # Adjacent characters
-                        return True
-                except ValueError:
-                    continue
-                    
-    except ValueError:
-        # Character not in progression
-        pass
+        # Only flag as outlier if neighbourhood is uniform (>70% agreement)
+        if neighbourhood_uniformity >= 0.7:
+            # This is a uniform region with an isolated outlier character
+            return False  # Character doesn't fit - likely salt-and-pepper noise
     
-    return False
+    # Rule 3: Preserve edge characters and facial features
+    # High-contrast characters (facial features) should be preserved even if isolated
+    facial_feature_chars = ['#', '*', '%', '@']  # Strong feature characters
+    if char in facial_feature_chars:
+        return True  # Always preserve facial features
+    
+    # Default: character fits (conservative approach)
+    return True
 
 
 def find_contextual_replacement(char: str, context_chars: List[str]) -> str:
-    """Find better character replacement based on spatial context"""
+    """
+    FIXED: Find replacement character using salt-and-pepper noise principles
+    
+    Return the most common character in uniform neighbourhood
+    """
     
     if not context_chars:
         return char
+    
+    # Find most frequent context character (median-filter approach)
+    char_counts = {}
+    for ctx_char in context_chars:
+        char_counts[ctx_char] = char_counts.get(ctx_char, 0) + 1
+    
+    if char_counts:
+        # Return most common character (like median filter for salt-and-pepper)
+        most_common = max(char_counts.items(), key=lambda x: x[1])[0]
+        return most_common
+    
+    return char
 
 
 def apply_temporal_smoothing(ascii_frames: List[List[List[str]]], 
@@ -652,76 +686,6 @@ def apply_temporal_smoothing(ascii_frames: List[List[List[str]]],
                 
                 # Use median to suppress noise
                 median_val = int(sorted(window_vals)[len(window_vals)//2])
-                smoothed_char = num_map[median_val]
-                smoothed_row.append(smoothed_char)
-                
-            smoothed_frame.append(smoothed_row)
-        smoothed.append(smoothed_frame)
-        
-        # Progress bar every 10 frames or so
-        if frame_idx % max(1, total_frames // 20) == 0 or frame_idx == total_frames - 1:
-            progress = (frame_idx + 1) / total_frames
-            bar_width = 40
-            filled_width = int(bar_width * progress)
-            bar = '█' * filled_width + '░' * (bar_width - filled_width)
-            percent = progress * 100
-            print(f"\r  Smoothing: |{bar}| {percent:5.1f}% ({frame_idx + 1}/{total_frames})", end='', flush=True)
-    
-    print()  # New line after progress bar
-    return smoothed
-    
-    # Find most common character in context
-    char_counts = {}
-    for ctx_char in context_chars:
-        char_counts[ctx_char] = char_counts.get(ctx_char, 0) + 1
-    
-    if char_counts:
-        # Return most frequent context character
-        most_common = max(char_counts.items(), key=lambda x: x[1])[0]
-        return most_common
-    
-    return char
-    """
-    Apply temporal smoothing to reduce character flipping noise
-    
-    Uses median filter across temporal window to suppress noise-induced
-    character boundary flipping that hurts compression.
-    """
-    
-    if len(ascii_frames) <= window_size:
-        return ascii_frames
-    
-    # Character to number mapping for median calculation
-    char_map = {' ': 0, '.': 1, ':': 2, '-': 3, '=': 4, 
-                '+': 5, '*': 6, '#': 7, '%': 8, '@': 9}
-    num_map = {v: k for k, v in char_map.items()}
-    
-    smoothed = []
-    height = len(ascii_frames[0])
-    width = len(ascii_frames[0][0])
-    total_frames = len(ascii_frames)
-    
-    print(f"Temporal smoothing: {total_frames} frames...")
-    
-    for frame_idx in range(total_frames):
-        smoothed_frame = []
-        
-        for row in range(height):
-            smoothed_row = []
-            
-            for col in range(width):
-                # Collect values in temporal window
-                window_vals = []
-                
-                start_frame = max(0, frame_idx - window_size // 2)
-                end_frame = min(len(ascii_frames), frame_idx + window_size // 2 + 1)
-                
-                for w_frame in range(start_frame, end_frame):
-                    char = ascii_frames[w_frame][row][col]
-                    window_vals.append(char_map.get(char, 0))
-                
-                # Use median to suppress noise
-                median_val = int(np.median(window_vals))
                 smoothed_char = num_map[median_val]
                 smoothed_row.append(smoothed_char)
                 

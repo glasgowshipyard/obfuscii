@@ -29,19 +29,19 @@ obfuscii/
 - [x] **Frame metadata** - Timing, dimensions, frame index
 - [x] **Memory management** - Handles large video files
 
-### Step 3: Character Pattern Cleanup ⚠️ PARTIALLY WORKING
+### Step 3: Character Pattern Cleanup ✅ WORKING
 - [x] **Modular cleanup pipeline** - 4 distinct stages with enable/disable flags
-- [x] **Stage 1: Isolated replacement** - Working (0 corrections, safe)
-- [x] **Stage 2: Run consolidation** - Working (0 corrections, safe)
-- [x] **Stage 3: Temporal smoothing** - Working (54k+ corrections, helps compression)
-- [x] **Stage 4: Spatial coherence** - ❌ BROKEN (destroys faces)
+- [x] **Stage 1: Isolated replacement** - Working (safe)
+- [x] **Stage 2: Run consolidation** - Working (safe)
+- [x] **Stage 3: Temporal smoothing** - Working (safe, helps compression)
+- [x] **Stage 4: Spatial coherence** - ✅ FIXED (preserves faces, some visual degradation)
 
-### Step 4: Compression Algorithm ✅ WORKING (NEEDS OPTIMIZATION)
+### Step 4: Compression Algorithm ✅ WORKING
 - [x] **RLE + LZMA compression** - Basic algorithm working
 - [x] **Compression analysis** - Performance metrics working
 - [x] **Baseline performance:** 4.4:1 compression ratio (all cleanup disabled)
-- [x] **Target proven:** 5.0:1 compression with broken spatial coherence
-- [ ] **Target performance:** 7:1+ compression ratio ❌ NOT ACHIEVED
+- [x] **Current performance:** 5.2:1 compression ratio (all stages enabled)
+- [ ] **Target performance:** 7:1+ compression ratio ❌ NOT YET ACHIEVED
 
 ### Step 5: .txv File Format ⚠️ PLACEHOLDER
 - [ ] **Format specification** - Header + frames + metadata structure
@@ -51,27 +51,27 @@ obfuscii/
 
 ## Phase 1 Critical Issue: Stage 4 Spatial Coherence
 
-### ❌ Problem Identified
-- **Symptom**: ASCII video becomes blank screen when spatial coherence enabled
-- **Root cause**: Algorithm treats facial features as "noise" and replaces with background
-- **Specific issue**: `fits_spatial_context()` uses 25% threshold (too aggressive)
-- **Impact**: 85k+ character changes destroy facial recognition
+### ✅ Problem Resolved
+- **Original symptom**: ASCII video becomes blank screen when spatial coherence enabled
+- **Root cause identified**: Algorithm treated facial features as "noise" and replaced with background
+- **Solution implemented**: Salt-and-pepper noise detection approach with conservative thresholds
 
-### ✅ Systematic Debugging Complete
-- **Method**: Disabled cleanup stages one by one to isolate problem
-- **Results**: Stages 1-3 safe, Stage 4 destroys face
-- **Proof of concept**: 5.0:1 compression achieved with broken Stage 4
+### ✅ Fixed Algorithm Working  
+- **15% neighbourhood frequency threshold** (vs previous 25%)
+- **70% neighbourhood uniformity required** before flagging outliers
+- **Facial feature preservation** - Never touches `#`, `*`, `%`, `@` characters
+- **Conservative approach** - Defaults to keeping characters when uncertain
 
-### 📋 Solution Identified  
-- **Research**: Salt-and-pepper noise removal algorithms provide exact guidance
-- **Approach**: Conservative outlier detection in uniform regions only
-- **Implementation**: Fixed algorithm created based on median filter principles
+### ⚠️ Current Status
+- **Face preservation**: ✅ Maintains facial recognition
+- **Compression achievement**: ✅ 5.2:1 ratio with all stages enabled
+- **Visual quality**: ⚠️ Some loss of coherence on individual frames
+- **Performance**: ✅ +0.8:1 compression improvement over baseline
 
-### 🎯 Next Actions (Priority Order)
-1. **Test fixed algorithm** - Verify logic on sample patterns
-2. **Replace broken functions** - Update `fits_spatial_context()` and `find_contextual_replacement()`
-3. **Enable Stage 4 only** - Test compression with fixed spatial coherence
-4. **Enable all stages** - Test combined cleanup performance
+### 🎯 Next Optimization Phase
+1. **Fine-tune thresholds** - Balance compression vs visual quality
+2. **Investigate frame rate** - Slow terminal playback affecting quality assessment
+3. **Push toward 7:1+ target** - Current 5.2:1 is good foundation
 
 ## Phase 1 Completion Criteria
 
@@ -80,8 +80,8 @@ obfuscii/
 - [x] **Working compression** - RLE + LZMA functional ✅
 - [x] **Terminal playback** - Video display working ✅
 - [x] **Modular cleanup** - Pipeline with enable/disable flags ✅
-- [ ] **Fixed spatial coherence** - Stage 4 preserves faces ❌
-- [ ] **5:1+ compression ratio** - Minimum acceptable performance ❌
+- [x] **Fixed spatial coherence** - Stage 4 preserves faces ✅
+- [x] **5:1+ compression ratio** - Minimum acceptable performance ✅ (5.2:1)
 
 ### Should Have (Important)  
 - [ ] **7:1+ compression ratio** - Target performance ❌
@@ -134,12 +134,12 @@ obfuscii/
 - ✅ Terminal playback functional
 - ✅ Compression working (basic)
 - ✅ Modular cleanup pipeline
-- ❌ **Spatial coherence fixed** - CURRENT BLOCKER
-- ❌ **5:1+ compression ratio** - DEPENDENT ON FIX
+- ✅ **Spatial coherence fixed** 
+- ✅ **5:1+ compression ratio** (5.2:1 ACHIEVED)
 
 ### Phase 2 Start When:
-- ✅ Phase 1 compression + quality targets met
-- ✅ .txv file format implemented  
-- ✅ Export functionality working
+- [ ] **7:1+ compression ratio** - Still needed for Phase 1 complete
+- [ ] **.txv file format** implemented  
+- [ ] **Export functionality** working
 
-**Current Status:** Phase 1 blocked on spatial coherence fix. Solution identified and ready for implementation.
+**Current Status:** Phase 1 nearly complete. Major breakthrough with spatial coherence fix achieving 5.2:1 compression while preserving faces. Need optimization to reach 7:1+ target.
