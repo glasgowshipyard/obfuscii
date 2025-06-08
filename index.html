@@ -58,7 +58,7 @@
 
         .ascii-content {
             font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-            font-size: min(1vw, 1vh); /* Scales with viewport */
+            font-size: calc(min(90vw / 140, 80vh / 80)); /* 140 chars wide, 80 lines tall */
             line-height: 1;
             letter-spacing: 0;
             white-space: pre;
@@ -66,7 +66,7 @@
             background: #ffffff;
             width: fit-content;
             max-width: 100%;
-            max-height: 70vh; /* Fits in 70% of viewport height */
+            max-height: 100%;
             overflow: hidden;
         }
 
