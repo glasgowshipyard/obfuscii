@@ -24,11 +24,6 @@
             padding: 40px 20px;
         }
 
-        .logo-container {
-            margin-bottom: 40px;
-            text-align: center;
-        }
-
         .ascii-logo {
             font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
             font-size: min(0.6vw, 0.6vh);
@@ -39,22 +34,9 @@
             background: #ffffff;
             width: fit-content;
             max-width: 100%;
-            margin: 0 auto;
-            border: 2px solid #f0f0f0;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin: 0 auto 40px auto;
             cursor: pointer;
             user-select: text;
-            transition: box-shadow 0.2s ease;
-        }
-
-        .ascii-logo:hover {
-            box-shadow: 0 6px 25px rgba(0,0,0,0.15);
-        }
-
-        .ascii-logo:active {
-            transform: scale(0.98);
         }
 
         h1 {
@@ -78,35 +60,6 @@
             font-size: 1rem;
             color: #555;
             margin-bottom: 40px;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
-            max-width: 800px;
-            margin-bottom: 40px;
-        }
-
-        .feature {
-            text-align: center;
-            padding: 20px;
-        }
-
-        .feature-icon {
-            font-size: 2rem;
-            margin-bottom: 15px;
-        }
-
-        .feature h3 {
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .feature p {
-            font-size: 0.9rem;
-            color: #666;
         }
 
         .links {
@@ -150,12 +103,6 @@
 
             .ascii-logo {
                 font-size: min(0.8vw, 0.8vh);
-                padding: 15px;
-            }
-
-            .features {
-                grid-template-columns: 1fr;
-                gap: 20px;
             }
 
             .links {
@@ -167,50 +114,18 @@
         @media (max-width: 480px) {
             .ascii-logo {
                 font-size: min(1vw, 1vh);
-                padding: 10px;
             }
-        }
-
-        /* Loading state */
-        .loading {
-            color: #999;
-            font-style: italic;
         }
     </style>
 </head>
 <body>
-    <div class="logo-container">
-        <pre class="ascii-logo" id="asciiLogo">Loading temporal portrait...</pre>
-    </div>
+    <pre class="ascii-logo" id="asciiLogo">Loading...</pre>
 
     <h1>OBFUSCII</h1>
     <p class="tagline">ASCII video codec for temporal portraits</p>
     
     <div class="description">
-        <p>Convert video into compressed ASCII animations that scale infinitely, load instantly, and adapt to any visual context. Responsive logos that move, breathe, and exist as pure text.</p>
-    </div>
-
-    <div class="features">
-        <div class="feature">
-            <div class="feature-icon">🎬</div>
-            <h3>Video → ASCII</h3>
-            <p>Convert any video into compressed ASCII animation with facial feature preservation</p>
-        </div>
-        <div class="feature">
-            <div class="feature-icon">📐</div>
-            <h3>Infinite Scaling</h3>
-            <p>CSS responsive from mobile headers to desktop displays without pixelation</p>
-        </div>
-        <div class="feature">
-            <div class="feature-icon">📋</div>
-            <h3>Copy/Paste</h3>
-            <p>Text-based format enables distribution through traditional copying methods</p>
-        </div>
-        <div class="feature">
-            <div class="feature-icon">⚡</div>
-            <h3>Lightning Fast</h3>
-            <p>Optimized compression achieving 5:1+ ratios with instant web loading</p>
-        </div>
+        <p>Convert video into compressed ASCII animations that scale infinitely and exist as pure text.</p>
     </div>
 
     <div class="links">
@@ -218,6 +133,7 @@
         <a href="https://github.com/craigzielinski/obfuscii" class="link secondary">View Source</a>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/lzma@2.3.2/src/lzma_worker.js"></script>
     <script>
         class LogoPlayer {
             constructor() {
@@ -235,14 +151,12 @@
 
             setupClickHandler() {
                 this.asciiLogo.addEventListener('click', (e) => {
-                    // Only toggle if user isn't selecting text
                     if (window.getSelection().toString().length === 0) {
                         this.togglePlayback();
                     }
                 });
                 
                 this.asciiLogo.addEventListener('touchend', (e) => {
-                    // Check if user was selecting text
                     if (window.getSelection().toString().length === 0) {
                         e.preventDefault();
                         this.togglePlayback();
@@ -278,7 +192,6 @@
 
             async loadLogo() {
                 try {
-                    // Try to load test.txv
                     const response = await fetch('test.txv');
                     if (!response.ok) {
                         throw new Error('Could not load logo');
@@ -290,14 +203,11 @@
                     this.frames = result.frames;
                     this.fps = result.fps || 30;
                     
-                    // Start playing immediately
-                    this.startLoop();
+                    this.play();
                     
                 } catch (error) {
-                    // Fallback to static text if loading fails
-                    this.asciiLogo.textContent = 'OBFUSCII\nTemporal Portrait\nDemo';
-                    this.asciiLogo.style.textAlign = 'center';
-                    console.log('Logo loading failed, using fallback text');
+                    this.asciiLogo.textContent = 'OBFUSCII';
+                    console.log('Logo loading failed');
                 }
             }
 
@@ -322,44 +232,36 @@
                 
                 const metadataBytes = new Uint8Array(arrayBuffer, offset, metadataLength);
                 const metadataJson = new TextDecoder().decode(metadataBytes);
-                const metadata = JSON.parse(metadataJson);
+                const metadata = JSON.loads(metadataJson);
                 offset += metadataLength;
 
                 // Read frame count
                 const frameCount = view.getUint32(offset, true);
                 offset += 4;
 
-                // For logo, we only need a subset of frames to keep it lightweight
-                const maxFrames = Math.min(frameCount, 60); // Max 2 seconds at 30fps
                 const frames = [];
                 
-                for (let i = 0; i < maxFrames; i++) {
-                    try {
-                        // Read frame header
-                        const frameIndex = view.getUint32(offset, true);
-                        offset += 4;
-                        const frameType = String.fromCharCode(view.getUint8(offset));
-                        offset += 1;
-                        offset += 3; // Skip padding
-                        const timestamp = view.getFloat64(offset, true);
-                        offset += 8;
-                        const rawSize = view.getUint32(offset, true);
-                        offset += 4;
-                        const compressedSize = view.getUint32(offset, true);
-                        offset += 4;
-                        
-                        // Read compressed frame data
-                        const compressedData = new Uint8Array(arrayBuffer, offset, compressedSize);
-                        offset += compressedSize;
-                        
-                        // For logo demo, create simplified frames
-                        const simpleFrame = this.createSimpleFrame(metadata.width, metadata.height, i);
-                        frames.push(simpleFrame);
-                        
-                    } catch (frameError) {
-                        // Skip problematic frames
-                        break;
-                    }
+                for (let i = 0; i < frameCount; i++) {
+                    // Read frame header
+                    const frameIndex = view.getUint32(offset, true);
+                    offset += 4;
+                    const frameType = String.fromCharCode(view.getUint8(offset));
+                    offset += 1;
+                    offset += 3; // Skip padding
+                    const timestamp = view.getFloat64(offset, true);
+                    offset += 8;
+                    const rawSize = view.getUint32(offset, true);
+                    offset += 4;
+                    const compressedSize = view.getUint32(offset, true);
+                    offset += 4;
+                    
+                    // Read compressed frame data
+                    const compressedData = new Uint8Array(arrayBuffer, offset, compressedSize);
+                    offset += compressedSize;
+                    
+                    // Decompress frame
+                    const asciiFrame = await this.decompressFrame(compressedData, metadata.width, metadata.height);
+                    frames.push(asciiFrame);
                 }
 
                 return {
@@ -370,29 +272,46 @@
                 };
             }
 
-            createSimpleFrame(width, height, frameIndex) {
-                // Create a simple animated pattern for the logo demo
-                // This is a fallback when LZMA decompression isn't available
-                const chars = [' ', '.', ':', '-', '=', '+', '*', '#', '%', '@'];
-                let frame = '';
-                
-                for (let y = 0; y < height; y++) {
-                    for (let x = 0; x < width; x++) {
-                        const distance = Math.sqrt((x - width/2) ** 2 + (y - height/2) ** 2);
-                        const wave = Math.sin(distance * 0.2 + frameIndex * 0.3);
-                        const charIndex = Math.floor((wave + 1) * chars.length / 2);
-                        frame += chars[Math.min(charIndex, chars.length - 1)];
-                    }
-                    if (y < height - 1) frame += '\n';
-                }
-                
-                return frame;
-            }
-
-            startLoop() {
-                if (this.frames.length === 0) return;
-                
-                this.play();
+            async decompressFrame(compressedData, width, height) {
+                return new Promise((resolve, reject) => {
+                    const dataArray = Array.from(compressedData);
+                    
+                    LZMA.decompress(dataArray, (result, error) => {
+                        if (error) {
+                            reject(new Error(`LZMA decompression failed: ${error}`));
+                        } else {
+                            try {
+                                let jsonString;
+                                if (typeof result === 'string') {
+                                    jsonString = result;
+                                } else {
+                                    jsonString = new TextDecoder().decode(new Uint8Array(result));
+                                }
+                                
+                                const rleSegments = JSON.parse(jsonString);
+                                
+                                // Reconstruct ASCII frame
+                                let frameString = '';
+                                let position = 0;
+                                
+                                for (const [char, runLength] of rleSegments) {
+                                    for (let i = 0; i < runLength; i++) {
+                                        frameString += char;
+                                        position++;
+                                        
+                                        if (position % width === 0 && position < width * height) {
+                                            frameString += '\n';
+                                        }
+                                    }
+                                }
+                                
+                                resolve(frameString);
+                            } catch (parseError) {
+                                reject(new Error(`Frame reconstruction failed: ${parseError.message}`));
+                            }
+                        }
+                    });
+                });
             }
 
             animate() {
@@ -411,7 +330,6 @@
             }
         }
 
-        // Initialize the logo player when the page loads
         document.addEventListener('DOMContentLoaded', () => {
             new LogoPlayer();
         });
