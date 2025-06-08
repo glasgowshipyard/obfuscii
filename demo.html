@@ -232,7 +232,7 @@
                 
                 const metadataBytes = new Uint8Array(arrayBuffer, offset, metadataLength);
                 const metadataJson = new TextDecoder().decode(metadataBytes);
-                const metadata = JSON.loads(metadataJson);
+                const metadata = JSON.parse(metadataJson);
                 offset += metadataLength;
 
                 // Read frame count
