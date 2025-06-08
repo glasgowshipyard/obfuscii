@@ -162,7 +162,7 @@ class OBFUSCIIPlayer {
 
             // Read and decompress frames
             const frames = [];
-            const maxFrames = Math.min(frameCount, 100); // Limit for performance
+            const maxFrames = frameCount;
             
             for (let i = 0; i < maxFrames; i++) {
                 try {
