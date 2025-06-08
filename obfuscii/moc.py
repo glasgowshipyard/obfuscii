@@ -185,7 +185,7 @@ def compress_rle_segments(rle_segments: List[Tuple[str, int]]) -> bytes:
     json_data = json.dumps(segment_data, separators=(',', ':')).encode('utf-8')
     
     # Apply LZMA compression (preset 6 = good compression/speed balance)
-    compressed_data = lzma.compress(json_data, preset=6)
+    compressed_data = lzma.compress(json_data, format=lzma.FORMAT_RAW, preset=6)
     
     return compressed_data
 
