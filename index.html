@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBFUSCII - ASCII Video Player</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1 class="logo">OBFUSCII</h1>
+            <p class="tagline">Temporal portraits as responsive ASCII loops</p>
+        </header>
+
+        <main class="player-section">
+            <div class="player-container">
+                <div class="video-display" id="videoDisplay">
+                    <div class="ascii-content" id="asciiContent">
+                        <div class="placeholder-text">
+                            Load a .txv file to begin
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls-panel">
+                    <div class="primary-controls">
+                        <input type="file" id="fileInput" accept=".txv" class="file-input">
+                        <label for="fileInput" class="load-button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14,2 14,8 20,8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10,9 9,9 8,9"></polyline>
+                            </svg>
+                            Load .txv File
+                        </label>
+
+                        <div class="playback-controls">
+                            <button class="control-btn" id="playBtn" disabled>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </button>
+                            <button class="control-btn" id="pauseBtn" disabled>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="6" y="4" width="4" height="16"></rect>
+                                    <rect x="14" y="4" width="4" height="16"></rect>
+                                </svg>
+                            </button>
+                            <button class="control-btn" id="stopBtn" disabled>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="scale-controls">
+                            <label for="scaleSlider">Scale:</label>
+                            <input type="range" id="scaleSlider" min="0.5" max="3" step="0.1" value="1" class="scale-slider">
+                            <span id="scaleValue">100%</span>
+                        </div>
+                    </div>
+
+                    <div class="status-bar">
+                        <div class="file-info" id="fileInfo">No file loaded</div>
+                        <div class="playback-info" id="playbackInfo">Ready</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <section class="demo-section">
+            <h2>Quick Test</h2>
+            <p>Load the included <code>test.txv</code> file to see OBFUSCII in action:</p>
+            <button class="demo-button" id="loadTestBtn">Load test.txv</button>
+        </section>
+
+        <footer class="app-footer">
+            <p>OBFUSCII - ASCII video codec for temporal portraits and responsive branding</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/lzma@2.3.2/src/lzma_worker.min.js"></script>
+    <script src="player.js"></script>
+</body>
+</html>
