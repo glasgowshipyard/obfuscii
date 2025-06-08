@@ -1,13 +1,13 @@
 """
-OBFUSCII Video Processing Module - Corrected Preprocessing Pipeline
+OBFUSCII Video Processing Module - Progressive Smoothing Pipeline
 
-Clean video-to-ASCII conversion with corrected preprocessing order:
-1. Noise reduction on color image (preserves channel relationships)
-2. Greyscale conversion (reduces information dimensionality)
-3. Contrast enhancement (operates on clean, simplified data)
-4. Morphological cleanup (final ASCII optimization)
+Clean video-to-ASCII conversion optimized for compression and viewability:
+1. Progressive blur cascade (bilateral → gaussian → median)
+2. Greyscale conversion on clean data
+3. Light contrast enhancement for viewability
+4. Temporal smoothing for compression
 
-Optimized for both ASCII quality and compression.
+Targets both facial recognition and 10:1 compression ratio.
 """
 
 import cv2
@@ -24,7 +24,7 @@ ASCII_CHARS = [' ', '.', ':', '-', '=', '+', '*', '#', '%', '@']
 def process_video(input_file: str, output_file: str, resolution: Optional[str] = None, 
                  preview_mode: bool = False, verbose: bool = False) -> None:
     """
-    Main video processing function with optimized preprocessing pipeline
+    Main video processing function with progressive smoothing pipeline
     
     Args:
         input_file: Path to input video file
@@ -56,19 +56,19 @@ def process_video(input_file: str, output_file: str, resolution: Optional[str] =
     else:
         max_frames = frame_count
     
-    # Process frames to ASCII with corrected preprocessing pipeline
+    # Process frames to ASCII with progressive smoothing pipeline
     ascii_frames = []
     frame_index = 0
     
-    print("Converting to ASCII with corrected preprocessing pipeline...")
+    print("Converting to ASCII with progressive smoothing pipeline...")
     
     while frame_index < max_frames:
         ret, frame = cap.read()
         if not ret:
             break
             
-        # Convert frame to ASCII using corrected pipeline
-        ascii_frame = frame_to_ascii_corrected(frame, target_width, target_height)
+        # Convert frame to ASCII using progressive smoothing
+        ascii_frame = frame_to_ascii_progressive(frame, target_width, target_height)
         ascii_frames.append(ascii_frame)
         
         # Progress reporting
@@ -151,15 +151,16 @@ def parse_resolution(resolution: Optional[str]) -> Tuple[Optional[int], Optional
         raise ValueError(f"Invalid resolution format: {resolution}. Use WIDTHxHEIGHT (e.g. 140x80)")
 
 
-def corrected_preprocessing_pipeline(frame: np.ndarray) -> np.ndarray:
+def progressive_smoothing_pipeline(frame: np.ndarray) -> np.ndarray:
     """
-    Corrected preprocessing pipeline for ASCII conversion and compression
+    Progressive smoothing cascade optimized for ASCII compression and viewability
     
-    Corrected order based on logical information reduction:
-    1. Noise reduction on COLOR image (uses all channel relationships)
-    2. Greyscale conversion (reduces information dimensionality) 
-    3. Contrast enhancement (operates on clean, simplified data)
-    4. Morphological cleanup (final optimization)
+    Three-stage smoothing approach:
+    1. Bilateral filter preserves major edges whilst removing noise
+    2. Gaussian blur eliminates texture without creating hard boundaries
+    3. Median filter removes remaining artifacts that fragment RLE runs
+    
+    Then light contrast enhancement for facial feature definition.
     
     Args:
         frame: BGR input frame from OpenCV
@@ -168,31 +169,33 @@ def corrected_preprocessing_pipeline(frame: np.ndarray) -> np.ndarray:
         Optimized greyscale frame ready for ASCII conversion
     """
     
-    # Step 1: Noise reduction on COLOR image FIRST
-    # Bilateral filter can use color channel relationships for better noise detection
-    denoised_color = cv2.bilateralFilter(frame, 15, 80, 80)
+    # Stage 1: Bilateral filter - preserves structural edges, removes noise
+    # Uses colour channel relationships for better edge detection
+    smooth1 = cv2.bilateralFilter(frame, 15, 80, 80)
     
-    # Step 2: Convert clean color image to greyscale
-    # Now operating on already-cleaned data
-    gray = cv2.cvtColor(denoised_color, cv2.COLOR_BGR2GRAY)
+    # Stage 2: Gaussian blur - eliminates texture patterns
+    # Creates smooth gradients that compress well with RLE
+    smooth2 = cv2.GaussianBlur(smooth1, (9, 9), 0)
     
-    # Step 3: Contrast enhancement on clean greyscale data
-    # CLAHE works more effectively on noise-reduced data
-    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
-    contrasted = clahe.apply(gray)
+    # Stage 3: Median filter - removes remaining salt-and-pepper artifacts
+    # Prevents single-pixel outliers that break RLE runs
+    smooth3 = cv2.medianBlur(smooth2, 5)
     
-    # Step 4: Final morphological cleanup
-    # Small cleanup on the final result
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-    cleaned = cv2.morphologyEx(contrasted, cv2.MORPH_CLOSE, kernel)
+    # Convert to greyscale on fully smoothed data
+    gray = cv2.cvtColor(smooth3, cv2.COLOR_BGR2GRAY)
     
-    return cleaned
+    # Light contrast enhancement for viewability (much gentler than before)
+    # clipLimit=1.5 vs previous 3.0 to avoid fragmenting smooth regions
+    clahe = cv2.createCLAHE(clipLimit=1.5, tileGridSize=(8, 8))
+    enhanced = clahe.apply(gray)
+    
+    return enhanced
 
 
-def frame_to_ascii_corrected(frame: np.ndarray, target_width: Optional[int] = None, 
-                           target_height: Optional[int] = None) -> List[List[str]]:
+def frame_to_ascii_progressive(frame: np.ndarray, target_width: Optional[int] = None, 
+                              target_height: Optional[int] = None) -> List[List[str]]:
     """
-    Convert video frame to ASCII using corrected preprocessing pipeline
+    Convert video frame to ASCII using progressive smoothing pipeline
     
     Args:
         frame: OpenCV frame (BGR format)
@@ -203,8 +206,8 @@ def frame_to_ascii_corrected(frame: np.ndarray, target_width: Optional[int] = No
         2D array of ASCII characters
     """
     
-    # Apply corrected preprocessing pipeline
-    processed_frame = corrected_preprocessing_pipeline(frame)
+    # Apply progressive smoothing pipeline
+    processed_frame = progressive_smoothing_pipeline(frame)
     
     # Determine target dimensions using GPT's exact method
     if target_width and target_height:
@@ -409,7 +412,7 @@ def resize_frame_to_terminal(ascii_frame: List[List[str]], dimensions: Tuple[int
 def process_image(input_file: str, output_file: str, resolution: Optional[str] = None,
                  verbose: bool = False) -> None:
     """
-    Process single image to ASCII using same corrected pipeline as video
+    Process single image to ASCII using same progressive smoothing pipeline as video
     
     Args:
         input_file: Path to input image file (jpg, png, etc.)
@@ -435,9 +438,9 @@ def process_image(input_file: str, output_file: str, resolution: Optional[str] =
         if resolution:
             print(f"Target resolution: {target_width}x{target_height}")
     
-    # Convert to ASCII using corrected pipeline
-    print("Converting image to ASCII with corrected preprocessing...")
-    ascii_frame = frame_to_ascii_corrected(img, target_width, target_height)
+    # Convert to ASCII using progressive smoothing pipeline
+    print("Converting image to ASCII with progressive smoothing...")
+    ascii_frame = frame_to_ascii_progressive(img, target_width, target_height)
     
     # Create single-frame "video" for compression
     ascii_frames = [ascii_frame]
@@ -459,71 +462,83 @@ def process_image(input_file: str, output_file: str, resolution: Optional[str] =
 
 
 # Comparison and testing functions
-def test_preprocessing_comparison(image_path: str) -> None:
+def test_pipeline_comparison(video_path: str) -> None:
     """
-    Compare old vs new preprocessing approaches for compression performance
+    Compare progressive smoothing vs current corrected pipeline
     """
     
-    print("=== PREPROCESSING PIPELINE COMPARISON ===")
+    print("=== PIPELINE COMPARISON TEST ===")
     
-    # Load image
-    img = cv2.imread(image_path)
-    if img is None:
-        print(f"Cannot load: {image_path}")
+    # Load first frame for testing
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print(f"Cannot load: {video_path}")
         return
     
-    print(f"Testing on: {image_path}")
+    ret, frame = cap.read()
+    cap.release()
     
-    # Test 1: Original OpenCV greyscale (baseline)
-    print("\n--- 1. Original OpenCV Greyscale (baseline) ---")
-    grey_old = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    ascii_old = convert_to_ascii_basic(grey_old, 80, None)
-    print_ascii_frame_sample(ascii_old, 10)  # Show first 10 lines
+    if not ret:
+        print("Cannot read first frame")
+        return
     
-    # Test 2: LAB L-channel approach 
-    print("\n--- 2. LAB L-channel Approach ---")
-    lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
-    lightness = lab[:, :, 0]
-    ascii_lab = convert_to_ascii_basic(lightness, 80, None)
-    print_ascii_frame_sample(ascii_lab, 10)
+    print(f"Testing on first frame of: {video_path}")
     
-    # Test 3: Corrected pipeline (noise → greyscale → contrast)
-    print("\n--- 3. Corrected Pipeline (noise → greyscale → contrast) ---")
-    ascii_corrected = frame_to_ascii_corrected(img, 80, None)
-    print_ascii_frame_sample(ascii_corrected, 10)
+    # Test 1: Progressive smoothing pipeline
+    print("\n--- 1. Progressive Smoothing Pipeline ---")
+    ascii_progressive = frame_to_ascii_progressive(frame, 80, None)
+    print_ascii_frame_sample(ascii_progressive, 15)
     
-    # Compression comparison
+    # Test 2: Original corrected pipeline (for comparison)
+    print("\n--- 2. Original Corrected Pipeline ---")
+    ascii_original = frame_to_ascii_corrected_legacy(frame, 80, None)
+    print_ascii_frame_sample(ascii_original, 15)
+    
+    # Compression comparison on single frame
     print("\n--- COMPRESSION COMPARISON ---")
-    old_result = moc.compress_video_rle([ascii_old], fps=1.0, verbose=False)
-    lab_result = moc.compress_video_rle([ascii_lab], fps=1.0, verbose=False)
-    corrected_result = moc.compress_video_rle([ascii_corrected], fps=1.0, verbose=False)
+    progressive_result = moc.compress_video_rle([ascii_progressive], fps=1.0, verbose=False)
+    original_result = moc.compress_video_rle([ascii_original], fps=1.0, verbose=False)
     
-    old_ratio = old_result.stats.overall_ratio if old_result.stats else 0
-    lab_ratio = lab_result.stats.overall_ratio if lab_result.stats else 0
-    corrected_ratio = corrected_result.stats.overall_ratio if corrected_result.stats else 0
+    prog_ratio = progressive_result.stats.overall_ratio if progressive_result.stats else 0
+    orig_ratio = original_result.stats.overall_ratio if original_result.stats else 0
     
-    print(f"Original greyscale:   {old_ratio:.1f}:1")
-    print(f"LAB L-channel:        {lab_ratio:.1f}:1") 
-    print(f"Corrected pipeline:   {corrected_ratio:.1f}:1")
+    print(f"Progressive smoothing: {prog_ratio:.1f}:1")
+    print(f"Original corrected:    {orig_ratio:.1f}:1")
     
-    best_ratio = max(old_ratio, lab_ratio, corrected_ratio)
-    if corrected_ratio == best_ratio:
-        print("✅ Corrected pipeline wins!")
-    elif lab_ratio == best_ratio:
-        print("⚠️  LAB approach wins")
+    if prog_ratio > orig_ratio:
+        improvement = prog_ratio - orig_ratio
+        print(f"✅ Progressive wins by {improvement:.1f}:1")
+    elif orig_ratio > prog_ratio:
+        loss = orig_ratio - prog_ratio
+        print(f"❌ Progressive loses by {loss:.1f}:1")
     else:
-        print("📊 Original approach still best")
+        print("🤝 Both approaches perform equally")
 
 
-def convert_to_ascii_basic(gray_frame: np.ndarray, width: int, height: Optional[int]) -> List[List[str]]:
-    """Helper function for basic ASCII conversion without preprocessing"""
+def frame_to_ascii_corrected_legacy(frame: np.ndarray, target_width: Optional[int] = None, 
+                                   target_height: Optional[int] = None) -> List[List[str]]:
+    """
+    Legacy corrected pipeline for comparison
+    """
     
-    if height is None:
-        h, w = gray_frame.shape
-        aspect_ratio = h / w
-        height = int(aspect_ratio * width * 0.55)
+    # Original corrected pipeline
+    denoised_color = cv2.bilateralFilter(frame, 15, 80, 80)
+    gray = cv2.cvtColor(denoised_color, cv2.COLOR_BGR2GRAY)
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+    contrasted = clahe.apply(gray)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    cleaned = cv2.morphologyEx(contrasted, cv2.MORPH_CLOSE, kernel)
     
-    resized = cv2.resize(gray_frame, (width, height), interpolation=cv2.INTER_LINEAR)
+    # Convert to ASCII
+    if target_width and target_height:
+        new_width, new_height = target_width, target_height
+    else:
+        height, width = cleaned.shape
+        aspect_ratio = height / width
+        new_width = 120
+        new_height = int(aspect_ratio * new_width * 0.55)
+    
+    resized = cv2.resize(cleaned, (new_width, new_height), interpolation=cv2.INTER_LINEAR)
     
     ascii_frame = []
     for row in resized:
@@ -557,15 +572,15 @@ def test_single_frame(video_path: str) -> None:
         
     ret, frame = cap.read()
     if ret:
-        ascii_frame = frame_to_ascii_corrected(frame, 120, None)
-        print("First frame ASCII conversion (corrected pipeline):")
+        ascii_frame = frame_to_ascii_progressive(frame, 120, None)
+        print("First frame ASCII conversion (progressive smoothing):")
         print_ascii_frame(ascii_frame)
     
     cap.release()
 
 
 def test_image(image_path: str, width: int = 120) -> None:
-    """Test ASCII conversion on a single image using corrected pipeline"""
+    """Test ASCII conversion on a single image using progressive smoothing"""
     process_image(image_path, "test_output.txv", f"{width}x", verbose=True)
 
 
