@@ -230,6 +230,20 @@ class OBFUSCIIPlayer {
         }
     }
 
+    async decompressFrame(compressedData, width, height) {
+        try {
+            // LZMA-JS returns the RLE segments directly as a JavaScript array
+            const rleSegments = await this.decompressLZMA(compressedData);
+            
+            // Skip JSON.parse entirely - we already have the array
+            return this.reconstructFrameFromRLE(rleSegments, width, height);
+            
+        } catch (error) {
+            console.warn('Frame decompression failed:', error);
+            return this.createFallbackFrame(width, height, 0);
+        }
+    }
+
     async decompressLZMA(compressedData) {
         return new Promise((resolve, reject) => {
             try {
@@ -239,10 +253,8 @@ class OBFUSCIIPlayer {
                     if (error) {
                         reject(new Error(`LZMA decompression failed: ${error}`));
                     } else {
-                        // LZMA-JS returns the JSON data directly as an array
-                        // Don't use TextDecoder - just convert to string
-                        const jsonString = String.fromCharCode(...result);
-                        resolve(jsonString);
+                        // Result is already the JavaScript array of RLE segments
+                        resolve(result);
                     }
                 });
             } catch (error) {
