@@ -1,5 +1,5 @@
 /**
- * OBFUSCII Player Library
+ * OBFUSCII Player Library with Debug Logging
  * Real LZMA decompression and .txv playback
  */
 
@@ -46,11 +46,12 @@ class OBFUSCIIPlayer {
     async initializeLZMA() {
         try {
             if (typeof LZMA === 'undefined') {
+                console.log('🔍 LZMA not immediately available, waiting...');
                 await this.waitForLZMA();
             }
-            console.log('LZMA library initialized');
+            console.log('✅ LZMA library initialized successfully');
         } catch (error) {
-            console.warn('LZMA initialization failed:', error);
+            console.error('❌ LZMA initialization failed:', error);
             this.updatePlaybackInfo('LZMA library failed to load', 'error');
         }
     }
@@ -60,6 +61,7 @@ class OBFUSCIIPlayer {
             const start = Date.now();
             const checkLZMA = () => {
                 if (typeof LZMA !== 'undefined') {
+                    console.log('✅ LZMA library loaded after', Date.now() - start, 'ms');
                     resolve();
                 } else if (Date.now() - start > timeout) {
                     reject(new Error('LZMA library load timeout'));
@@ -76,10 +78,13 @@ class OBFUSCIIPlayer {
         if (!file) return;
 
         try {
+            console.log('🔍 Loading file:', file.name, file.size, 'bytes');
             this.updatePlaybackInfo('Loading .txv file...', 'loading');
             this.disableControls();
             
             const arrayBuffer = await file.arrayBuffer();
+            console.log('🔍 File loaded as ArrayBuffer:', arrayBuffer.byteLength, 'bytes');
+            
             const result = await this.parseTxvFile(arrayBuffer);
             
             this.frames = result.frames;
@@ -87,19 +92,26 @@ class OBFUSCIIPlayer {
             this.metadata = result.metadata;
             this.currentFrame = 0;
             
+            console.log('✅ TXV parsing complete:', {
+                frameCount: this.frames.length,
+                fps: this.fps,
+                firstFrameLength: this.frames[0] ? this.frames[0].length : 0
+            });
+            
             this.updateFileInfo(`${result.width}x${result.height}, ${this.frames.length} frames, ${this.fps} FPS`);
             this.updatePlaybackInfo('File loaded successfully', 'success');
             this.displayFrame(0);
             this.enableControls();
             
         } catch (error) {
+            console.error('❌ File load error:', error);
             this.updatePlaybackInfo(`Load error: ${error.message}`, 'error');
-            console.error('TXV load error:', error);
         }
     }
 
     async loadTestFile() {
         try {
+            console.log('🔍 Loading test.txv...');
             this.updatePlaybackInfo('Loading test.txv...', 'loading');
             
             const response = await fetch('test.txv');
@@ -108,6 +120,8 @@ class OBFUSCIIPlayer {
             }
             
             const arrayBuffer = await response.arrayBuffer();
+            console.log('🔍 test.txv loaded:', arrayBuffer.byteLength, 'bytes');
+            
             const result = await this.parseTxvFile(arrayBuffer);
             
             this.frames = result.frames;
@@ -121,8 +135,8 @@ class OBFUSCIIPlayer {
             this.enableControls();
             
         } catch (error) {
+            console.error('❌ Test file error:', error);
             this.updatePlaybackInfo(`Test file error: ${error.message}`, 'error');
-            console.error('Test file error:', error);
         }
     }
 
@@ -131,8 +145,11 @@ class OBFUSCIIPlayer {
         let offset = 0;
 
         try {
+            console.log('🔍 Parsing TXV file structure...');
+            
             // Read magic header
             const magic = new TextDecoder().decode(new Uint8Array(arrayBuffer, offset, 8));
+            console.log('🔍 Magic header:', magic);
             if (magic !== 'OBFUSCII') {
                 throw new Error('Invalid .txv file: bad magic header');
             }
@@ -140,25 +157,27 @@ class OBFUSCIIPlayer {
 
             // Read version
             const version = view.getUint32(offset, true);
+            console.log('🔍 TXV version:', version);
             offset += 4;
 
             // Read metadata
             const metadataLength = view.getUint32(offset, true);
             offset += 4;
+            console.log('🔍 Metadata length:', metadataLength, 'bytes');
             
             const metadataBytes = new Uint8Array(arrayBuffer, offset, metadataLength);
             const metadataJson = new TextDecoder().decode(metadataBytes);
             const metadata = JSON.parse(metadataJson);
             offset += metadataLength;
 
+            console.log('✅ TXV metadata:', metadata);
+
             // Read frame count
             const frameCount = view.getUint32(offset, true);
             offset += 4;
-
-            console.log('✅ TXV metadata:', metadata);
             console.log('✅ Frame count:', frameCount);
 
-            // Load ALL frames
+            // Load ALL frames with detailed logging
             const frames = [];
             
             for (let i = 0; i < frameCount; i++) {
@@ -176,16 +195,41 @@ class OBFUSCIIPlayer {
                     const compressedSize = view.getUint32(offset, true);
                     offset += 4;
                     
+                    if (i === 0 || i % 10 === 0) {
+                        console.log(`🔍 Frame ${i} header:`, {
+                            frameIndex, frameType, timestamp, rawSize, compressedSize
+                        });
+                    }
+                    
                     // Read compressed frame data
                     const compressedData = new Uint8Array(arrayBuffer, offset, compressedSize);
                     offset += compressedSize;
                     
-                    // Decompress frame
-                    const asciiFrame = await this.decompressFrame(compressedData, metadata.width, metadata.height);
+                    if (i === 0) {
+                        console.log('🔍 First frame compressed data:', {
+                            length: compressedData.length,
+                            firstBytes: Array.from(compressedData.slice(0, 10)),
+                            lastBytes: Array.from(compressedData.slice(-10))
+                        });
+                    }
+                    
+                    // Decompress frame with detailed logging
+                    const asciiFrame = await this.decompressFrame(compressedData, metadata.width, metadata.height, i);
                     frames.push(asciiFrame);
                     
+                    if (i === 0) {
+                        console.log('🔍 First frame decompressed:', {
+                            type: typeof asciiFrame,
+                            length: asciiFrame.length,
+                            hasNewlines: asciiFrame.includes('\n'),
+                            lineCount: asciiFrame.split('\n').length,
+                            firstLine: asciiFrame.split('\n')[0],
+                            preview: asciiFrame.substring(0, 100)
+                        });
+                    }
+                    
                 } catch (frameError) {
-                    console.warn(`Frame ${i} decompression failed:`, frameError);
+                    console.warn(`❌ Frame ${i} decompression failed:`, frameError);
                     const fallbackFrame = this.createFallbackFrame(metadata.width, metadata.height, i);
                     frames.push(fallbackFrame);
                 }
@@ -196,6 +240,8 @@ class OBFUSCIIPlayer {
                 }
             }
 
+            console.log('✅ All frames loaded:', frames.length);
+            
             return {
                 frames: frames,
                 fps: metadata.fps,
@@ -205,18 +251,34 @@ class OBFUSCIIPlayer {
             };
             
         } catch (error) {
+            console.error('❌ TXV parsing failed:', error);
             throw new Error(`TXV parsing failed: ${error.message}`);
         }
     }
 
-    async decompressFrame(compressedData, width, height) {
+    async decompressFrame(compressedData, width, height, frameIndex) {
         try {
-            // LZMA decompression returns RLE segments directly as JavaScript array
-            const rleSegments = await this.decompressLZMA(compressedData);
+            console.log(`🔍 Decompressing frame ${frameIndex}:`, {
+                compressedDataLength: compressedData.length,
+                width,
+                height,
+                expectedCharacters: width * height
+            });
+            
+            // LZMA decompression with detailed logging
+            const rleSegments = await this.decompressLZMA(compressedData, frameIndex);
             
             // Reconstruct ASCII frame from RLE segments
             let frameString = '';
             let position = 0;
+            
+            if (frameIndex === 0) {
+                console.log('🔍 First frame RLE reconstruction:', {
+                    segmentCount: rleSegments.length,
+                    firstSegments: rleSegments.slice(0, 5),
+                    lastSegments: rleSegments.slice(-5)
+                });
+            }
             
             for (const [char, runLength] of rleSegments) {
                 for (let i = 0; i < runLength; i++) {
@@ -230,15 +292,28 @@ class OBFUSCIIPlayer {
                 }
             }
             
+            if (frameIndex === 0) {
+                console.log('✅ First frame reconstructed:', {
+                    finalLength: frameString.length,
+                    expectedLength: width * height + height - 1, // +newlines -last newline
+                    hasNewlines: frameString.includes('\n'),
+                    lineCount: frameString.split('\n').length,
+                    expectedLines: height,
+                    firstLine: frameString.split('\n')[0],
+                    firstLineLength: frameString.split('\n')[0].length,
+                    expectedLineLength: width
+                });
+            }
+            
             return frameString;
             
         } catch (error) {
-            console.warn('Frame decompression failed:', error);
-            return this.createFallbackFrame(width, height, 0);
+            console.error(`❌ Frame ${frameIndex} decompression failed:`, error);
+            return this.createFallbackFrame(width, height, frameIndex);
         }
     }
 
-    async decompressLZMA(compressedData) {
+    async decompressLZMA(compressedData, frameIndex) {
         return new Promise((resolve, reject) => {
             try {
                 if (typeof LZMA === 'undefined') {
@@ -247,22 +322,87 @@ class OBFUSCIIPlayer {
                 
                 const dataArray = Array.from(compressedData);
                 
+                if (frameIndex === 0) {
+                    console.log('🔍 LZMA.decompress input:', {
+                        dataArrayLength: dataArray.length,
+                        firstElements: dataArray.slice(0, 10),
+                        lastElements: dataArray.slice(-10)
+                    });
+                }
+                
                 LZMA.decompress(dataArray, (result, error) => {
+                    if (frameIndex === 0) {
+                        console.log('🔍 LZMA.decompress callback:', {
+                            hasError: !!error,
+                            error: error,
+                            resultType: typeof result,
+                            resultLength: result ? result.length : 0,
+                            resultIsArray: Array.isArray(result),
+                            resultConstructor: result ? result.constructor.name : null
+                        });
+                    }
+                    
                     if (error) {
                         reject(new Error(`LZMA decompression failed: ${error}`));
                     } else {
-                        // LZMA-JS returns the RLE segments directly as a JavaScript array
-                        resolve(result);
+                        try {
+                            // Handle different return types from LZMA.decompress
+                            let jsonString;
+                            if (typeof result === 'string') {
+                                jsonString = result;
+                                if (frameIndex === 0) {
+                                    console.log('🔍 LZMA returned string directly');
+                                }
+                            } else if (Array.isArray(result)) {
+                                // Convert array of bytes to string
+                                jsonString = new TextDecoder().decode(new Uint8Array(result));
+                                if (frameIndex === 0) {
+                                    console.log('🔍 LZMA returned array, converted to string');
+                                }
+                            } else {
+                                // Try to decode as Uint8Array
+                                jsonString = new TextDecoder().decode(new Uint8Array(result));
+                                if (frameIndex === 0) {
+                                    console.log('🔍 LZMA returned unknown type, attempting decode');
+                                }
+                            }
+                            
+                            if (frameIndex === 0) {
+                                console.log('🔍 JSON string to parse:', {
+                                    length: jsonString.length,
+                                    preview: jsonString.substring(0, 200),
+                                    hasValidJson: jsonString.startsWith('[')
+                                });
+                            }
+                            
+                            const rleSegments = JSON.parse(jsonString);
+                            
+                            if (frameIndex === 0) {
+                                console.log('✅ RLE segments parsed:', {
+                                    segmentCount: rleSegments.length,
+                                    firstSegment: rleSegments[0],
+                                    lastSegment: rleSegments[rleSegments.length - 1],
+                                    totalCharacters: rleSegments.reduce((sum, [char, count]) => sum + count, 0)
+                                });
+                            }
+                            
+                            resolve(rleSegments);
+                        } catch (parseError) {
+                            console.error('❌ JSON parsing failed:', parseError);
+                            reject(new Error(`JSON parsing failed: ${parseError.message}`));
+                        }
                     }
                 });
                 
             } catch (error) {
+                console.error('❌ LZMA setup failed:', error);
                 reject(error);
             }
         });
     }
 
     createFallbackFrame(width, height, frameIndex) {
+        console.log(`⚠️ Creating fallback frame ${frameIndex}`);
         // Create fallback frame when decompression fails
         const chars = [' ', '.', ':', '-', '=', '+', '*', '#', '%', '@'];
         let frame = '';
@@ -272,20 +412,50 @@ class OBFUSCIIPlayer {
                 const charIndex = Math.floor((Math.sin(frameIndex * 0.1 + x * 0.05 + y * 0.05) + 1) * chars.length / 2);
                 frame += chars[Math.min(charIndex, chars.length - 1)];
             }
-            frame += '\n';
+            if (y < height - 1) frame += '\n';
         }
         
         return frame;
     }
 
     displayFrame(frameIndex) {
-        if (frameIndex < 0 || frameIndex >= this.frames.length) return;
+        if (frameIndex < 0 || frameIndex >= this.frames.length) {
+            console.warn('⚠️ Invalid frame index:', frameIndex, 'of', this.frames.length);
+            return;
+        }
         
-        this.asciiContent.textContent = this.frames[frameIndex];
+        const frameContent = this.frames[frameIndex];
+        
+        // Debug the content being displayed
+        if (frameIndex === 0) {
+            console.log('🔍 Displaying first frame:', {
+                frameIndex,
+                contentType: typeof frameContent,
+                contentLength: frameContent.length,
+                hasNewlines: frameContent.includes('\n'),
+                lineCount: frameContent.split('\n').length,
+                firstLine: frameContent.split('\n')[0],
+                firstLineLength: frameContent.split('\n')[0].length,
+                preview: frameContent.substring(0, 100)
+            });
+        }
+        
+        // Set the content using textContent (should preserve newlines with <pre> tag)
+        this.asciiContent.textContent = frameContent;
         this.currentFrame = frameIndex;
         
         if (this.frames.length > 1) {
             this.updatePlaybackInfo(`Frame ${frameIndex + 1}/${this.frames.length}`);
+        }
+        
+        // Debug what's actually in the DOM
+        if (frameIndex === 0) {
+            console.log('🔍 DOM after setting textContent:', {
+                elementTagName: this.asciiContent.tagName,
+                elementTextContent: this.asciiContent.textContent.substring(0, 100),
+                elementInnerHTML: this.asciiContent.innerHTML.substring(0, 100),
+                elementComputedStyle: window.getComputedStyle(this.asciiContent).whiteSpace
+            });
         }
     }
 
@@ -295,6 +465,7 @@ class OBFUSCIIPlayer {
             return;
         }
 
+        console.log('▶️ Starting playback');
         this.isPlaying = true;
         this.lastFrameTime = performance.now();
         this.animate();
@@ -302,6 +473,7 @@ class OBFUSCIIPlayer {
     }
 
     pause() {
+        console.log('⏸️ Pausing playback');
         this.isPlaying = false;
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
@@ -310,6 +482,7 @@ class OBFUSCIIPlayer {
     }
 
     stop() {
+        console.log('⏹️ Stopping playback');
         this.isPlaying = false;
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
@@ -382,5 +555,5 @@ class OBFUSCIIPlayer {
 // Initialize player when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.obfusciiPlayer = new OBFUSCIIPlayer();
-    console.log('OBFUSCII Player initialized');
+    console.log('✅ OBFUSCII Player initialized with debugging');
 });
