@@ -233,23 +233,18 @@ class OBFUSCIIPlayer {
     async decompressLZMA(compressedData) {
         return new Promise((resolve, reject) => {
             try {
-                if (typeof LZMA === 'undefined') {
-                    throw new Error('LZMA library not available');
-                }
-                
-                // Convert Uint8Array to regular array for LZMA
                 const dataArray = Array.from(compressedData);
                 
                 LZMA.decompress(dataArray, (result, error) => {
                     if (error) {
                         reject(new Error(`LZMA decompression failed: ${error}`));
                     } else {
-                        // Convert result back to string
-                        const decompressed = new TextDecoder().decode(new Uint8Array(result));
-                        resolve(decompressed);
+                        // LZMA-JS returns the JSON data directly as an array
+                        // Don't use TextDecoder - just convert to string
+                        const jsonString = String.fromCharCode(...result);
+                        resolve(jsonString);
                     }
                 });
-                
             } catch (error) {
                 reject(error);
             }
