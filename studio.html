@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBFUSCII Studio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .studio-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            grid-template-rows: auto 1fr auto;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff88, #0099ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        .main-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .upload-section {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 30px;
+            border: 2px dashed #333;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-section:hover {
+            border-color: #00ff88;
+            background: #1f1f1f;
+        }
+
+        .upload-section.drag-over {
+            border-color: #00ff88;
+            background: #0f2f1f;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .preview-section {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .preview-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #00ff88;
+        }
+
+        .compression-info {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+        }
+
+        .metric {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .metric-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #00ff88;
+        }
+
+        .metric-label {
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        .preview-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            flex: 1;
+            min-height: 400px;
+        }
+
+        .preview-panel {
+            background: #0f0f0f;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #888;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .ascii-display {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 6px;
+            line-height: 1;
+            letter-spacing: 0;
+            white-space: pre;
+            color: #00ff88;
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            overflow: auto;
+            flex: 1;
+            text-shadow: 0 0 5px rgba(0, 255, 136, 0.3);
+        }
+
+        .original-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            background: #000;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .original-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .controls-panel {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .control-group {
+            border-bottom: 1px solid #333;
+            padding-bottom: 20px;
+        }
+
+        .control-group:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .group-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #00ff88;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-item {
+            margin-bottom: 15px;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .control-value {
+            font-weight: 600;
+            color: #00ff88;
+            font-family: monospace;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #333;
+            outline: none;
+            -webkit-appearance: none;
+            transition: all 0.2s ease;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #00ff88;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 255, 136, 0.3);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #00ff88;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 255, 136, 0.3);
+        }
+
+        .slider:hover {
+            background: #444;
+        }
+
+        .action-buttons {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            padding: 20px 0;
+            border-top: 1px solid #333;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00ff88, #0099ff);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-secondary {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+        }
+
+        .btn-secondary:hover {
+            background: #444;
+            border-color: #666;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-bar {
+            grid-column: 1 / -1;
+            background: #111;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .processing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .processing-indicator.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #333;
+            border-top: 2px solid #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .studio-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr auto;
+            }
+
+            .controls-panel {
+                max-height: none;
+                order: -1;
+            }
+
+            .preview-display {
+                grid-template-columns: 1fr;
+                min-height: 300px;
+            }
+
+            .ascii-display {
+                font-size: 4px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .studio-container {
+                padding: 10px;
+                gap: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .compression-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="studio-container">
+        <header class="header">
+            <h1>OBFUSCII Studio</h1>
+            <p>Real-time algorithm optimization for ASCII video compression</p>
+        </header>
+
+        <main class="main-area">
+            <div class="upload-section" id="uploadSection">
+                <input type="file" id="fileInput" class="file-input" accept="image/*,video/*">
+                <div class="upload-text">Drop image or video file here</div>
+                <div class="upload-hint">Supports JPG, PNG, MP4, MOV • Click to browse</div>
+            </div>
+
+            <div class="preview-section">
+                <div class="preview-header">
+                    <h2 class="preview-title">Live Preview</h2>
+                    <div class="compression-info">
+                        <div class="metric">
+                            <div class="metric-value" id="compressionRatio">0:1</div>
+                            <div class="metric-label">Compression</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value" id="runLength">0</div>
+                            <div class="metric-label">Avg Run</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value" id="efficiency">0%</div>
+                            <div class="metric-label">Efficiency</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="preview-display">
+                    <div class="preview-panel">
+                        <div class="panel-title">Original</div>
+                        <div class="original-display">
+                            <img id="originalImage" class="original-image" style="display: none;">
+                            <div id="originalPlaceholder" style="color: #666; text-align: center;">No image loaded</div>
+                        </div>
+                    </div>
+
+                    <div class="preview-panel">
+                        <div class="panel-title">ASCII Output</div>
+                        <pre class="ascii-display" id="asciiDisplay">Load an image to see ASCII conversion</pre>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <aside class="controls-panel">
+            <!-- Progressive Smoothing Controls -->
+            <div class="control-group">
+                <h3 class="group-title">🔧 Progressive Smoothing</h3>
+                
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Bilateral Filter</span>
+                        <span class="control-value" id="bilateralValue">15</span>
+                    </div>
+                    <input type="range" class="slider" id="bilateralSlider" min="5" max="25" value="15" step="2">
+                </div>
+
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Gaussian Blur</span>
+                        <span class="control-value" id="gaussianValue">9</span>
+                    </div>
+                    <input type="range" class="slider" id="gaussianSlider" min="3" max="15" value="9" step="2">
+                </div>
+
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Median Filter</span>
+                        <span class="control-value" id="medianValue">5</span>
+                    </div>
+                    <input type="range" class="slider" id="medianSlider" min="3" max="11" value="5" step="2">
+                </div>
+
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Contrast Enhancement</span>
+                        <span class="control-value" id="contrastValue">1.5</span>
+                    </div>
+                    <input type="range" class="slider" id="contrastSlider" min="0.5" max="3.0" value="1.5" step="0.1">
+                </div>
+            </div>
+
+            <!-- Character Conversion Controls -->
+            <div class="control-group">
+                <h3 class="group-title">📝 Character Conversion</h3>
+                
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Hysteresis Threshold</span>
+                        <span class="control-value" id="hysteresisValue">8</span>
+                    </div>
+                    <input type="range" class="slider" id="hysteresisSlider" min="4" max="24" value="8" step="1">
+                </div>
+
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Boundary Sensitivity</span>
+                        <span class="control-value" id="boundaryValue">1.0</span>
+                    </div>
+                    <input type="range" class="slider" id="boundarySlider" min="0.1" max="2.0" value="1.0" step="0.1">
+                </div>
+
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Output Width</span>
+                        <span class="control-value" id="widthValue">120</span>
+                    </div>
+                    <input type="range" class="slider" id="widthSlider" min="80" max="200" value="120" step="10">
+                </div>
+            </div>
+
+            <!-- Cleanup Pipeline Controls -->
+            <div class="control-group">
+                <h3 class="group-title">🧹 Pattern Cleanup</h3>
+                
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Isolated Replacement</span>
+                        <span class="control-value" id="isolatedValue">75</span>
+                    </div>
+                    <input type="range" class="slider" id="isolatedSlider" min="0" max="100" value="75" step="5">
+                </div>
+
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Run Consolidation</span>
+                        <span class="control-value" id="consolidationValue">85</span>
+                    </div>
+                    <input type="range" class="slider" id="consolidationSlider" min="0" max="100" value="85" step="5">
+                </div>
+
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Spatial Coherence</span>
+                        <span class="control-value" id="coherenceValue">40</span>
+                    </div>
+                    <input type="range" class="slider" id="coherenceSlider" min="15" max="70" value="40" step="5">
+                </div>
+
+                <div class="control-item">
+                    <div class="control-label">
+                        <span>Cleanup Passes</span>
+                        <span class="control-value" id="passesValue">2</span>
+                    </div>
+                    <input type="range" class="slider" id="passesSlider" min="1" max="5" value="2" step="1">
+                </div>
+            </div>
+        </aside>
+
+        <div class="action-buttons">
+            <button class="btn btn-secondary" id="resetBtn">Reset to Defaults</button>
+            <button class="btn btn-secondary" id="loadPresetBtn">Load Preset</button>
+            <button class="btn btn-secondary" id="savePresetBtn" disabled>Save Preset</button>
+            <button class="btn btn-primary" id="exportSettingsBtn" disabled>Export Settings</button>
+            <button class="btn btn-primary" id="processVideoBtn" disabled>Process Full Video</button>
+        </div>
+
+        <div class="status-bar">
+            <div class="processing-indicator" id="processingIndicator">
+                <div class="spinner"></div>
+                <span>Processing...</span>
+            </div>
+            <div id="statusText">Ready • Load an image or video to begin optimization</div>
+            <div id="fileInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        class OBFUSCIIStudio {
+            constructor() {
+                this.currentImage = null;
+                this.originalImageData = null;
+                this.currentASCII = '';
+                this.parameters = this.getDefaultParameters();
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.setupSliders();
+                this.updateStatus('Ready • Load an image or video to begin optimization');
+            }
+
+            getDefaultParameters() {
+                return {
+                    smoothing: {
+                        bilateral: 15,
+                        gaussian: 9,
+                        median: 5,
+                        contrast: 1.5
+                    },
+                    conversion: {
+                        hysteresis: 8,
+                        boundary: 1.0,
+                        width: 120
+                    },
+                    cleanup: {
+                        isolated: 75,
+                        consolidation: 85,
+                        coherence: 40,
+                        passes: 2
+                    }
+                };
+            }
+
+            initializeElements() {
+                // File handling
+                this.uploadSection = document.getElementById('uploadSection');
+                this.fileInput = document.getElementById('fileInput');
+                
+                // Display elements
+                this.originalImage = document.getElementById('originalImage');
+                this.originalPlaceholder = document.getElementById('originalPlaceholder');
+                this.asciiDisplay = document.getElementById('asciiDisplay');
+                
+                // Metrics
+                this.compressionRatio = document.getElementById('compressionRatio');
+                this.runLength = document.getElementById('runLength');
+                this.efficiency = document.getElementById('efficiency');
+                
+                // Status
+                this.statusText = document.getElementById('statusText');
+                this.fileInfo = document.getElementById('fileInfo');
+                this.processingIndicator = document.getElementById('processingIndicator');
+                
+                // Buttons
+                this.resetBtn = document.getElementById('resetBtn');
+                this.loadPresetBtn = document.getElementById('loadPresetBtn');
+                this.savePresetBtn = document.getElementById('savePresetBtn');
+                this.exportSettingsBtn = document.getElementById('exportSettingsBtn');
+                this.processVideoBtn = document.getElementById('processVideoBtn');
+            }
+
+            bindEvents() {
+                // File upload
+                this.uploadSection.addEventListener('click', () => this.fileInput.click());
+                this.fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
+                
+                // Drag and drop
+                this.uploadSection.addEventListener('dragover', (e) => this.handleDragOver(e));
+                this.uploadSection.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+                this.uploadSection.addEventListener('drop', (e) => this.handleDrop(e));
+                
+                // Buttons
+                this.resetBtn.addEventListener('click', () => this.resetParameters());
+                this.exportSettingsBtn.addEventListener('click', () => this.exportSettings());
+            }
+
+            setupSliders() {
+                // Progressive Smoothing sliders
+                this.setupSlider('bilateralSlider', 'bilateralValue', 'smoothing.bilateral');
+                this.setupSlider('gaussianSlider', 'gaussianValue', 'smoothing.gaussian');
+                this.setupSlider('medianSlider', 'medianValue', 'smoothing.median');
+                this.setupSlider('contrastSlider', 'contrastValue', 'smoothing.contrast');
+                
+                // Character Conversion sliders
+                this.setupSlider('hysteresisSlider', 'hysteresisValue', 'conversion.hysteresis');
+                this.setupSlider('boundarySlider', 'boundaryValue', 'conversion.boundary');
+                this.setupSlider('widthSlider', 'widthValue', 'conversion.width');
+                
+                // Cleanup Pipeline sliders
+                this.setupSlider('isolatedSlider', 'isolatedValue', 'cleanup.isolated');
+                this.setupSlider('consolidationSlider', 'consolidationValue', 'cleanup.consolidation');
+                this.setupSlider('coherenceSlider', 'coherenceValue', 'cleanup.coherence');
+                this.setupSlider('passesSlider', 'passesValue', 'cleanup.passes');
+            }
+
+            setupSlider(sliderId, valueId, paramPath) {
+                const slider = document.getElementById(sliderId);
+                const valueElement = document.getElementById(valueId);
+                
+                slider.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    valueElement.textContent = value;
+                    
+                    // Update parameter
+                    this.setParameterByPath(paramPath, value);
+                    
+                    // Trigger reprocessing
+                    this.debounceReprocess();
+                });
+            }
+
+            setParameterByPath(path, value) {
+                const parts = path.split('.');
+                let obj = this.parameters;
+                for (let i = 0; i < parts.length - 1; i++) {
+                    obj = obj[parts[i]];
+                }
+                obj[parts[parts.length - 1]] = value;
+            }
+
+            debounceReprocess = this.debounce(() => {
+                if (this.originalImageData) {
+                    this.processImage();
+                }
+            }, 100);
+
+            debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            handleDragOver(e) {
+                e.preventDefault();
+                this.uploadSection.classList.add('drag-over');
+            }
+
+            handleDragLeave(e) {
+                e.preventDefault();
+                this.uploadSection.classList.remove('drag-over');
+            }
+
+            handleDrop(e) {
+                e.preventDefault();
+                this.uploadSection.classList.remove('drag-over');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.processFile(files[0]);
+                }
+            }
+
+            handleFileUpload(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    this.processFile(file);
+                }
+            }
+
+            processFile(file) {
+                this.updateStatus('Loading file...');
+                this.showProcessing(true);
+                
+                const fileSize = (file.size / 1024 / 1024).toFixed(1);
+                this.fileInfo.textContent = `${file.name} (${fileSize} MB)`;
+                
+                if (file.type.startsWith('image/')) {
+                    this.loadImage(file);
+                } else if (file.type.startsWith('video/')) {
+                    this.loadVideo(file);
+                } else {
+                    this.updateStatus('Unsupported file type');
+                    this.showProcessing(false);
+                }
+            }
+
+            loadImage(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.originalImage.onload = () => {
+                        this.originalImage.style.display = 'block';
+                        this.originalPlaceholder.style.display = 'none';
+                        this.extractImageData();
+                    };
+                    this.originalImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            loadVideo(file) {
+                // For now, extract first frame
+                const video = document.createElement('video');
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                video.onloadeddata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    ctx.drawImage(video, 0, 0);
+                    
+                    const dataURL = canvas.toDataURL();
+                    this.originalImage.onload = () => {
+                        this.originalImage.style.display = 'block';
+                        this.originalPlaceholder.style.display = 'none';
+                        this.extractImageData();
+                    };
+                    this.originalImage.src = dataURL;
+                };
+                
+                video.src = URL.createObjectURL(file);
+            }
+
+            extractImageData() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = this.originalImage.naturalWidth;
+                canvas.height = this.originalImage.naturalHeight;
+                ctx.drawImage(this.originalImage, 0, 0);
+                
+                this.originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                this.processImage();
+                
+                this.savePresetBtn.disabled = false;
+                this.exportSettingsBtn.disabled = false;
+                this.updateStatus('Image loaded • Adjust parameters to optimize compression');
+                this.showProcessing(false);
+            }
+
+            processImage() {
+                if (!this.originalImageData) return;
+                
+                this.showProcessing(true);
+                
+                // Use setTimeout for responsiveness
+                setTimeout(() => {
+                    try {
+                        // Step 1: Progressive smoothing
+                        const smoothed = ASCIIProcessor.progressiveSmoothing(
+                            this.originalImageData, 
+                            this.parameters.smoothing
+                        );
+                        
+                        // Step 2: Convert to ASCII
+                        const asciiFrame = ASCIIProcessor.frameToASCII(
+                            smoothed, 
+                            this.parameters.conversion,
+                            this.currentASCII // Previous frame for hysteresis
+                        );
+                        
+                        // Step 3: Apply cleanup pipeline
+                        const cleaned = ASCIIProcessor.cleanupPatterns(
+                            asciiFrame, 
+                            this.parameters.cleanup
+                        );
+                        
+                        // Step 4: Convert to string and display
+                        const asciiString = ASCIIProcessor.asciiArrayToString(cleaned);
+                        this.currentASCII = asciiString;
+                        this.asciiDisplay.textContent = asciiString;
+                        
+                        // Step 5: Calculate compression metrics
+                        const metrics = CompressionAnalyzer.calculateMetrics(cleaned);
+                        this.updateMetricsFromAnalysis(metrics);
+                        
+                        this.showProcessing(false);
+                        this.updateStatus('Processing complete • Adjust parameters to optimize further');
+                        
+                    } catch (error) {
+                        console.error('Processing error:', error);
+                        this.updateStatus('Processing failed: ' + error.message);
+                        this.showProcessing(false);
+                    }
+                }, 10); // Very small delay to keep UI responsive
+            }
+
+            updateMetricsFromAnalysis(metrics) {
+                this.compressionRatio.textContent = `${metrics.ratio.toFixed(1)}:1`;
+                this.runLength.textContent = metrics.avgRunLength.toFixed(1);
+                this.efficiency.textContent = `${metrics.efficiency.toFixed(0)}%`;
+                
+                // Update ratio color based on performance
+                if (metrics.ratio >= 7) {
+                    this.compressionRatio.style.color = '#00ff88';
+                } else if (metrics.ratio >= 5) {
+                    this.compressionRatio.style.color = '#ffaa00';
+                } else {
+                    this.compressionRatio.style.color = '#ff4444';
+                }
+                
+                // Update status with detailed metrics
+                const statusDetails = `${metrics.rleSegments} RLE segments • ${metrics.originalSize} chars → ${Math.round(metrics.estimatedCompressed)} compressed`;
+                console.log('Compression analysis:', statusDetails);
+            }
+
+            createPlaceholderASCII() {
+                // This method is no longer used - real processing handles ASCII generation
+                return 'Real processing enabled';
+            }
+
+            updateMetrics(ascii) {
+                // Calculate RLE compression simulation
+                const runs = this.calculateRLERuns(ascii);
+                const originalSize = ascii.length;
+                const compressedSize = runs.length * 2; // Simplified estimation
+                const ratio = originalSize / compressedSize;
+                const avgRunLength = originalSize / runs.length;
+                const efficiency = Math.min((ratio / 10) * 100, 100); // Target 10:1 ratio
+                
+                this.compressionRatio.textContent = `${ratio.toFixed(1)}:1`;
+                this.runLength.textContent = avgRunLength.toFixed(1);
+                this.efficiency.textContent = `${efficiency.toFixed(0)}%`;
+                
+                // Update ratio color based on performance
+                if (ratio >= 7) {
+                    this.compressionRatio.style.color = '#00ff88';
+                } else if (ratio >= 5) {
+                    this.compressionRatio.style.color = '#ffaa00';
+                } else {
+                    this.compressionRatio.style.color = '#ff4444';
+                }
+            }
+
+            calculateRLERuns(ascii) {
+                const runs = [];
+                let currentChar = '';
+                let currentCount = 0;
+                
+                for (const char of ascii) {
+                    if (char === '\n') continue;
+                    
+                    if (char === currentChar) {
+                        currentCount++;
+                    } else {
+                        if (currentCount > 0) {
+                            runs.push([currentChar, currentCount]);
+                        }
+                        currentChar = char;
+                        currentCount = 1;
+                    }
+                }
+                
+                if (currentCount > 0) {
+                    runs.push([currentChar, currentCount]);
+                }
+                
+                return runs;
+            }
+
+            resetParameters() {
+                this.parameters = this.getDefaultParameters();
+                this.updateSlidersFromParameters();
+                this.debounceReprocess();
+            }
+
+            updateSlidersFromParameters() {
+                // Update all sliders and values from current parameters
+                document.getElementById('bilateralSlider').value = this.parameters.smoothing.bilateral;
+                document.getElementById('bilateralValue').textContent = this.parameters.smoothing.bilateral;
+                
+                document.getElementById('gaussianSlider').value = this.parameters.smoothing.gaussian;
+                document.getElementById('gaussianValue').textContent = this.parameters.smoothing.gaussian;
+                
+                document.getElementById('medianSlider').value = this.parameters.smoothing.median;
+                document.getElementById('medianValue').textContent = this.parameters.smoothing.median;
+                
+                document.getElementById('contrastSlider').value = this.parameters.smoothing.contrast;
+                document.getElementById('contrastValue').textContent = this.parameters.smoothing.contrast;
+                
+                document.getElementById('hysteresisSlider').value = this.parameters.conversion.hysteresis;
+                document.getElementById('hysteresisValue').textContent = this.parameters.conversion.hysteresis;
+                
+                document.getElementById('boundarySlider').value = this.parameters.conversion.boundary;
+                document.getElementById('boundaryValue').textContent = this.parameters.conversion.boundary;
+                
+                document.getElementById('widthSlider').value = this.parameters.conversion.width;
+                document.getElementById('widthValue').textContent = this.parameters.conversion.width;
+                
+                document.getElementById('isolatedSlider').value = this.parameters.cleanup.isolated;
+                document.getElementById('isolatedValue').textContent = this.parameters.cleanup.isolated;
+                
+                document.getElementById('consolidationSlider').value = this.parameters.cleanup.consolidation;
+                document.getElementById('consolidationValue').textContent = this.parameters.cleanup.consolidation;
+                
+                document.getElementById('coherenceSlider').value = this.parameters.cleanup.coherence;
+                document.getElementById('coherenceValue').textContent = this.parameters.cleanup.coherence;
+                
+                document.getElementById('passesSlider').value = this.parameters.cleanup.passes;
+                document.getElementById('passesValue').textContent = this.parameters.cleanup.passes;
+            }
+
+            exportSettings() {
+                // Create comprehensive settings export
+                const settings = {
+                    version: "1.0",
+                    timestamp: new Date().toISOString(),
+                    parameters: this.parameters,
+                    metrics: {
+                        compressionRatio: this.compressionRatio.textContent,
+                        avgRunLength: this.runLength.textContent,
+                        efficiency: this.efficiency.textContent
+                    },
+                    pythonConfig: this.generatePythonConfig()
+                };
+
+                // Download as JSON file
+                const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `obfuscii-settings-${Date.now()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                this.updateStatus('Settings exported successfully');
+            }
+
+            generatePythonConfig() {
+                // Generate Python-compatible configuration
+                return {
+                    progressive_smoothing: {
+                        bilateral_d: this.parameters.smoothing.bilateral,
+                        bilateral_sigma_color: 80,
+                        bilateral_sigma_space: 80,
+                        gaussian_kernel: `(${this.parameters.smoothing.gaussian}, ${this.parameters.smoothing.gaussian})`,
+                        median_kernel: this.parameters.smoothing.median,
+                        clahe_clip_limit: this.parameters.smoothing.contrast,
+                        clahe_tile_size: "(8, 8)"
+                    },
+                    character_conversion: {
+                        hysteresis_threshold: this.parameters.conversion.hysteresis,
+                        boundary_sensitivity: this.parameters.conversion.boundary,
+                        target_width: this.parameters.conversion.width,
+                        character_set: "[' ', '.', ':', '-', '=', '+', '*', '#', '%', '@']"
+                    },
+                    cleanup_pipeline: {
+                        isolated_replacement_enabled: this.parameters.cleanup.isolated > 0,
+                        isolated_replacement_threshold: this.parameters.cleanup.isolated / 100,
+                        run_consolidation_enabled: this.parameters.cleanup.consolidation > 0,
+                        run_consolidation_aggressiveness: this.parameters.cleanup.consolidation / 100,
+                        spatial_coherence_enabled: this.parameters.cleanup.coherence > 0,
+                        spatial_coherence_threshold: this.parameters.cleanup.coherence / 100,
+                        cleanup_passes: this.parameters.cleanup.passes
+                    }
+                };
+            }
+
+            showProcessing(show) {
+                if (show) {
+                    this.processingIndicator.classList.add('active');
+                } else {
+                    this.processingIndicator.classList.remove('active');
+                }
+            }
+
+            updateStatus(message) {
+                this.statusText.textContent = message;
+            }
+        }
+
+        // Core Algorithm Implementation
+        // Ported from vid.py and moc.py
+
+        class ImageFilters {
+            static gaussianBlur(imageData, radius) {
+                const { data, width, height } = imageData;
+                const result = new Uint8ClampedArray(data.length);
+                
+                // Create gaussian kernel
+                const kernel = this.createGaussianKernel(radius);
+                const kernelSize = kernel.length;
+                const halfKernel = Math.floor(kernelSize / 2);
+                
+                // Apply gaussian blur
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        let r = 0, g = 0, b = 0, a = 0;
+                        let weightSum = 0;
+                        
+                        for (let ky = -halfKernel; ky <= halfKernel; ky++) {
+                            for (let kx = -halfKernel; kx <= halfKernel; kx++) {
+                                const py = Math.min(Math.max(y + ky, 0), height - 1);
+                                const px = Math.min(Math.max(x + kx, 0), width - 1);
+                                const pi = (py * width + px) * 4;
+                                const weight = kernel[ky + halfKernel][kx + halfKernel];
+                                
+                                r += data[pi] * weight;
+                                g += data[pi + 1] * weight;
+                                b += data[pi + 2] * weight;
+                                a += data[pi + 3] * weight;
+                                weightSum += weight;
+                            }
+                        }
+                        
+                        const i = (y * width + x) * 4;
+                        result[i] = r / weightSum;
+                        result[i + 1] = g / weightSum;
+                        result[i + 2] = b / weightSum;
+                        result[i + 3] = a / weightSum;
+                    }
+                }
+                
+                return new ImageData(result, width, height);
+            }
+            
+            static createGaussianKernel(radius) {
+                const size = radius * 2 + 1;
+                const kernel = Array(size).fill().map(() => Array(size));
+                const sigma = radius / 3;
+                let sum = 0;
+                
+                for (let y = 0; y < size; y++) {
+                    for (let x = 0; x < size; x++) {
+                        const dx = x - radius;
+                        const dy = y - radius;
+                        const value = Math.exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
+                        kernel[y][x] = value;
+                        sum += value;
+                    }
+                }
+                
+                // Normalize kernel
+                for (let y = 0; y < size; y++) {
+                    for (let x = 0; x < size; x++) {
+                        kernel[y][x] /= sum;
+                    }
+                }
+                
+                return kernel;
+            }
+            
+            static medianFilter(imageData, kernelSize) {
+                const { data, width, height } = imageData;
+                const result = new Uint8ClampedArray(data.length);
+                const halfKernel = Math.floor(kernelSize / 2);
+                
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const rValues = [], gValues = [], bValues = [];
+                        
+                        // Collect neighborhood values
+                        for (let ky = -halfKernel; ky <= halfKernel; ky++) {
+                            for (let kx = -halfKernel; kx <= halfKernel; kx++) {
+                                const py = Math.min(Math.max(y + ky, 0), height - 1);
+                                const px = Math.min(Math.max(x + kx, 0), width - 1);
+                                const pi = (py * width + px) * 4;
+                                
+                                rValues.push(data[pi]);
+                                gValues.push(data[pi + 1]);
+                                bValues.push(data[pi + 2]);
+                            }
+                        }
+                        
+                        // Sort and take median
+                        rValues.sort((a, b) => a - b);
+                        gValues.sort((a, b) => a - b);
+                        bValues.sort((a, b) => a - b);
+                        
+                        const median = Math.floor(rValues.length / 2);
+                        const i = (y * width + x) * 4;
+                        
+                        result[i] = rValues[median];
+                        result[i + 1] = gValues[median];
+                        result[i + 2] = bValues[median];
+                        result[i + 3] = data[i + 3]; // Keep alpha
+                    }
+                }
+                
+                return new ImageData(result, width, height);
+            }
+            
+            static toGrayscale(imageData) {
+                const { data, width, height } = imageData;
+                const result = new Uint8ClampedArray(data.length);
+                
+                for (let i = 0; i < data.length; i += 4) {
+                    const gray = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+                    result[i] = gray;
+                    result[i + 1] = gray;
+                    result[i + 2] = gray;
+                    result[i + 3] = data[i + 3];
+                }
+                
+                return new ImageData(result, width, height);
+            }
+            
+            static enhanceContrast(imageData, clipLimit) {
+                const { data, width, height } = imageData;
+                const result = new Uint8ClampedArray(data.length);
+                
+                // Simple contrast enhancement (simplified CLAHE)
+                for (let i = 0; i < data.length; i += 4) {
+                    const gray = data[i]; // Already grayscale
+                    const enhanced = Math.min(255, Math.max(0, (gray - 128) * clipLimit + 128));
+                    
+                    result[i] = enhanced;
+                    result[i + 1] = enhanced;
+                    result[i + 2] = enhanced;
+                    result[i + 3] = data[i + 3];
+                }
+                
+                return new ImageData(result, width, height);
+            }
+        }
+
+        class ASCIIProcessor {
+            static ASCII_CHARS = [' ', '.', ':', '-', '=', '+', '*', '#', '%', '@'];
+            
+            static progressiveSmoothing(imageData, parameters) {
+                let processed = imageData;
+                
+                // Convert to grayscale first
+                processed = ImageFilters.toGrayscale(processed);
+                
+                // Gaussian blur (simplified bilateral filter)
+                if (parameters.gaussian > 1) {
+                    processed = ImageFilters.gaussianBlur(processed, Math.floor(parameters.gaussian / 2));
+                }
+                
+                // Median filter
+                if (parameters.median > 1) {
+                    processed = ImageFilters.medianFilter(processed, parameters.median);
+                }
+                
+                // Contrast enhancement
+                if (parameters.contrast !== 1.0) {
+                    processed = ImageFilters.enhanceContrast(processed, parameters.contrast);
+                }
+                
+                return processed;
+            }
+            
+            static frameToASCII(imageData, parameters, prevASCII = null) {
+                const { data, width, height } = imageData;
+                const targetWidth = parameters.width;
+                const aspectRatio = height / width;
+                const targetHeight = Math.floor(targetWidth * aspectRatio * 0.55); // Terminal compensation
+                
+                // Resize image data
+                const resized = this.resizeImageData(imageData, targetWidth, targetHeight);
+                
+                // Convert to ASCII with hysteresis
+                const asciiFrame = [];
+                const prevFrame = prevASCII ? this.parseASCIIToArray(prevASCII) : null;
+                
+                for (let y = 0; y < targetHeight; y++) {
+                    const row = [];
+                    for (let x = 0; x < targetWidth; x++) {
+                        const i = (y * targetWidth + x) * 4;
+                        const pixel = resized.data[i]; // Grayscale value
+                        
+                        // Standard character mapping
+                        let charIndex = Math.floor((pixel / 255) * (this.ASCII_CHARS.length - 1));
+                        charIndex = Math.min(Math.max(charIndex, 0), this.ASCII_CHARS.length - 1);
+                        
+                        // Apply hysteresis if we have previous frame
+                        if (prevFrame && y < prevFrame.length && x < prevFrame[y].length) {
+                            const prevChar = prevFrame[y][x];
+                            const prevIndex = this.ASCII_CHARS.indexOf(prevChar);
+                            
+                            if (prevIndex !== -1 && Math.abs(charIndex - prevIndex) === 1) {
+                                const boundaryPixel = (prevIndex + 0.5) * (255 / this.ASCII_CHARS.length);
+                                const pixelDistance = Math.abs(pixel - boundaryPixel);
+                                
+                                if (pixelDistance < parameters.hysteresis) {
+                                    charIndex = prevIndex;
+                                }
+                            }
+                        }
+                        
+                        row.push(this.ASCII_CHARS[charIndex]);
+                    }
+                    asciiFrame.push(row);
+                }
+                
+                return asciiFrame;
+            }
+            
+            static resizeImageData(imageData, newWidth, newHeight) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Create temporary canvas with original image
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = imageData.width;
+                tempCanvas.height = imageData.height;
+                tempCtx.putImageData(imageData, 0, 0);
+                
+                // Resize
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+                ctx.drawImage(tempCanvas, 0, 0, newWidth, newHeight);
+                
+                return ctx.getImageData(0, 0, newWidth, newHeight);
+            }
+            
+            static parseASCIIToArray(asciiString) {
+                return asciiString.split('\n').map(line => line.split(''));
+            }
+            
+            static asciiArrayToString(asciiArray) {
+                return asciiArray.map(row => row.join('')).join('\n');
+            }
+            
+            static cleanupPatterns(asciiFrame, parameters) {
+                let cleaned = JSON.parse(JSON.stringify(asciiFrame)); // Deep copy
+                
+                for (let pass = 0; pass < parameters.passes; pass++) {
+                    // Stage 1: Isolated character replacement
+                    if (parameters.isolated > 0) {
+                        cleaned = this.replaceIsolatedCharacters(cleaned, parameters.isolated / 100);
+                    }
+                    
+                    // Stage 2: Run consolidation
+                    if (parameters.consolidation > 0) {
+                        cleaned = this.consolidateRuns(cleaned, parameters.consolidation / 100);
+                    }
+                    
+                    // Stage 3: Spatial coherence
+                    if (parameters.coherence > 0) {
+                        cleaned = this.improveSpatialCoherence(cleaned, parameters.coherence / 100);
+                    }
+                }
+                
+                return cleaned;
+            }
+            
+            static replaceIsolatedCharacters(frame, threshold) {
+                const height = frame.length;
+                const width = frame[0].length;
+                const result = JSON.parse(JSON.stringify(frame));
+                
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const char = frame[y][x];
+                        const neighbors = this.getNeighbors(frame, x, y);
+                        
+                        if (neighbors.length >= 3) {
+                            const charCounts = {};
+                            neighbors.forEach(neighbor => {
+                                charCounts[neighbor] = (charCounts[neighbor] || 0) + 1;
+                            });
+                            
+                            if (!(char in charCounts) || charCounts[char] === 0) {
+                                const mostCommon = Object.entries(charCounts)
+                                    .sort(([,a], [,b]) => b - a)[0];
+                                
+                                if (mostCommon && mostCommon[1] >= neighbors.length * threshold) {
+                                    result[y][x] = mostCommon[0];
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                return result;
+            }
+            
+            static consolidateRuns(frame, threshold) {
+                const result = JSON.parse(JSON.stringify(frame));
+                
+                // Consolidate horizontal runs
+                for (let y = 0; y < frame.length; y++) {
+                    const row = result[y];
+                    let changed = true;
+                    
+                    while (changed && threshold > 0.5) {
+                        changed = false;
+                        for (let x = 0; x < row.length - 4; x++) {
+                            // Look for A A B A A pattern
+                            if (row[x] === row[x + 1] && 
+                                row[x] === row[x + 3] && 
+                                row[x] === row[x + 4] && 
+                                row[x + 2] !== row[x]) {
+                                row[x + 2] = row[x];
+                                changed = true;
+                            }
+                        }
+                    }
+                }
+                
+                return result;
+            }
+            
+            static improveSpatialCoherence(frame, threshold) {
+                const height = frame.length;
+                const width = frame[0].length;
+                const result = JSON.parse(JSON.stringify(frame));
+                
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const char = frame[y][x];
+                        const context = this.getSpatialContext(frame, x, y, 2);
+                        
+                        if (!this.fitsContext(char, context, threshold)) {
+                            const replacement = this.findContextualReplacement(char, context);
+                            if (replacement !== char) {
+                                result[y][x] = replacement;
+                            }
+                        }
+                    }
+                }
+                
+                return result;
+            }
+            
+            static getNeighbors(frame, x, y) {
+                const neighbors = [];
+                const height = frame.length;
+                const width = frame[0].length;
+                
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (dx === 0 && dy === 0) continue;
+                        
+                        const ny = y + dy;
+                        const nx = x + dx;
+                        
+                        if (ny >= 0 && ny < height && nx >= 0 && nx < width) {
+                            neighbors.push(frame[ny][nx]);
+                        }
+                    }
+                }
+                
+                return neighbors;
+            }
+            
+            static getSpatialContext(frame, x, y, radius) {
+                const context = [];
+                const height = frame.length;
+                const width = frame[0].length;
+                
+                for (let dy = -radius; dy <= radius; dy++) {
+                    for (let dx = -radius; dx <= radius; dx++) {
+                        if (dx === 0 && dy === 0) continue;
+                        
+                        const ny = y + dy;
+                        const nx = x + dx;
+                        
+                        if (ny >= 0 && ny < height && nx >= 0 && nx < width) {
+                            context.push(frame[ny][nx]);
+                        }
+                    }
+                }
+                
+                return context;
+            }
+            
+            static fitsContext(char, context, threshold) {
+                if (context.length === 0) return true;
+                
+                const charCounts = {};
+                context.forEach(c => {
+                    charCounts[c] = (charCounts[c] || 0) + 1;
+                });
+                
+                const charFrequency = (charCounts[char] || 0) / context.length;
+                
+                // Character appears frequently enough
+                if (charFrequency >= 0.15) return true;
+                
+                // Check if neighborhood is uniform (indicating noise)
+                const maxCount = Math.max(...Object.values(charCounts));
+                const uniformity = maxCount / context.length;
+                
+                return uniformity < (0.7 * threshold);
+            }
+            
+            static findContextualReplacement(char, context) {
+                if (context.length === 0) return char;
+                
+                const charCounts = {};
+                context.forEach(c => {
+                    charCounts[c] = (charCounts[c] || 0) + 1;
+                });
+                
+                const mostCommon = Object.entries(charCounts)
+                    .sort(([,a], [,b]) => b - a)[0];
+                
+                return mostCommon ? mostCommon[0] : char;
+            }
+        }
+
+        class CompressionAnalyzer {
+            static encodeRLE(asciiFrame) {
+                const segments = [];
+                const asciiString = ASCIIProcessor.asciiArrayToString(asciiFrame);
+                
+                let currentChar = '';
+                let currentCount = 0;
+                
+                for (const char of asciiString) {
+                    if (char === '\n') continue; // Skip newlines for RLE
+                    
+                    if (char === currentChar) {
+                        currentCount++;
+                    } else {
+                        if (currentCount > 0) {
+                            segments.push([currentChar, currentCount]);
+                        }
+                        currentChar = char;
+                        currentCount = 1;
+                    }
+                }
+                
+                if (currentCount > 0) {
+                    segments.push([currentChar, currentCount]);
+                }
+                
+                return segments;
+            }
+            
+            static calculateMetrics(asciiFrame) {
+                const rleSegments = this.encodeRLE(asciiFrame);
+                const asciiString = ASCIIProcessor.asciiArrayToString(asciiFrame);
+                const originalSize = asciiString.replace(/\n/g, '').length; // Exclude newlines
+                
+                // Estimate compressed size (RLE + JSON + LZMA compression factor)
+                const rleSize = rleSegments.length * 8; // Rough estimate: [char, count] pairs
+                const jsonSize = JSON.stringify(rleSegments).length;
+                const estimatedCompressed = jsonSize * 0.3; // Rough LZMA compression factor
+                
+                const ratio = originalSize / estimatedCompressed;
+                const avgRunLength = originalSize / rleSegments.length;
+                const efficiency = Math.min((ratio / 10) * 100, 100); // Target 10:1 ratio
+                
+                return {
+                    ratio: ratio,
+                    avgRunLength: avgRunLength,
+                    efficiency: efficiency,
+                    rleSegments: rleSegments.length,
+                    originalSize: originalSize,
+                    estimatedCompressed: estimatedCompressed
+                };
+            }
+        }
+
+        // Initialize studio when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.obfusciiStudio = new OBFUSCIIStudio();
+            console.log('OBFUSCII Studio initialized');
+        });
+    </script>
+</body>
+</html>
