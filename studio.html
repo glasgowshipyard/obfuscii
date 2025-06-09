@@ -417,6 +417,21 @@
         <header class="header">
             <h1>OBFUSCII Studio</h1>
             <p>Real-time algorithm optimization for ASCII video compression</p>
+            <div style="max-width: 800px; margin: 20px auto 0; text-align: left; background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef;">
+                <h3 style="margin-bottom: 15px; color: #000;">How It Works</h3>
+                <p style="margin-bottom: 10px; color: #495057; font-size: 0.9rem;">
+                    <strong>1. Upload:</strong> Drop an image or video file to extract a representative frame for optimization.
+                </p>
+                <p style="margin-bottom: 10px; color: #495057; font-size: 0.9rem;">
+                    <strong>2. Optimize:</strong> Adjust sliders to find the sweet spot between visual quality and compression ratio. Target: 7:1+ compression.
+                </p>
+                <p style="margin-bottom: 10px; color: #495057; font-size: 0.9rem;">
+                    <strong>3. Export:</strong> Save optimal settings as JSON config for use in Python pipeline, or process the full video.
+                </p>
+                <p style="margin: 0; color: #495057; font-size: 0.9rem;">
+                    <strong>Problem:</strong> Errant noise characters fragment RLE runs. Solution: Aggressive cleanup pipeline tuning.
+                </p>
+            </div>
         </header>
 
         <main class="main-area">
@@ -450,7 +465,7 @@
                         <div class="panel-title">Original</div>
                         <div class="original-display">
                             <img id="originalImage" class="original-image" style="display: none;">
-                            <div id="originalPlaceholder" style="color: #666; text-align: center;">No image loaded</div>
+                            <div id="originalPlaceholder" style="color: #6c757d; text-align: center;">No image loaded</div>
                         </div>
                     </div>
 
@@ -466,10 +481,13 @@
             <!-- Progressive Smoothing Controls -->
             <div class="control-group">
                 <h3 class="group-title">🔧 Progressive Smoothing</h3>
+                <p style="font-size: 0.85rem; color: #6c757d; margin-bottom: 15px;">
+                    Reduces noise and texture before ASCII conversion. Higher values = smoother but less detail.
+                </p>
                 
                 <div class="control-item">
                     <div class="control-label">
-                        <span>Bilateral Filter</span>
+                        <span>Bilateral Filter <small>(edge preservation)</small></span>
                         <span class="control-value" id="bilateralValue">15</span>
                     </div>
                     <input type="range" class="slider" id="bilateralSlider" min="5" max="25" value="15" step="2">
@@ -477,7 +495,7 @@
 
                 <div class="control-item">
                     <div class="control-label">
-                        <span>Gaussian Blur</span>
+                        <span>Gaussian Blur <small>(texture removal)</small></span>
                         <span class="control-value" id="gaussianValue">9</span>
                     </div>
                     <input type="range" class="slider" id="gaussianSlider" min="3" max="15" value="9" step="2">
@@ -485,7 +503,7 @@
 
                 <div class="control-item">
                     <div class="control-label">
-                        <span>Median Filter</span>
+                        <span>Median Filter <small>(salt/pepper noise)</small></span>
                         <span class="control-value" id="medianValue">5</span>
                     </div>
                     <input type="range" class="slider" id="medianSlider" min="3" max="11" value="5" step="2">
@@ -493,7 +511,7 @@
 
                 <div class="control-item">
                     <div class="control-label">
-                        <span>Contrast Enhancement</span>
+                        <span>Contrast Enhancement <small>(CLAHE)</small></span>
                         <span class="control-value" id="contrastValue">1.5</span>
                     </div>
                     <input type="range" class="slider" id="contrastSlider" min="0.5" max="3.0" value="1.5" step="0.1">
@@ -503,10 +521,13 @@
             <!-- Character Conversion Controls -->
             <div class="control-group">
                 <h3 class="group-title">📝 Character Conversion</h3>
+                <p style="font-size: 0.85rem; color: #6c757d; margin-bottom: 15px;">
+                    Controls how pixels map to ASCII characters. Hysteresis prevents character flicker between frames.
+                </p>
                 
                 <div class="control-item">
                     <div class="control-label">
-                        <span>Hysteresis Threshold</span>
+                        <span>Hysteresis Threshold <small>(anti-flicker)</small></span>
                         <span class="control-value" id="hysteresisValue">8</span>
                     </div>
                     <input type="range" class="slider" id="hysteresisSlider" min="4" max="24" value="8" step="1">
@@ -514,7 +535,7 @@
 
                 <div class="control-item">
                     <div class="control-label">
-                        <span>Boundary Sensitivity</span>
+                        <span>Boundary Sensitivity <small>(character edges)</small></span>
                         <span class="control-value" id="boundaryValue">1.0</span>
                     </div>
                     <input type="range" class="slider" id="boundarySlider" min="0.1" max="2.0" value="1.0" step="0.1">
@@ -522,7 +543,7 @@
 
                 <div class="control-item">
                     <div class="control-label">
-                        <span>Output Width</span>
+                        <span>Output Width <small>(resolution)</small></span>
                         <span class="control-value" id="widthValue">120</span>
                     </div>
                     <input type="range" class="slider" id="widthSlider" min="80" max="200" value="120" step="10">
@@ -532,10 +553,13 @@
             <!-- Cleanup Pipeline Controls -->
             <div class="control-group">
                 <h3 class="group-title">🧹 Pattern Cleanup</h3>
+                <p style="font-size: 0.85rem; color: #6c757d; margin-bottom: 15px;">
+                    <strong>Critical for compression:</strong> Removes errant characters that break RLE runs. More aggressive = better compression, less detail.
+                </p>
                 
                 <div class="control-item">
                     <div class="control-label">
-                        <span>Isolated Replacement</span>
+                        <span>Isolated Replacement <small>(lone characters)</small></span>
                         <span class="control-value" id="isolatedValue">75</span>
                     </div>
                     <input type="range" class="slider" id="isolatedSlider" min="0" max="100" value="75" step="5">
@@ -543,7 +567,7 @@
 
                 <div class="control-item">
                     <div class="control-label">
-                        <span>Run Consolidation</span>
+                        <span>Run Consolidation <small>(A-A-B-A-A patterns)</small></span>
                         <span class="control-value" id="consolidationValue">85</span>
                     </div>
                     <input type="range" class="slider" id="consolidationSlider" min="0" max="100" value="85" step="5">
@@ -551,7 +575,7 @@
 
                 <div class="control-item">
                     <div class="control-label">
-                        <span>Spatial Coherence</span>
+                        <span>Spatial Coherence <small>(context-aware noise)</small></span>
                         <span class="control-value" id="coherenceValue">40</span>
                     </div>
                     <input type="range" class="slider" id="coherenceSlider" min="15" max="70" value="40" step="5">
@@ -559,7 +583,7 @@
 
                 <div class="control-item">
                     <div class="control-label">
-                        <span>Cleanup Passes</span>
+                        <span>Cleanup Passes <small>(iterations)</small></span>
                         <span class="control-value" id="passesValue">2</span>
                     </div>
                     <input type="range" class="slider" id="passesSlider" min="1" max="5" value="2" step="1">
@@ -662,6 +686,7 @@
                 // Buttons
                 this.resetBtn.addEventListener('click', () => this.resetParameters());
                 this.exportSettingsBtn.addEventListener('click', () => this.exportSettings());
+                this.processVideoBtn.addEventListener('click', () => this.processFullVideo());
             }
 
             setupSliders() {
@@ -819,6 +844,7 @@
                 
                 this.savePresetBtn.disabled = false;
                 this.exportSettingsBtn.disabled = false;
+                this.processVideoBtn.disabled = false; // Enable video processing
                 this.updateStatus('Image loaded • Adjust parameters to optimize compression');
                 this.showProcessing(false);
             }
@@ -983,6 +1009,21 @@
                 
                 document.getElementById('passesSlider').value = this.parameters.cleanup.passes;
                 document.getElementById('passesValue').textContent = this.parameters.cleanup.passes;
+            }
+
+            processFullVideo() {
+                if (!this.originalImageData) {
+                    this.updateStatus('No file loaded for processing');
+                    return;
+                }
+                
+                // For now, just show that it would process with current settings
+                const settings = this.generatePythonConfig();
+                const compressionRatio = this.compressionRatio.textContent;
+                
+                alert(`Full Video Processing\n\nWould process video with current settings:\n• Compression target: ${compressionRatio}\n• Cleanup passes: ${this.parameters.cleanup.passes}\n• Resolution: ${this.parameters.conversion.width} chars wide\n\nNext: Implement video frame extraction and batch processing with these optimized parameters.`);
+                
+                this.updateStatus('Video processing initiated (stub implementation)');
             }
 
             exportSettings() {
