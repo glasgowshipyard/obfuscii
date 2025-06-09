@@ -15,17 +15,15 @@ from dataclasses import dataclass
 class CompressionStats:
     """Compression statistics container"""
     total_frames: int
-    original_video_size: int
-    ascii_text_size: int
+    total_raw_size: int
     total_compressed_size: int
-    ascii_compression_ratio: float
-    overall_compression_ratio: float
-    ascii_expansion_factor: float
-    ascii_size_mb: float
-    compressed_size_mb: float
-    original_size_mb: float
-    space_saved_mb: float
-    space_saved_percent: float
+    overall_ratio: float
+    raw_size_kb: float
+    compressed_size_kb: float
+    i_frame_count: int = 0
+    p_frame_count: int = 0
+    avg_i_frame_ratio: float = 0.0
+    avg_p_frame_ratio: float = 0.0
 
 @dataclass
 class FrameResult:
@@ -41,25 +39,25 @@ class FrameResult:
 class CompressedVideo:
     """Container for compressed ASCII video"""
     
-    def __init__(self, width: int, height: int, fps: float, original_video_size: int = 0):
+    def __init__(self, width: int, height: int, fps: float):
         self.width = width
         self.height = height
         self.fps = fps
-        self.original_video_size = original_video_size
         self.frames: List[FrameResult] = []
         self.stats: Optional[CompressionStats] = None
         self.metadata = {
             'version': '3.0',
-            'algorithm': 'middle-out-rle-lzma',
+            'algorithm': 'spatial-rle-lzma',
             'created_by': 'OBFUSCII'
         }
 
 def compress_video_rle(ascii_frames: List[List[List[str]]], fps: float = 30.0, 
-                      original_video_size: int = 0, verbose: bool = False) -> CompressedVideo:
+                      verbose: bool = False) -> CompressedVideo:
     """
-    Primary compression function using middle-out RLE + LZMA
+    Primary compression function using RLE + LZMA
     
-    Shows both ASCII compression (text → compressed) and overall compression (video → compressed)
+    Targets 10:1 compression ratio by exploiting spatial redundancy
+    in ASCII art rather than temporal prediction.
     """
     
     if not ascii_frames:
@@ -67,31 +65,20 @@ def compress_video_rle(ascii_frames: List[List[List[str]]], fps: float = 30.0,
     
     height = len(ascii_frames[0])
     width = len(ascii_frames[0][0])
-    frame_char_count = width * height
+    frame_size = height * width
     
     if verbose:
-        print(f"Middle-out compression: {len(ascii_frames)} frames ({width}x{height})")
-        print("Algorithm: ASCII Expansion + RLE + LZMA")
+        print(f"RLE compression: {len(ascii_frames)} frames ({width}x{height})")
+        print("Algorithm: Run-Length Encoding + LZMA")
     
-    compressed = CompressedVideo(width, height, fps, original_video_size)
+    compressed = CompressedVideo(width, height, fps)
+    total_raw_size = 0
     total_compressed_size = 0
-    
-    # Calculate raw ASCII text size
-    total_ascii_chars = 0
-    for frame in ascii_frames:
-        for row in frame:
-            total_ascii_chars += len(row) + 1  # +1 for newline
-        total_ascii_chars -= 1  # Remove last newline
-    
-    ascii_text_size = total_ascii_chars  # bytes (1 char = 1 byte)
-    
-    if verbose:
-        print(f"Raw ASCII text: {ascii_text_size:,} characters ({ascii_text_size / 1024 / 1024:.1f} MB)")
     
     # Process each frame with RLE compression
     for frame_idx, ascii_frame in enumerate(ascii_frames):
         timestamp = frame_idx / fps
-        raw_size = frame_char_count
+        raw_size = frame_size
         
         # Apply run-length encoding
         rle_segments = encode_frame_rle(ascii_frame)
@@ -115,73 +102,45 @@ def compress_video_rle(ascii_frames: List[List[List[str]]], fps: float = 30.0,
         )
         
         compressed.frames.append(frame_result)
+        
+        total_raw_size += raw_size
         total_compressed_size += compressed_size
         
-        # Progress reporting - simplified
+        # Progress reporting
         if verbose and frame_idx % 30 == 0:
-            progress = (frame_idx + 1) / len(ascii_frames) * 100
-            print(f"Compressing: {frame_idx + 1}/{len(ascii_frames)} frames ({progress:.0f}%)")
-        elif not verbose and frame_idx % 60 == 0:
-            progress = (frame_idx + 1) / len(ascii_frames) * 100
-            print(f"Compressing: {frame_idx + 1}/{len(ascii_frames)} frames ({progress:.0f}%)")
+            print(f"Compressed frame {frame_idx}/{len(ascii_frames)} (ratio: {compression_ratio:.1f}:1)")
     
-    # Calculate comprehensive statistics
-    ascii_compression_ratio = ascii_text_size / total_compressed_size if total_compressed_size > 0 else 0
-    overall_compression_ratio = original_video_size / total_compressed_size if original_video_size > 0 and total_compressed_size > 0 else 0
-    ascii_expansion_factor = ascii_text_size / original_video_size if original_video_size > 0 else 0
-    
-    # Size conversions
-    ascii_size_mb = ascii_text_size / 1024 / 1024
-    compressed_size_mb = total_compressed_size / 1024 / 1024
-    original_size_mb = original_video_size / 1024 / 1024
-    space_saved_mb = original_size_mb - compressed_size_mb
-    space_saved_percent = (space_saved_mb / original_size_mb * 100) if original_size_mb > 0 else 0
+    # Calculate overall statistics
+    overall_ratio = total_raw_size / total_compressed_size if total_compressed_size > 0 else 0
     
     compressed.stats = CompressionStats(
         total_frames=len(ascii_frames),
-        original_video_size=original_video_size,
-        ascii_text_size=ascii_text_size,
+        total_raw_size=total_raw_size,
         total_compressed_size=total_compressed_size,
-        ascii_compression_ratio=ascii_compression_ratio,
-        overall_compression_ratio=overall_compression_ratio,
-        ascii_expansion_factor=ascii_expansion_factor,
-        ascii_size_mb=ascii_size_mb,
-        compressed_size_mb=compressed_size_mb,
-        original_size_mb=original_size_mb,
-        space_saved_mb=space_saved_mb,
-        space_saved_percent=space_saved_percent
+        overall_ratio=overall_ratio,
+        raw_size_kb=total_raw_size / 1024,
+        compressed_size_kb=total_compressed_size / 1024,
+        i_frame_count=len(ascii_frames),  # All frames are I-frames
+        p_frame_count=0,
+        avg_i_frame_ratio=overall_ratio
     )
     
-    # Print comprehensive results
+    # Print results
     if verbose:
-        print(f"\n=== MIDDLE-OUT COMPRESSION RESULTS ===")
+        print(f"\n=== COMPRESSION RESULTS ===")
         print(f"Total frames: {len(ascii_frames)}")
-        if original_video_size > 0:
-            print(f"Original video: {original_size_mb:.1f} MB")
-            print(f"Raw ASCII text: {ascii_size_mb:.1f} MB ({ascii_expansion_factor:.1f}x expansion)")
-        else:
-            print(f"Raw ASCII text: {ascii_size_mb:.1f} MB")
-        print(f"Compressed .txv: {compressed_size_mb:.1f} MB")
-        print(f"")
-        print(f"ASCII compression: {ascii_compression_ratio:.1f}:1 ({ascii_size_mb:.1f}MB → {compressed_size_mb:.1f}MB)")
-        if original_video_size > 0:
-            print(f"Overall compression: {overall_compression_ratio:.1f}:1 ({original_size_mb:.1f}MB → {compressed_size_mb:.1f}MB)")
-            print(f"Space saved: {space_saved_mb:.1f} MB ({space_saved_percent:.1f}%)")
+        print(f"Raw size: {total_raw_size:,} chars ({total_raw_size/1024:.1f} KB)")
+        print(f"Compressed: {total_compressed_size:,} bytes ({total_compressed_size/1024:.1f} KB)")
+        print(f"Overall ratio: {overall_ratio:.1f}:1")
     else:
-        if original_video_size > 0:
-            print(f"ASCII compression: {ascii_compression_ratio:.1f}:1, Overall: {overall_compression_ratio:.1f}:1 ({compressed_size_mb:.1f} MB)")
-        else:
-            print(f"ASCII compression: {ascii_compression_ratio:.1f}:1 ({compressed_size_mb:.1f} MB)")
+        print(f"Compression: {overall_ratio:.1f}:1 ratio ({total_compressed_size/1024:.1f} KB)")
     
-    # Performance assessment
-    if ascii_compression_ratio >= 50.0:
-        print("🎯 EXCELLENT: ASCII compression >50:1")
-    elif ascii_compression_ratio >= 20.0:
-        print("✅ VERY GOOD: ASCII compression >20:1")
-    elif ascii_compression_ratio >= 10.0:
-        print("⚠️  ACCEPTABLE: ASCII compression >10:1")
+    if overall_ratio >= 10.0:
+        print("✅ TARGET ACHIEVED: 10:1+ compression ratio")
+    elif overall_ratio >= 5.0:
+        print("⚠️  GOOD PROGRESS: 5:1+ compression ratio")
     else:
-        print("❌ POOR: ASCII compression below 10:1")
+        print("❌ NEEDS WORK: Below 5:1 compression")
     
     return compressed
 
@@ -270,7 +229,7 @@ def analyze_compression_performance(ascii_frames: List[List[List[str]]],
                                   compressed_result: CompressedVideo) -> None:
     """Detailed compression performance analysis"""
     
-    print(f"\n=== DETAILED MIDDLE-OUT ANALYSIS ===")
+    print(f"\n=== DETAILED COMPRESSION ANALYSIS ===")
     
     stats = compressed_result.stats
     if not stats:
@@ -278,19 +237,10 @@ def analyze_compression_performance(ascii_frames: List[List[List[str]]],
         return
     
     print(f"Input: {stats.total_frames} frames, {compressed_result.width}x{compressed_result.height}")
-    
-    if stats.original_video_size > 0:
-        print(f"Original video: {stats.original_size_mb:.1f} MB")
-        print(f"ASCII expansion: {stats.ascii_expansion_factor:.1f}x ({stats.original_size_mb:.1f}MB → {stats.ascii_size_mb:.1f}MB)")
-    else:
-        print(f"Raw ASCII text: {stats.ascii_size_mb:.1f} MB")
-    
-    print(f"Compressed output: {stats.compressed_size_mb:.1f} MB")
-    print(f"ASCII compression ratio: {stats.ascii_compression_ratio:.1f}:1")
-    
-    if stats.original_video_size > 0:
-        print(f"Overall compression ratio: {stats.overall_compression_ratio:.1f}:1")
-        print(f"Space saved: {stats.space_saved_mb:.1f} MB ({stats.space_saved_percent:.1f}%)")
+    print(f"Raw size: {stats.raw_size_kb:.1f} KB")
+    print(f"Compressed size: {stats.compressed_size_kb:.1f} KB")
+    print(f"Space saved: {stats.raw_size_kb - stats.compressed_size_kb:.1f} KB ({((stats.raw_size_kb - stats.compressed_size_kb) / stats.raw_size_kb * 100):.1f}%)")
+    print(f"Overall compression ratio: {stats.overall_ratio:.1f}:1")
     
     # Frame-by-frame analysis
     ratios = [f.compression_ratio for f in compressed_result.frames]
@@ -302,19 +252,19 @@ def analyze_compression_performance(ascii_frames: List[List[List[str]]],
     print(f"Ratio std deviation: {np.std(ratios):.1f}")
     
     # Performance assessment
-    print(f"\n=== MIDDLE-OUT PERFORMANCE ASSESSMENT ===")
-    if stats.ascii_compression_ratio >= 50.0:
-        print("🎯 EXCELLENT: ASCII compression >50:1")
-        print("   Middle-out algorithm highly effective")
-    elif stats.ascii_compression_ratio >= 20.0:
-        print("✅ VERY GOOD: ASCII compression >20:1")
-        print("   Strong middle-out performance")
-    elif stats.ascii_compression_ratio >= 10.0:
-        print("⚠️  ACCEPTABLE: ASCII compression >10:1")
-        print("   Moderate middle-out effectiveness")
+    print(f"\n=== PERFORMANCE ASSESSMENT ===")
+    if stats.overall_ratio >= 10.0:
+        print("🎯 EXCELLENT: Target 10:1 ratio achieved")
+        print("   Ready for production use")
+    elif stats.overall_ratio >= 8.0:
+        print("✅ VERY GOOD: Close to 10:1 target")
+        print("   Minor optimizations possible")
+    elif stats.overall_ratio >= 5.0:
+        print("⚠️  ACCEPTABLE: 5:1+ compression")
+        print("   Consider content optimization")
     else:
-        print("❌ POOR: ASCII compression below 10:1")
-        print("   Content may not be suitable for middle-out compression")
+        print("❌ POOR: Below 5:1 compression")
+        print("   Content may not be suitable for ASCII video")
 
 # Legacy support
 def compress_video(ascii_frames: List[List[List[str]]], fps: float = 30.0, 
@@ -329,4 +279,4 @@ def calculate_compression_ratio(ascii_frames: List[List[List[str]]],
         return 0, 0, 0.0
     
     stats = compressed_result.stats
-    return stats.ascii_text_size, stats.total_compressed_size, stats.ascii_compression_ratio
+    return stats.total_raw_size, stats.total_compressed_size, stats.overall_ratio
