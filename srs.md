@@ -1,236 +1,324 @@
 # OBFUSCII Software Requirements Specification
 
-**Version:** 2.0  
+**Version:** 3.0  
 **Date:** June 2025  
-**Status:** Phase 1 Complete, Production Deployment Ready
+**Status:** Algorithm Development Phase
 
 ## Project Overview
 
 OBFUSCII is an ASCII video codec for creating temporal portraits and responsive branding. The system converts video into compressed ASCII animations that scale infinitely, load instantly, and adapt to any visual context.
 
-**Core Innovation:** Moving ASCII portraits that work as responsive web logos, distributed through copy/paste text mechanics while maintaining professional compression ratios.
+**Current Problem:** Compression ratios are 3.7:1-5:1, below the 7:1+ target needed for practical web deployment. The core issue is errant noise characters fragmenting RLE runs.
+
+**Solution Approach:** Build a studio interface for real-time algorithm optimization rather than blind parameter tweaking in code.
 
 ## System Architecture
 
-### Two-Component System
+### Three-Component System
 
+**OBFUSCII Studio** - Web-based algorithm development and optimization environment  
 **OBFUSCII Player** - Media application for content creation, testing, and file management  
 **OBFUSCII Embed** - Component library for website/email integration
 
 **File Format:** `.txv` (Text Video) - Binary container with LZMA-compressed RLE ASCII frames plus metadata
 
-## Functional Requirements
+## Current Status
 
-### FR1: Content Creation Pipeline
+### Working Components ✅
+- Video → ASCII conversion pipeline
+- RLE + LZMA compression (achieving 3.7:1-5:1 ratios)
+- .txv binary file format with validation
+- Web player with LZMA decompression
+- Terminal playback functionality
+- Cross-platform deployment
+
+### Critical Issues ❌
+- Compression ratios below 7:1+ target
+- Errant noise characters fragmenting RLE runs
+- Cleanup pipeline parameters require systematic optimization
+- No efficient method for algorithm tuning
+
+## Priority Requirements: OBFUSCII Studio
+
+### SR1: Algorithm Development Environment
+
+**Core Function:** Real-time parameter optimization interface for compression algorithm development.
 
 **Input Processing:**
-- Video file support: `.mp4`, `.mov`, `.avi`, `.mkv`
-- Resolution targeting: 140x80 (portrait), 80x24 (terminal), 160x45 (web cinema)
-- Frame rate preservation: 30fps baseline, 60fps target capability
-- Progressive smoothing cascade for compression optimization
+- Video file upload (.mp4, .mov, .avi, .mkv)
+- Single image upload (.jpg, .png) for testing
+- Frame isolation from video timeline
+- Drag-and-drop file handling
 
-**ASCII Conversion:**
-- Character set: `[' ', '.', ':', '-', '=', '+', '*', '#', '%', '@']`
-- Character boundary hysteresis to prevent flicker artifacts
-- Aspect ratio compensation for display differences
-- Quality preservation targeting facial feature recognition
+**Real-time ASCII Preview:**
+- Live ASCII conversion as parameters change
+- Side-by-side before/after comparison
+- Monospace font display using `<pre>` elements
+- Responsive viewport scaling
 
-**Compression Engine:**
-- Algorithm: Spatial RLE + LZMA compression
-- Target ratio: 5:1 minimum, 7:1+ production goal
-- 4-stage cleanup pipeline:
-  - Isolated character replacement
-  - Run consolidation for RLE optimization  
-  - Temporal smoothing across frames
-  - Spatial coherence filtering
+**Parameter Control Interface:**
+- **Progressive Smoothing Controls:**
+  - Bilateral filter strength (0-100)
+  - Gaussian blur radius (1-15)
+  - Median filter kernel size (3-11)
+  - CLAHE contrast enhancement (0.5-3.0)
 
-### FR2: Media Player Application
+- **Character Conversion Controls:**
+  - Hysteresis threshold (4-24 pixels)
+  - Character boundary sensitivity (0.1-2.0)
+  - Brightness mapping curve adjustment
 
-**Core Playback:**
-- `.txv` file loading with format validation
-- 60fps playback capability
-- Frame timing precision <16.67ms
-- Dynamic resizing with real-time adaptation
+- **Cleanup Pipeline Controls:**
+  - Isolated character replacement aggressiveness (0-100%)
+  - Run consolidation strength (0-100%)
+  - Spatial coherence threshold (0.15-0.7)
+  - Multiple cleanup passes (1-5 iterations)
 
-**Media Controls:**
-- Playback interface: play/pause/stop/loop controls
-- Frame scrubbing and timing control
-- Size scaling: manual + responsive viewport adaptation
-- Performance monitoring: compression ratios, frame rates, statistics
+**Real-time Metrics Display:**
+- RLE compression ratio calculation
+- Run length distribution analysis
+- Character frequency histogram
+- Visual quality preservation metrics
 
-**File Operations:**
-- `.txv` metadata inspection and validation
-- Export pipeline for distribution formats
-- Batch processing for multiple video conversion
+### SR2: Full Video Processing Workflow
 
-### FR3: Embeddable Component System
+**Apply Optimized Settings:**
+- Process entire video with studio-optimized parameters
+- Progress indication for long videos
+- Memory-efficient frame processing
+- Error handling and recovery
 
-**Integration Features:**
-- Minimal UI - no visible player boundaries
-- Auto-play infinite looping for logo applications
-- CSS-responsive scaling across viewport sizes
-- Self-contained HTML snippets
+**Preview and Validation:**
+- ASCII video playback with optimized settings
+- Frame-by-frame scrubbing capability
+- Compression ratio validation across full video
+- Visual quality assessment tools
 
-**Distribution Formats:**
-- Inline ASCII data with CSS animation
-- JavaScript component library
-- Email-compatible HTML rendering
-- Copy/paste ASCII text preservation
+**Settings Management:**
+- Save/load parameter presets
+- Export optimized settings for production pipeline
+- Content-type specific parameter sets (faces, landscapes, motion)
+- Parameter validation and bounds checking
 
-**Performance Specifications:**
-- <100ms load time for embedded components
-- <500KB typical file sizes
-- Cross-browser compatibility: Chrome, Firefox, Safari, Edge
+### SR3: Export Pipeline
 
-### FR4: Social Media Export Pipeline
+**ASCII Video Export:**
+- .txv format with optimized compression
+- Metadata embedding (settings used, compression achieved)
+- File size optimization
+- Validation and integrity checking
 
-**Video Export Capabilities:**
-- `.txv` → `.mp4` conversion with frame-perfect rendering
-- Canvas-based ASCII-to-video pipeline
-- Multiple aspect ratios: 9:16 (vertical), 1:1 (square), 16:9 (landscape)
-- Background options: transparent, solid colors, branded overlays
-- Platform-optimized compression for Instagram/TikTok/LinkedIn
+**Social Media Export:**
+- Canvas-based ASCII-to-video rendering
+- Multiple aspect ratios (1:1, 9:16, 16:9)
+- .mp4 export using MediaRecorder API or equivalent
+- Frame rate and quality controls
+- Background options (transparent, solid, branded)
 
-**Export Specifications:**
-- Monospace font optimization for video rendering
-- File size optimization leveraging ASCII compression
-- Quality preservation across format conversions
+**Settings Export:**
+- JSON parameter export for production pipeline integration
+- Documentation generation for settings
+- Batch processing configuration files
 
-## Security Requirements
+## Technical Implementation Requirements
 
-### SR1: Input Validation
+### TI1: Studio Architecture
 
-**File Format Security:**
-- `.txv` binary validation before processing
-- Magic header verification and version checking
-- Metadata sanitization
-- File size limits and processing timeouts
+**Frontend Framework:**
+- Pure HTML/CSS/JavaScript (no framework dependencies)
+- Real-time parameter updates using input event handlers
+- Canvas API for image processing and preview
+- File API for drag-and-drop functionality
 
-**Decompression Security:**
-- LZMA decompression limits with memory bounds
-- Maximum frame count and resolution limits
-- Timeout protection for operations
-- Content sanitization to prevent injection attacks
+**Algorithm Implementation:**
+- Port critical functions from `vid.py` and `moc.py` to JavaScript
+- Real-time ASCII conversion without server round-trips
+- RLE compression calculation in browser
+- Efficient frame processing for responsive UI
 
-**Web Security:**
-- Content Security Policy headers
-- CORS validation for external files
-- Input sanitization for user content
-- Error boundary isolation
+**Required Functions from Python Codebase:**
+```javascript
+// From vid.py
+progressiveSmoothing(imageData, parameters)
+frameToASCII(imageData, parameters)
+cleanupASCIIPatterns(asciiFrame, parameters)
 
-## Performance Requirements
+// From moc.py  
+encodeFrameRLE(asciiFrame)
+calculateCompressionRatio(rleSegments, originalSize)
+```
 
-### PR1: Playback Performance
+### TI2: Parameter System
 
-**Frame Rate Targets:**
-- 30fps baseline performance across supported browsers
-- 60fps stretch goal with hardware acceleration
-- Smooth playback under resource constraints
-- Frame timing precision for video quality
+**Parameter Structure:**
+```javascript
+const optimizationParameters = {
+  smoothing: {
+    bilateralStrength: 80,
+    gaussianRadius: 9,
+    medianKernel: 5,
+    claheClip: 1.5
+  },
+  conversion: {
+    hysteresisThreshold: 8,
+    boundarySensitivity: 1.0,
+    contrastCurve: 'linear' // 'linear', 'sigmoid', 'exponential'
+  },
+  cleanup: {
+    isolatedReplacement: 75,
+    runConsolidation: 85,
+    spatialCoherence: 0.4,
+    cleanupPasses: 2
+  }
+}
+```
+
+**Parameter Validation:**
+- Real-time bounds checking
+- Parameter interdependency validation  
+- Performance impact warnings for expensive settings
+- Automatic parameter suggestions based on content analysis
+
+### TI3: Performance Requirements
+
+**Real-time Responsiveness:**
+- Parameter changes reflected in ASCII preview within 100ms
+- Smooth slider interactions without lag
+- Efficient canvas operations for large images
+- Progressive processing for high-resolution inputs
 
 **Memory Management:**
-- Efficient frame buffering for large files
-- Progressive loading for web playback
-- Memory optimization for embedded components
-- Garbage collection efficiency
+- Efficient image buffer handling
+- Garbage collection optimization
+- Memory usage monitoring and limits
+- Progressive loading for large video files
 
-### PR2: Compression Performance
+**Browser Compatibility:**
+- Modern browsers with Canvas API support
+- File API and drag-and-drop functionality
+- MediaRecorder API for video export
+- Fallback options for unsupported features
 
-**Ratio Targets:**
-- 5:1 minimum compression ratio
-- 7:1+ target ratio for web distribution
-- Quality preservation across compression levels
+## Integration with Existing System
 
-**Processing Speed:**
-- Real-time preview during conversion
-- Batch processing capabilities
-- Progressive encoding with user feedback
-- Export optimization for different formats
+### Studio → Production Pipeline
 
-## Technical Specifications
+**Parameter Export:**
+- JSON configuration files consumable by `obfuscii.py`
+- Direct parameter injection into Python pipeline
+- Batch processing configuration generation
+- Settings validation and compatibility checking
 
-### File Format Structure
-```
-[8 bytes] Magic: b'OBFUSCII'
-[4 bytes] Version: uint32
-[4 bytes] Metadata length: uint32  
-[N bytes] Metadata: JSON (UTF-8)
-[4 bytes] Frame count: uint32
-[Frame data] Compressed frames with headers
-```
+**Workflow Integration:**
+1. Optimize parameters in Studio using representative content
+2. Export validated parameter sets 
+3. Apply settings to production `obfuscii.py` pipeline
+4. Batch process content with proven parameters
+5. Eliminate iterative parameter guessing
 
-### Frame Header Structure
-```
-[4 bytes] Frame index
-[1 byte]  Frame type ('I' or 'P')
-[3 bytes] Padding
-[8 bytes] Timestamp (double)
-[4 bytes] Raw size
-[4 bytes] Compressed size
-[N bytes] Compressed data
-```
+### Backward Compatibility
 
-### Character Mapping
-Optimized 8-character progression for maximum compression efficiency:
-- Space character enables background transparency
-- Linear brightness progression
-- 98.5% visual fidelity with minimal overhead
+**Existing .txv Files:**
+- Studio can load and analyze existing .txv files
+- Parameter reverse-engineering from compressed content
+- Quality assessment of historical conversions
+- Migration path for improved compression
+
+**Player Integration:**
+- Studio-generated .txv files compatible with existing player
+- Metadata preservation for settings tracking
+- Version compatibility across studio and player components
 
 ## Development Phases
 
-### Phase 1: Foundation ✅ Complete
-- Core video → ASCII → compression → .txv pipeline
-- 5:1+ compression ratios achieved
-- Binary file format implemented
-- Terminal playback functional
+### Phase 1: Core Studio Development (Immediate Priority)
+- Single frame parameter optimization interface
+- Real-time ASCII preview with sliders
+- RLE compression ratio calculation
+- Parameter export functionality
 
-### Phase 2: Production Deployment (Next)
-- Web player deployment to Cloudflare Pages
-- Modern UI design
-- Browser LZMA decompression
+### Phase 2: Full Video Processing
+- Video upload and frame isolation
+- Full video processing with optimized parameters
+- ASCII video preview and validation
 - Social media export pipeline
-- Embeddable component library
 
-### Phase 3: Growth & Adoption (1-3 months)
-- Portrait logo proof-of-concept
-- Developer documentation
-- Performance optimization
-- Security hardening
+### Phase 3: Production Integration
+- Parameter injection into Python pipeline
+- Batch processing workflows
+- Content-type specific parameter sets
+- Advanced analytics and optimization
 
-### Phase 4: Advanced Features (Long-term)
-- Audio synchronization
-- Background removal tools
-- Advanced export options
-- Format evolution
+### Phase 4: Advanced Features (Future)
+- Audio synchronization support
+- AI-powered parameter optimization
+- Content analysis and automatic parameter selection
+- Cloud processing for large videos
 
-## Success Metrics
+## Success Criteria
 
-### Technical Performance
-- 60fps playback capability
-- <100ms embed load times
-- 7:1+ compression ratio consistently
-- Zero security vulnerabilities
+### Algorithm Optimization
+- Consistent 7:1+ compression ratios on real-world content
+- Visual quality preservation for facial recognition
+- Elimination of errant noise characters fragmenting RLE runs
+- Reproducible parameter sets for different content types
 
-### Adoption Metrics
-- Portrait logo deployments
-- Copy/paste distribution events
-- Developer community adoption
-- Integration case studies
+### Development Efficiency
+- Real-time parameter tuning replacing code iteration cycles
+- Settings validation and export for production use
+- Systematic algorithm development rather than trial-and-error
+- Clear path from optimization to deployment
+
+### System Integration
+- Seamless workflow from studio optimization to production
+- Backward compatibility with existing components
+- Parameter portability across development and production environments
+- Reliable batch processing with proven settings
+
+## Technical Debt and Constraints
+
+### Current Limitations
+- ASCII conversion quality vs compression trade-off not optimized
+- Manual parameter tuning is inefficient and unreliable
+- No systematic approach to algorithm development
+- Limited visibility into compression bottlenecks
+
+### Studio Constraints
+- Browser-based processing limits for very large videos
+- Canvas API performance constraints for real-time processing
+- JavaScript implementation complexity for advanced image processing
+- Memory limitations for high-resolution content
+
+### Integration Challenges
+- Parameter synchronization between JavaScript and Python implementations
+- Algorithm consistency across studio and production environments
+- Performance differences between browser and native implementations
+- Version compatibility and parameter migration
 
 ## Implementation Notes
 
-### Browser Compatibility
-- Modern browsers with ES6+ support
-- WebAssembly for performance-critical operations
-- Graceful degradation for older browsers
-- Mobile optimization for responsive scaling
+### File Structure
+```
+studio/
+  index.html              # Main studio interface
+  studio.js               # Core studio logic
+  algorithms/
+    smoothing.js          # Progressive smoothing implementation
+    ascii.js              # ASCII conversion logic
+    cleanup.js            # Pattern cleanup algorithms
+    compression.js        # RLE compression calculation
+  ui/
+    sliders.js           # Parameter control interface
+    preview.js           # ASCII preview management
+    export.js            # Settings and video export
+  assets/
+    styles.css           # Studio styling
+    test-frames/         # Sample frames for testing
+```
 
-### Deployment Requirements
-- Static hosting with custom MIME type support
-- CORS headers for cross-origin .txv loading
-- CDN optimization for global distribution
-- Custom domain support for branding
+### Development Priority
+The studio is not a nice-to-have feature - it's the critical tool needed to solve the compression optimization problem. Manual parameter tweaking has proven ineffective. The studio approach provides the systematic optimization capability required to achieve production-ready compression ratios.
 
 ---
 
-**Current Status:** Phase 1 complete, ready for production deployment. Core pipeline validated, compression targets achieved, file format stable.
+**Current Status:** Core algorithm functional but below compression targets. Studio development is immediate priority to enable systematic optimization rather than continued trial-and-error parameter adjustment.
