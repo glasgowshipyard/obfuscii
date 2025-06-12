@@ -238,7 +238,7 @@ def decompress_frame_rle(compressed_data: bytes, width: int, height: int) -> Lis
                 
                 # Check if frame is complete
                 if len(frame) == height:
-                    break
+                    return frame
     
     return frame
 

@@ -33,8 +33,10 @@ class SmoothingConfig:
 @dataclass
 class ConversionConfig:
     """ASCII character conversion parameters"""
-    # Character set for ASCII conversion
+    # Character sets for ASCII conversion
     ascii_chars: List[str] = None
+    dark_ascii_chars: Optional[List[str]] = None
+    light_ascii_chars: Optional[List[str]] = None
     
     # Hysteresis threshold for anti-flicker
     hysteresis_threshold: int = 8
@@ -46,6 +48,10 @@ class ConversionConfig:
     def __post_init__(self):
         if self.ascii_chars is None:
             self.ascii_chars = [' ', '.', ':', '-', '=', '+', '*', '#', '%', '@']
+        if self.dark_ascii_chars is None:
+            self.dark_ascii_chars = self.ascii_chars
+        if self.light_ascii_chars is None:
+            self.light_ascii_chars = list(reversed(self.dark_ascii_chars))
 
 
 @dataclass  
@@ -242,6 +248,13 @@ def validate_config(config: OBFUSCIIConfig) -> List[str]:
         issues.append("aspect_compensation must be positive")
     if not config.conversion.ascii_chars:
         issues.append("ascii_chars cannot be empty")
+    if not config.conversion.dark_ascii_chars:
+        issues.append("dark_ascii_chars cannot be empty")
+    if not config.conversion.light_ascii_chars:
+        issues.append("light_ascii_chars cannot be empty")
+    if (config.conversion.dark_ascii_chars and config.conversion.light_ascii_chars and
+            len(config.conversion.dark_ascii_chars) != len(config.conversion.light_ascii_chars)):
+        issues.append("dark_ascii_chars and light_ascii_chars must be same length")
     
     # Validate cleanup parameters
     if not (0 <= config.cleanup.spatial_coherence_threshold <= 1):

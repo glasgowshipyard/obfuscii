@@ -58,6 +58,7 @@ Moving company branding that exists as behaviour rather than static imagery. Cop
 - **Clean codebase:** No legacy bumf, every line has purpose
 
 **Character Set:** `[' ', '-', '#', '=', '+', '*', '%', '@']`
+Supports both dark and light backgrounds with inverted character maps.
 - 98.5% visual fidelity with minimal compression overhead
 - Space character enables background transparency
 - Linear brightness progression
@@ -68,8 +69,11 @@ Moving company branding that exists as behaviour rather than static imagery. Cop
 # Basic conversion
 python3 obfuscii.py input.mp4
 
-# Custom output and resolution  
+# Custom output and resolution
 python3 obfuscii.py input.mp4 -o portrait.txv --resolution 140x80
+
+# Specify background mode (dark, light, or both)
+python3 obfuscii.py input.mp4 --background dark
 
 # Preview in terminal
 python3 obfuscii.py input.mp4 --preview

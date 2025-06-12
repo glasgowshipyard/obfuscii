@@ -19,6 +19,7 @@ def main():
     parser.add_argument('-o', '--output', help='Output .txv file (default: input name + .txv)')
     parser.add_argument('--resolution', help='Output resolution (WIDTHxHEIGHT, e.g. 140x80)')
     parser.add_argument('--config', help='Configuration file (.json) - Available presets: light_balanced_high_max.json (default), config_high_quality.json, config_high_compression.json')
+    parser.add_argument('--background', choices=['dark', 'light', 'both'], help='Target background mode for ASCII output')
     
     # Behavior flags
     parser.add_argument('--info', action='store_true', help='Show .txv file information')
@@ -102,6 +103,19 @@ def convert_video_to_txv(args):
         print(f"Converting: {args.input} → {args.output}")
         print(f"Using configuration: {config_file} ({config.description})")
     
+    # Determine background rendering mode
+    bg_choice = args.background
+    if not bg_choice:
+        resp = input("Render for dark, light, or both backgrounds? [d/l/b] (default: both): ").strip().lower()
+        if resp in ("d", "dark"):
+            bg_choice = "dark"
+        elif resp in ("l", "light"):
+            bg_choice = "light"
+        else:
+            bg_choice = "both"
+
+    backgrounds = [bg_choice] if bg_choice in ("dark", "light") else ["dark", "light"]
+
     # Parse resolution (override config default if specified)
     target_width, target_height = parse_resolution(args.resolution)
     if not args.resolution:
@@ -116,59 +130,73 @@ def convert_video_to_txv(args):
     if args.preview:
         print(f"Preview mode: processing first 30 frames")
     
-    # Process video
-    compressed_result = process_video_to_compressed(
-        input_file=args.input,
-        target_width=target_width,
-        target_height=target_height,
-        max_frames=max_frames,
-        verbose=args.verbose,
-        config=config
-    )
-    
-    # Export to .txv
-    print(f"\nExporting to .txv format...")
-    original_filename = Path(args.input).name
-    write_txv_file(compressed_result, args.output, original_filename)
-    
-    # Show results
-    if compressed_result.stats:
-        ratio = compressed_result.stats.overall_ratio
-        size_kb = compressed_result.stats.compressed_size_kb
-        print(f"\n✅ SUCCESS: {args.output}")
-        print(f"   Compression: {ratio:.1f}:1 ratio")
-        print(f"   File size: {size_kb:.1f} KB")
-        
-        if ratio >= 10.0:
-            print("🎯 EXCELLENT: Target 10:1+ compression achieved!")
-        elif ratio >= 7.0:
-            print("🔥 VERY GOOD: 7:1+ compression achieved")
-        elif ratio >= 5.0:
-            print("✅ GOOD: 5:1+ compression achieved")
+    for bg in backgrounds:
+        cfg = config.copy()
+        if bg == "light":
+            cfg.conversion.ascii_chars = cfg.conversion.light_ascii_chars
         else:
-            print("⚠️  ACCEPTABLE: Compression below 5:1")
-    
-    # Play result
-    if args.preview:
-        print(f"\nPreview complete. Use 'python obfuscii.py {args.output}' to play full .txv file")
-    else:
-        print(f"\nPlaying result...")
-        # Get decompressed frames for playback
-        from obfuscii.txv import read_txv_file, decompress_txv_frame
-        
-        # Load and decompress for playback
-        compressed_video = read_txv_file(args.output)
-        ascii_frames = []
-        
-        print("Decompressing for playback...")
-        for frame_idx in range(len(compressed_video.frames)):
-            ascii_frame = decompress_txv_frame(compressed_video, frame_idx)
-            ascii_frames.append(ascii_frame)
-            
-            if frame_idx % 30 == 0:
-                print(f"Decompressed frame {frame_idx}/{len(compressed_video.frames)}")
-        
-        play_ascii_video(ascii_frames, compressed_video.fps)
+            cfg.conversion.ascii_chars = cfg.conversion.dark_ascii_chars
+
+        # Process video
+        compressed_result = process_video_to_compressed(
+            input_file=args.input,
+            target_width=target_width,
+            target_height=target_height,
+            max_frames=max_frames,
+            verbose=args.verbose,
+            config=cfg
+        )
+
+        # Export to .txv
+        print(f"\nExporting to .txv format...")
+        original_filename = Path(args.input).name
+        output_file = args.output
+        if len(backgrounds) > 1:
+            stem = Path(args.output).stem
+            suffix = Path(args.output).suffix
+            output_file = f"{stem}_{bg}{suffix}"
+
+        write_txv_file(compressed_result, output_file, original_filename)
+
+        # Show results
+        if compressed_result.stats:
+            ratio = compressed_result.stats.overall_ratio
+            size_kb = compressed_result.stats.compressed_size_kb
+            print(f"\n✅ SUCCESS: {output_file}")
+            print(f"   Compression: {ratio:.1f}:1 ratio")
+            print(f"   File size: {size_kb:.1f} KB")
+
+            if ratio >= 10.0:
+                print("🎯 EXCELLENT: Target 10:1+ compression achieved!")
+            elif ratio >= 7.0:
+                print("🔥 VERY GOOD: 7:1+ compression achieved")
+            elif ratio >= 5.0:
+                print("✅ GOOD: 5:1+ compression achieved")
+            else:
+                print("⚠️  ACCEPTABLE: Compression below 5:1")
+
+        # Play result
+        if args.preview:
+            print(f"\nPreview complete. Use 'python obfuscii.py {output_file}' to play full .txv file")
+        else:
+            print(f"\nPlaying result for {bg} background...")
+            from obfuscii.txv import read_txv_file, decompress_txv_frame
+
+            try:
+                compressed_video = read_txv_file(output_file)
+                ascii_frames = []
+
+                print("Decompressing for playback...")
+                for frame_idx in range(len(compressed_video.frames)):
+                    ascii_frame = decompress_txv_frame(compressed_video, frame_idx)
+                    ascii_frames.append(ascii_frame)
+
+                    if frame_idx % 30 == 0:
+                        print(f"Decompressed frame {frame_idx}/{len(compressed_video.frames)}")
+
+                play_ascii_video(ascii_frames, compressed_video.fps)
+            except KeyboardInterrupt:
+                print("\nPlayback cancelled")
 
 if __name__ == '__main__':
     main()
