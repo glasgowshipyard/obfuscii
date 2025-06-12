@@ -1,0 +1,36 @@
+OBFUSCII PARAMETER OPTIMIZATION - LLM EVALUATION GUIDE
+=================================================================
+
+🎯 TASK: Analyze ASCII outputs to recommend optimal parameters
+
+📊 EVALUATION CRITERIA (in order of importance):
+1. COMPRESSION RATIO: Higher is better (target 7:1+, excellent 10:1+)
+2. VISUAL QUALITY: Recognizable features, clean edges, minimal noise
+3. DETAIL PRESERVATION: Important facial features, text, edges visible
+4. ARTIFACT REDUCTION: Minimal salt-and-pepper noise, smooth gradients
+
+🔧 PARAMETER GUIDE:
+• SMOOTHING: light=detail, medium=balanced, heavy=compression
+• CLEANUP: conservative=detail, balanced=moderate, aggressive=compression
+• RESOLUTION: low=speed, medium=balanced, high=quality
+• COMPRESSION: fast=speed, balanced=moderate, max=size
+
+🎨 VISUAL ASSESSMENT TIPS:
+• Look for recognizable shapes and features
+• Check for excessive noise (random scattered characters)
+• Evaluate edge smoothness and gradient quality
+• Consider if main subject is clearly distinguishable
+
+📈 TEST RESULTS SUMMARY:
+Total configurations tested: 81
+Compression range: 2.3:1 to 4.0:1
+Best performing config: light_balanced_high_balanced
+
+🤖 RECOMMENDATION FORMAT:
+Please provide:
+1. Top 3 recommended configurations (with rationale)
+2. Trade-offs analysis (compression vs quality)
+3. Optimal settings for different use cases:
+   - Maximum compression (web delivery)
+   - Balanced quality (general use)
+   - Maximum detail (high quality)

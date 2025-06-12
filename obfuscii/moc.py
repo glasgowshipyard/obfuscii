@@ -52,13 +52,22 @@ class CompressedVideo:
         }
 
 def compress_video_rle(ascii_frames: List[List[List[str]]], fps: float = 30.0, 
-                      verbose: bool = False) -> CompressedVideo:
+                      verbose: bool = False, config: Optional['CompressionConfig'] = None) -> CompressedVideo:
     """
     Primary compression function using RLE + LZMA
     
     Targets 10:1 compression ratio by exploiting spatial redundancy
     in ASCII art rather than temporal prediction.
+    
+    Args:
+        ascii_frames: List of ASCII frame arrays
+        fps: Frames per second for output video
+        verbose: Print progress information
+        config: Compression configuration (uses defaults if None)
     """
+    if config is None:
+        from .config import CompressionConfig
+        config = CompressionConfig()  # Use defaults
     
     if not ascii_frames:
         raise ValueError("No frames to compress")
@@ -83,8 +92,8 @@ def compress_video_rle(ascii_frames: List[List[List[str]]], fps: float = 30.0,
         # Apply run-length encoding
         rle_segments = encode_frame_rle(ascii_frame)
         
-        # Compress with LZMA
-        compressed_data = compress_rle_segments(rle_segments)
+        # Compress with LZMA using configured settings
+        compressed_data = compress_rle_segments(rle_segments, config)
         compressed_size = len(compressed_data)
         
         # Calculate compression ratio for this frame
@@ -135,12 +144,15 @@ def compress_video_rle(ascii_frames: List[List[List[str]]], fps: float = 30.0,
     else:
         print(f"Compression: {overall_ratio:.1f}:1 ratio ({total_compressed_size/1024:.1f} KB)")
     
-    if overall_ratio >= 10.0:
-        print("✅ TARGET ACHIEVED: 10:1+ compression ratio")
-    elif overall_ratio >= 5.0:
-        print("⚠️  GOOD PROGRESS: 5:1+ compression ratio")
+    # Use configured thresholds for performance assessment
+    if overall_ratio >= config.target_ratio:
+        print(f"✅ TARGET ACHIEVED: {config.target_ratio}:1+ compression ratio")
+    elif overall_ratio >= config.good_ratio:
+        print(f"🔥 VERY GOOD: {config.good_ratio}:1+ compression ratio")
+    elif overall_ratio >= config.acceptable_ratio:
+        print(f"⚠️  ACCEPTABLE: {config.acceptable_ratio}:1+ compression ratio")
     else:
-        print("❌ NEEDS WORK: Below 5:1 compression")
+        print(f"❌ NEEDS WORK: Below {config.acceptable_ratio}:1 compression")
     
     return compressed
 
@@ -170,12 +182,16 @@ def encode_frame_rle(ascii_frame: List[List[str]]) -> List[Tuple[str, int]]:
     
     return rle_segments
 
-def compress_rle_segments(rle_segments: List[Tuple[str, int]]) -> bytes:
+def compress_rle_segments(rle_segments: List[Tuple[str, int]], config: 'CompressionConfig') -> bytes:
     """
     Compress RLE segments using LZMA
     
     Converts to JSON then applies LZMA compression.
     LZMA is extremely effective on the structured patterns.
+    
+    Args:
+        rle_segments: Run-length encoded segments
+        config: Compression configuration
     """
     
     # Convert to compact JSON representation
@@ -184,8 +200,9 @@ def compress_rle_segments(rle_segments: List[Tuple[str, int]]) -> bytes:
     # Serialize to JSON (minimal formatting)
     json_data = json.dumps(segment_data, separators=(',', ':')).encode('utf-8')
     
-    # Apply LZMA compression (preset 6 = good compression/speed balance)
-    compressed_data = lzma.compress(json_data, format=lzma.FORMAT_ALONE, preset=6)
+    # Apply LZMA compression with configured settings
+    lzma_format = lzma.FORMAT_ALONE if config.lzma_format == "alone" else lzma.FORMAT_XZ
+    compressed_data = lzma.compress(json_data, format=lzma_format, preset=config.lzma_preset)
     
     return compressed_data
 

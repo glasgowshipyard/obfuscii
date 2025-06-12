@@ -15,11 +15,10 @@ import os
 import sys
 from typing import List, Tuple, Optional
 from . import moc
+from .config import OBFUSCIIConfig, SmoothingConfig, ConversionConfig, CleanupConfig
 
-# Character set - dark to light progression
+# Legacy constants for backward compatibility
 ASCII_CHARS = [' ', '.', ':', '-', '=', '+', '*', '#', '%', '@']
-
-# Character boundary hysteresis threshold (pixels)
 HYSTERESIS_THRESHOLD = 8
 
 def load_video(filename: str) -> Tuple[cv2.VideoCapture, float, int]:
@@ -45,7 +44,7 @@ def parse_resolution(resolution: Optional[str]) -> Tuple[Optional[int], Optional
     except (ValueError, AttributeError):
         raise ValueError(f"Invalid resolution format: {resolution}. Use WIDTHxHEIGHT (e.g. 140x80)")
 
-def progressive_smoothing(frame: np.ndarray) -> np.ndarray:
+def progressive_smoothing(frame: np.ndarray, config: Optional[SmoothingConfig] = None) -> np.ndarray:
     """
     Progressive smoothing cascade for ASCII compression optimization
     
@@ -53,42 +52,74 @@ def progressive_smoothing(frame: np.ndarray) -> np.ndarray:
     2. Gaussian blur - eliminates texture patterns  
     3. Median filter - removes salt-and-pepper artifacts
     4. Light contrast enhancement for viewability
+    
+    Args:
+        frame: Input BGR frame
+        config: Smoothing configuration parameters
     """
+    if config is None:
+        config = SmoothingConfig()  # Use defaults
+    
     # Bilateral filter - preserves structural edges
-    smooth1 = cv2.bilateralFilter(frame, 15, 80, 80)
+    smooth1 = cv2.bilateralFilter(
+        frame, 
+        config.bilateral_d, 
+        config.bilateral_sigma_color, 
+        config.bilateral_sigma_space
+    )
     
     # Gaussian blur - creates smooth gradients
-    smooth2 = cv2.GaussianBlur(smooth1, (9, 9), 0)
+    kernel_size = config.gaussian_kernel_size
+    if kernel_size % 2 == 0:
+        kernel_size += 1  # Ensure odd kernel size
+    smooth2 = cv2.GaussianBlur(smooth1, (kernel_size, kernel_size), 0)
     
     # Median filter - removes remaining artifacts
-    smooth3 = cv2.medianBlur(smooth2, 5)
+    median_size = config.median_kernel_size
+    if median_size % 2 == 0:
+        median_size += 1  # Ensure odd kernel size
+    smooth3 = cv2.medianBlur(smooth2, median_size)
     
     # Convert to greyscale
     gray = cv2.cvtColor(smooth3, cv2.COLOR_BGR2GRAY)
     
     # Light contrast enhancement
-    clahe = cv2.createCLAHE(clipLimit=1.5, tileGridSize=(8, 8))
+    clahe = cv2.createCLAHE(
+        clipLimit=config.clahe_clip_limit, 
+        tileGridSize=config.clahe_tile_grid_size
+    )
     enhanced = clahe.apply(gray)
     
     return enhanced
 
 def frame_to_ascii_with_hysteresis(frame: np.ndarray, target_width: Optional[int] = None, 
                                   target_height: Optional[int] = None, 
-                                  prev_ascii_frame: Optional[List[List[str]]] = None) -> List[List[str]]:
-    """Convert video frame to ASCII using progressive smoothing and character boundary hysteresis"""
+                                  prev_ascii_frame: Optional[List[List[str]]] = None,
+                                  config: Optional[OBFUSCIIConfig] = None) -> List[List[str]]:
+    """Convert video frame to ASCII using progressive smoothing and character boundary hysteresis
     
-    # Apply progressive smoothing
-    processed_frame = progressive_smoothing(frame)
+    Args:
+        frame: Input BGR frame
+        target_width: Target ASCII width (overrides config)
+        target_height: Target ASCII height (overrides config) 
+        prev_ascii_frame: Previous frame for hysteresis
+        config: OBFUSCII configuration
+    """
+    if config is None:
+        config = OBFUSCIIConfig()  # Use defaults
+    
+    # Apply progressive smoothing with config
+    processed_frame = progressive_smoothing(frame, config.smoothing)
     
     # Determine target dimensions
     if target_width and target_height:
         new_width, new_height = target_width, target_height
     else:
-        # Auto-size for terminal display
+        # Auto-size for terminal display using config
         height, width = processed_frame.shape
         aspect_ratio = height / width
-        new_width = 120
-        new_height = int(aspect_ratio * new_width * 0.55)  # Terminal compensation
+        new_width = config.conversion.default_width
+        new_height = int(aspect_ratio * new_width * config.conversion.aspect_compensation)
     
     # Resize frame
     resized = cv2.resize(processed_frame, (new_width, new_height), interpolation=cv2.INTER_LINEAR)
@@ -99,8 +130,11 @@ def frame_to_ascii_with_hysteresis(frame: np.ndarray, target_width: Optional[int
         ascii_row = []
         for col_idx, pixel in enumerate(row):
             
+            # Use configured character set
+            ascii_chars = config.conversion.ascii_chars
+            
             # Standard pixel-to-character conversion
-            char_index = min(int(pixel) * len(ASCII_CHARS) // 256, len(ASCII_CHARS) - 1)
+            char_index = min(int(pixel) * len(ascii_chars) // 256, len(ascii_chars) - 1)
             
             # Apply hysteresis if we have previous frame
             if (prev_ascii_frame and 
@@ -109,33 +143,35 @@ def frame_to_ascii_with_hysteresis(frame: np.ndarray, target_width: Optional[int
                 
                 prev_char = prev_ascii_frame[row_idx][col_idx]
                 try:
-                    prev_index = ASCII_CHARS.index(prev_char)
+                    prev_index = ascii_chars.index(prev_char)
                     
-                    if (0 <= char_index < len(ASCII_CHARS) and 
-                        0 <= prev_index < len(ASCII_CHARS)):
+                    if (0 <= char_index < len(ascii_chars) and 
+                        0 <= prev_index < len(ascii_chars)):
                         
                         # Check for adjacent character boundary
                         if abs(char_index - prev_index) == 1:
-                            boundary_pixel = (prev_index + 0.5) * (256 // len(ASCII_CHARS))
+                            boundary_pixel = (prev_index + 0.5) * (256 // len(ascii_chars))
                             pixel_distance = abs(pixel - boundary_pixel)
                             
-                            # Apply hysteresis threshold
-                            if pixel_distance < HYSTERESIS_THRESHOLD:
+                            # Apply configured hysteresis threshold
+                            if pixel_distance < config.conversion.hysteresis_threshold:
                                 char_index = prev_index
                             
                 except ValueError:
                     pass
             
-            ascii_row.append(ASCII_CHARS[char_index])
+            ascii_row.append(ascii_chars[char_index])
         ascii_frame.append(ascii_row)
     
     return ascii_frame
 
 def cleanup_ascii_patterns(ascii_frames: List[List[List[str]]], verbose: bool = False, 
-                         enable_isolated_replacement: bool = True,
-                         enable_run_consolidation: bool = True,
-                         enable_temporal_smoothing: bool = True,
-                         enable_spatial_coherence: bool = True) -> List[List[List[str]]]:
+                         config: Optional[OBFUSCIIConfig] = None,
+                         # Legacy parameters for backward compatibility
+                         enable_isolated_replacement: Optional[bool] = None,
+                         enable_run_consolidation: Optional[bool] = None,
+                         enable_temporal_smoothing: Optional[bool] = None,
+                         enable_spatial_coherence: Optional[bool] = None) -> List[List[List[str]]]:
     """
     Clean up ASCII patterns for compression optimization
     
@@ -144,7 +180,25 @@ def cleanup_ascii_patterns(ascii_frames: List[List[List[str]]], verbose: bool = 
     2. Run consolidation  
     3. Temporal smoothing
     4. Spatial coherence filtering
+    
+    Args:
+        ascii_frames: List of ASCII frame arrays
+        verbose: Print progress information
+        config: Cleanup configuration (preferred)
+        enable_*: Legacy boolean flags (override config if provided)
     """
+    if config is None:
+        config = OBFUSCIIConfig()  # Use defaults
+    
+    # Handle legacy parameter overrides
+    if enable_isolated_replacement is not None:
+        config.cleanup.enable_isolated_replacement = enable_isolated_replacement
+    if enable_run_consolidation is not None:
+        config.cleanup.enable_run_consolidation = enable_run_consolidation
+    if enable_temporal_smoothing is not None:
+        config.cleanup.enable_temporal_smoothing = enable_temporal_smoothing
+    if enable_spatial_coherence is not None:
+        config.cleanup.enable_spatial_coherence = enable_spatial_coherence
     
     if not ascii_frames:
         return ascii_frames
@@ -160,7 +214,7 @@ def cleanup_ascii_patterns(ascii_frames: List[List[List[str]]], verbose: bool = 
     total_changes = 0
     
     # Stage 1: Isolated character replacement
-    if enable_isolated_replacement:
+    if config.cleanup.enable_isolated_replacement:
         if verbose:
             print("  Stage 1: Isolated character replacement...")
         
@@ -182,7 +236,7 @@ def cleanup_ascii_patterns(ascii_frames: List[List[List[str]]], verbose: bool = 
                                 total_changes += 1
     
     # Stage 2: Run consolidation
-    if enable_run_consolidation:
+    if config.cleanup.enable_run_consolidation:
         if verbose:
             print("  Stage 2: Run consolidation...")
         
@@ -192,7 +246,7 @@ def cleanup_ascii_patterns(ascii_frames: List[List[List[str]]], verbose: bool = 
                 cleaned_frames[frame_idx][row_idx] = consolidated_row
     
     # Stage 3: Temporal smoothing
-    if enable_temporal_smoothing:
+    if config.cleanup.enable_temporal_smoothing:
         if verbose:
             print("  Stage 3: Temporal smoothing...")
         
@@ -210,12 +264,12 @@ def cleanup_ascii_patterns(ascii_frames: List[List[List[str]]], verbose: bool = 
                         
                         # Suppress A→B→A flicker patterns
                         if prev_char == next_char and curr_char != prev_char:
-                            if is_temporal_noise(prev_char, curr_char, next_char):
+                            if is_temporal_noise(prev_char, curr_char, next_char, config.conversion.ascii_chars):
                                 cleaned_frames[frame_idx][row_idx][col_idx] = prev_char
                                 total_changes += 1
     
     # Stage 4: Spatial coherence filtering
-    if enable_spatial_coherence:
+    if config.cleanup.enable_spatial_coherence:
         if verbose:
             print("  Stage 4: Spatial coherence filtering...")
         
@@ -226,7 +280,7 @@ def cleanup_ascii_patterns(ascii_frames: List[List[List[str]]], verbose: bool = 
                     
                     context_chars = get_spatial_context(frame, row_idx, col_idx, radius=2)
                     
-                    if not fits_spatial_context(char, context_chars):
+                    if not fits_spatial_context(char, context_chars, config.cleanup):
                         better_char = find_contextual_replacement(char, context_chars)
                         if better_char != char:
                             cleaned_frames[frame_idx][row_idx][col_idx] = better_char
@@ -286,12 +340,19 @@ def consolidate_character_runs(row: List[str]) -> List[str]:
     
     return consolidated
 
-def is_temporal_noise(prev_char: str, curr_char: str, next_char: str) -> bool:
-    """Determine if character change is temporal noise"""
+def is_temporal_noise(prev_char: str, curr_char: str, next_char: str, ascii_chars: List[str]) -> bool:
+    """Determine if character change is temporal noise
+    
+    Args:
+        prev_char: Previous frame character
+        curr_char: Current frame character  
+        next_char: Next frame character
+        ascii_chars: Configured ASCII character set
+    """
     try:
-        prev_idx = ASCII_CHARS.index(prev_char)
-        curr_idx = ASCII_CHARS.index(curr_char)
-        next_idx = ASCII_CHARS.index(next_char)
+        prev_idx = ascii_chars.index(prev_char)
+        curr_idx = ascii_chars.index(curr_char)
+        next_idx = ascii_chars.index(next_char)
         
         # Adjacent characters in progression are likely boundary noise
         if (abs(curr_idx - prev_idx) <= 1 or abs(curr_idx - next_idx) <= 1):
@@ -319,8 +380,14 @@ def get_spatial_context(frame: List[List[str]], row: int, col: int, radius: int 
     
     return context
 
-def fits_spatial_context(char: str, context_chars: List[str]) -> bool:
-    """Check if character fits spatial context using salt-and-pepper detection"""
+def fits_spatial_context(char: str, context_chars: List[str], config: CleanupConfig) -> bool:
+    """Check if character fits spatial context using salt-and-pepper detection
+    
+    Args:
+        char: Character to check
+        context_chars: Surrounding characters
+        config: Cleanup configuration with thresholds
+    """
     if not context_chars:
         return True
     
@@ -333,7 +400,7 @@ def fits_spatial_context(char: str, context_chars: List[str]) -> bool:
     current_char_frequency = current_char_count / len(context_chars)
     
     # Character appears frequently in neighbourhood
-    if current_char_frequency >= 0.15:
+    if current_char_frequency >= config.spatial_coherence_threshold:
         return True
     
     # Check neighbourhood uniformity
@@ -343,12 +410,11 @@ def fits_spatial_context(char: str, context_chars: List[str]) -> bool:
         neighbourhood_uniformity = most_common_count / len(context_chars)
         
         # Uniform region with isolated outlier
-        if neighbourhood_uniformity >= 0.7:
+        if neighbourhood_uniformity >= config.spatial_uniformity_threshold:
             return False
     
-    # Preserve facial features
-    facial_feature_chars = ['#', '*', '%', '@']
-    if char in facial_feature_chars:
+    # Preserve facial features if enabled
+    if config.preserve_facial_features and char in config.facial_feature_chars:
         return True
     
     return True
@@ -460,12 +526,23 @@ def resize_frame_to_terminal(ascii_frame: List[List[str]], dimensions: Tuple[int
 def process_video_to_compressed(input_file: str, target_width: Optional[int] = None, 
                                target_height: Optional[int] = None, 
                                max_frames: Optional[int] = None,
-                               verbose: bool = False) -> moc.CompressedVideo:
+                               verbose: bool = False,
+                               config: Optional[OBFUSCIIConfig] = None) -> moc.CompressedVideo:
     """
     Process video file to compressed ASCII video
     
+    Args:
+        input_file: Path to input video file
+        target_width: Override target ASCII width
+        target_height: Override target ASCII height
+        max_frames: Limit number of frames processed
+        verbose: Print progress information
+        config: OBFUSCII configuration (uses defaults if None)
+    
     Returns CompressedVideo object ready for .txv export
     """
+    if config is None:
+        config = OBFUSCIIConfig()  # Use defaults
     
     if verbose:
         print(f"Loading video: {input_file}")
@@ -495,7 +572,7 @@ def process_video_to_compressed(input_file: str, target_width: Optional[int] = N
             break
             
         ascii_frame = frame_to_ascii_with_hysteresis(
-            frame, target_width, target_height, prev_ascii_frame
+            frame, target_width, target_height, prev_ascii_frame, config
         )
         ascii_frames.append(ascii_frame)
         prev_ascii_frame = ascii_frame
@@ -519,18 +596,15 @@ def process_video_to_compressed(input_file: str, target_width: Optional[int] = N
     ascii_frames = cleanup_ascii_patterns(
         ascii_frames, 
         verbose,
-        enable_isolated_replacement=True,
-        enable_run_consolidation=True,
-        enable_temporal_smoothing=True,
-        enable_spatial_coherence=True
+        config
     )
     
     # Compress
     print("Compressing...")
     if verbose:
-        compressed_result = moc.compress_video_rle(ascii_frames, fps=fps, verbose=True)
+        compressed_result = moc.compress_video_rle(ascii_frames, fps=fps, verbose=True, config=config.compression)
         moc.analyze_compression_performance(ascii_frames, compressed_result)
     else:
-        compressed_result = moc.compress_video_rle(ascii_frames, fps=fps, verbose=False)
+        compressed_result = moc.compress_video_rle(ascii_frames, fps=fps, verbose=False, config=config.compression)
     
     return compressed_result

@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "description": "OBFUSCII processing configuration",
+  "smoothing": {
+    "bilateral_d": 21,
+    "bilateral_sigma_color": 80,
+    "bilateral_sigma_space": 80,
+    "gaussian_kernel_size": 13,
+    "median_kernel_size": 7,
+    "clahe_clip_limit": 2.0,
+    "clahe_tile_grid_size": [
+      8,
+      8
+    ]
+  },
+  "conversion": {
+    "ascii_chars": [
+      " ",
+      ".",
+      ":",
+      "-",
+      "=",
+      "+",
+      "*",
+      "#",
+      "%",
+      "@"
+    ],
+    "hysteresis_threshold": 8,
+    "default_width": 120,
+    "aspect_compensation": 0.55
+  },
+  "cleanup": {
+    "enable_isolated_replacement": true,
+    "enable_run_consolidation": true,
+    "enable_temporal_smoothing": true,
+    "enable_spatial_coherence": true,
+    "spatial_coherence_threshold": 0.2,
+    "spatial_uniformity_threshold": 0.6,
+    "preserve_facial_features": true,
+    "facial_feature_chars": [
+      "#",
+      "*",
+      "%",
+      "@"
+    ]
+  },
+  "compression": {
+    "lzma_preset": 9,
+    "lzma_format": "alone",
+    "target_ratio": 15.0,
+    "acceptable_ratio": 5.0,
+    "excellent_ratio": 10.0,
+    "good_ratio": 7.0
+  }
+}

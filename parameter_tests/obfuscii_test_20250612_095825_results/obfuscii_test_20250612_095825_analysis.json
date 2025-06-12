@@ -1,0 +1,2448 @@
+{
+  "test_info": {
+    "test_id": "obfuscii_test_20250612_095825",
+    "source_video": "new.mov",
+    "frame_number": 30,
+    "generated": "2025-06-12T09:59:45.604774",
+    "total_configurations": 81,
+    "strategy": "Strategic parameter grid for optimal compression vs quality balance"
+  },
+  "parameter_strategy": {
+    "smoothing_levels": [
+      "light (preserve detail)",
+      "medium (balanced)",
+      "heavy (max compression)"
+    ],
+    "cleanup_levels": [
+      "conservative (preserve detail)",
+      "balanced (moderate cleanup)",
+      "aggressive (max compression)"
+    ],
+    "resolutions": [
+      "low (100px)",
+      "medium (120px)",
+      "high (140px)"
+    ],
+    "compression_levels": [
+      "fast (preset 1)",
+      "balanced (preset 6)",
+      "max (preset 9)"
+    ]
+  },
+  "results": [
+    {
+      "test_name": "light_conservative_low_fast",
+      "filename": "obfuscii_test_20250612_095825_light_conservative_low_fast.txt",
+      "compression_ratio": 2.43,
+      "file_size_kb": 3.89,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_conservative_low_balanced",
+      "filename": "obfuscii_test_20250612_095825_light_conservative_low_balanced.txt",
+      "compression_ratio": 3.05,
+      "file_size_kb": 3.11,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_conservative_low_max",
+      "filename": "obfuscii_test_20250612_095825_light_conservative_low_max.txt",
+      "compression_ratio": 3.05,
+      "file_size_kb": 3.11,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_conservative_medium_fast",
+      "filename": "obfuscii_test_20250612_095825_light_conservative_medium_fast.txt",
+      "compression_ratio": 2.69,
+      "file_size_kb": 5.1,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_conservative_medium_balanced",
+      "filename": "obfuscii_test_20250612_095825_light_conservative_medium_balanced.txt",
+      "compression_ratio": 3.43,
+      "file_size_kb": 4.0,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_conservative_medium_max",
+      "filename": "obfuscii_test_20250612_095825_light_conservative_medium_max.txt",
+      "compression_ratio": 3.43,
+      "file_size_kb": 4.0,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_conservative_high_fast",
+      "filename": "obfuscii_test_20250612_095825_light_conservative_high_fast.txt",
+      "compression_ratio": 2.89,
+      "file_size_kb": 6.44,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_conservative_high_balanced",
+      "filename": "obfuscii_test_20250612_095825_light_conservative_high_balanced.txt",
+      "compression_ratio": 3.73,
+      "file_size_kb": 4.98,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_conservative_high_max",
+      "filename": "obfuscii_test_20250612_095825_light_conservative_high_max.txt",
+      "compression_ratio": 3.73,
+      "file_size_kb": 4.98,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_balanced_low_fast",
+      "filename": "obfuscii_test_20250612_095825_light_balanced_low_fast.txt",
+      "compression_ratio": 2.63,
+      "file_size_kb": 3.6,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_balanced_low_balanced",
+      "filename": "obfuscii_test_20250612_095825_light_balanced_low_balanced.txt",
+      "compression_ratio": 3.22,
+      "file_size_kb": 2.94,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_balanced_low_max",
+      "filename": "obfuscii_test_20250612_095825_light_balanced_low_max.txt",
+      "compression_ratio": 3.22,
+      "file_size_kb": 2.94,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_balanced_medium_fast",
+      "filename": "obfuscii_test_20250612_095825_light_balanced_medium_fast.txt",
+      "compression_ratio": 2.9,
+      "file_size_kb": 4.73,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_balanced_medium_balanced",
+      "filename": "obfuscii_test_20250612_095825_light_balanced_medium_balanced.txt",
+      "compression_ratio": 3.68,
+      "file_size_kb": 3.73,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_balanced_medium_max",
+      "filename": "obfuscii_test_20250612_095825_light_balanced_medium_max.txt",
+      "compression_ratio": 3.68,
+      "file_size_kb": 3.73,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_balanced_high_fast",
+      "filename": "obfuscii_test_20250612_095825_light_balanced_high_fast.txt",
+      "compression_ratio": 3.12,
+      "file_size_kb": 5.96,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_balanced_high_balanced",
+      "filename": "obfuscii_test_20250612_095825_light_balanced_high_balanced.txt",
+      "compression_ratio": 4.02,
+      "file_size_kb": 4.63,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_balanced_high_max",
+      "filename": "obfuscii_test_20250612_095825_light_balanced_high_max.txt",
+      "compression_ratio": 4.02,
+      "file_size_kb": 4.63,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_aggressive_low_fast",
+      "filename": "obfuscii_test_20250612_095825_light_aggressive_low_fast.txt",
+      "compression_ratio": 2.6,
+      "file_size_kb": 3.65,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_aggressive_low_balanced",
+      "filename": "obfuscii_test_20250612_095825_light_aggressive_low_balanced.txt",
+      "compression_ratio": 3.19,
+      "file_size_kb": 2.97,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_aggressive_low_max",
+      "filename": "obfuscii_test_20250612_095825_light_aggressive_low_max.txt",
+      "compression_ratio": 3.19,
+      "file_size_kb": 2.97,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_aggressive_medium_fast",
+      "filename": "obfuscii_test_20250612_095825_light_aggressive_medium_fast.txt",
+      "compression_ratio": 2.86,
+      "file_size_kb": 4.8,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_aggressive_medium_balanced",
+      "filename": "obfuscii_test_20250612_095825_light_aggressive_medium_balanced.txt",
+      "compression_ratio": 3.63,
+      "file_size_kb": 3.77,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_aggressive_medium_max",
+      "filename": "obfuscii_test_20250612_095825_light_aggressive_medium_max.txt",
+      "compression_ratio": 3.63,
+      "file_size_kb": 3.77,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_aggressive_high_fast",
+      "filename": "obfuscii_test_20250612_095825_light_aggressive_high_fast.txt",
+      "compression_ratio": 3.08,
+      "file_size_kb": 6.03,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_aggressive_high_balanced",
+      "filename": "obfuscii_test_20250612_095825_light_aggressive_high_balanced.txt",
+      "compression_ratio": 3.96,
+      "file_size_kb": 4.7,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "light_aggressive_high_max",
+      "filename": "obfuscii_test_20250612_095825_light_aggressive_high_max.txt",
+      "compression_ratio": 3.96,
+      "file_size_kb": 4.7,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_conservative_low_fast",
+      "filename": "obfuscii_test_20250612_095825_medium_conservative_low_fast.txt",
+      "compression_ratio": 2.41,
+      "file_size_kb": 3.94,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_conservative_low_balanced",
+      "filename": "obfuscii_test_20250612_095825_medium_conservative_low_balanced.txt",
+      "compression_ratio": 3.04,
+      "file_size_kb": 3.12,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_conservative_low_max",
+      "filename": "obfuscii_test_20250612_095825_medium_conservative_low_max.txt",
+      "compression_ratio": 3.04,
+      "file_size_kb": 3.12,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_conservative_medium_fast",
+      "filename": "obfuscii_test_20250612_095825_medium_conservative_medium_fast.txt",
+      "compression_ratio": 2.64,
+      "file_size_kb": 5.19,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_conservative_medium_balanced",
+      "filename": "obfuscii_test_20250612_095825_medium_conservative_medium_balanced.txt",
+      "compression_ratio": 3.4,
+      "file_size_kb": 4.03,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_conservative_medium_max",
+      "filename": "obfuscii_test_20250612_095825_medium_conservative_medium_max.txt",
+      "compression_ratio": 3.4,
+      "file_size_kb": 4.03,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_conservative_high_fast",
+      "filename": "obfuscii_test_20250612_095825_medium_conservative_high_fast.txt",
+      "compression_ratio": 2.89,
+      "file_size_kb": 6.43,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_conservative_high_balanced",
+      "filename": "obfuscii_test_20250612_095825_medium_conservative_high_balanced.txt",
+      "compression_ratio": 3.8,
+      "file_size_kb": 4.9,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_conservative_high_max",
+      "filename": "obfuscii_test_20250612_095825_medium_conservative_high_max.txt",
+      "compression_ratio": 3.8,
+      "file_size_kb": 4.9,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_balanced_low_fast",
+      "filename": "obfuscii_test_20250612_095825_medium_balanced_low_fast.txt",
+      "compression_ratio": 2.55,
+      "file_size_kb": 3.72,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_balanced_low_balanced",
+      "filename": "obfuscii_test_20250612_095825_medium_balanced_low_balanced.txt",
+      "compression_ratio": 3.17,
+      "file_size_kb": 2.99,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_balanced_low_max",
+      "filename": "obfuscii_test_20250612_095825_medium_balanced_low_max.txt",
+      "compression_ratio": 3.17,
+      "file_size_kb": 2.99,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_balanced_medium_fast",
+      "filename": "obfuscii_test_20250612_095825_medium_balanced_medium_fast.txt",
+      "compression_ratio": 2.82,
+      "file_size_kb": 4.86,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_balanced_medium_balanced",
+      "filename": "obfuscii_test_20250612_095825_medium_balanced_medium_balanced.txt",
+      "compression_ratio": 3.63,
+      "file_size_kb": 3.78,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_balanced_medium_max",
+      "filename": "obfuscii_test_20250612_095825_medium_balanced_medium_max.txt",
+      "compression_ratio": 3.63,
+      "file_size_kb": 3.78,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_balanced_high_fast",
+      "filename": "obfuscii_test_20250612_095825_medium_balanced_high_fast.txt",
+      "compression_ratio": 3.04,
+      "file_size_kb": 6.11,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_balanced_high_balanced",
+      "filename": "obfuscii_test_20250612_095825_medium_balanced_high_balanced.txt",
+      "compression_ratio": 3.92,
+      "file_size_kb": 4.74,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_balanced_high_max",
+      "filename": "obfuscii_test_20250612_095825_medium_balanced_high_max.txt",
+      "compression_ratio": 3.92,
+      "file_size_kb": 4.74,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_aggressive_low_fast",
+      "filename": "obfuscii_test_20250612_095825_medium_aggressive_low_fast.txt",
+      "compression_ratio": 2.54,
+      "file_size_kb": 3.73,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_aggressive_low_balanced",
+      "filename": "obfuscii_test_20250612_095825_medium_aggressive_low_balanced.txt",
+      "compression_ratio": 3.17,
+      "file_size_kb": 2.99,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_aggressive_low_max",
+      "filename": "obfuscii_test_20250612_095825_medium_aggressive_low_max.txt",
+      "compression_ratio": 3.17,
+      "file_size_kb": 2.99,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_aggressive_medium_fast",
+      "filename": "obfuscii_test_20250612_095825_medium_aggressive_medium_fast.txt",
+      "compression_ratio": 2.79,
+      "file_size_kb": 4.92,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_aggressive_medium_balanced",
+      "filename": "obfuscii_test_20250612_095825_medium_aggressive_medium_balanced.txt",
+      "compression_ratio": 3.58,
+      "file_size_kb": 3.83,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_aggressive_medium_max",
+      "filename": "obfuscii_test_20250612_095825_medium_aggressive_medium_max.txt",
+      "compression_ratio": 3.58,
+      "file_size_kb": 3.83,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_aggressive_high_fast",
+      "filename": "obfuscii_test_20250612_095825_medium_aggressive_high_fast.txt",
+      "compression_ratio": 3.03,
+      "file_size_kb": 6.13,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_aggressive_high_balanced",
+      "filename": "obfuscii_test_20250612_095825_medium_aggressive_high_balanced.txt",
+      "compression_ratio": 3.92,
+      "file_size_kb": 4.75,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "medium_aggressive_high_max",
+      "filename": "obfuscii_test_20250612_095825_medium_aggressive_high_max.txt",
+      "compression_ratio": 3.92,
+      "file_size_kb": 4.75,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 15,
+          "gaussian_kernel": 9,
+          "median_kernel": 5,
+          "clahe_clip_limit": 1.5
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_conservative_low_fast",
+      "filename": "obfuscii_test_20250612_095825_heavy_conservative_low_fast.txt",
+      "compression_ratio": 2.34,
+      "file_size_kb": 4.05,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_conservative_low_balanced",
+      "filename": "obfuscii_test_20250612_095825_heavy_conservative_low_balanced.txt",
+      "compression_ratio": 2.98,
+      "file_size_kb": 3.18,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_conservative_low_max",
+      "filename": "obfuscii_test_20250612_095825_heavy_conservative_low_max.txt",
+      "compression_ratio": 2.98,
+      "file_size_kb": 3.18,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_conservative_medium_fast",
+      "filename": "obfuscii_test_20250612_095825_heavy_conservative_medium_fast.txt",
+      "compression_ratio": 2.59,
+      "file_size_kb": 5.29,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_conservative_medium_balanced",
+      "filename": "obfuscii_test_20250612_095825_heavy_conservative_medium_balanced.txt",
+      "compression_ratio": 3.35,
+      "file_size_kb": 4.09,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_conservative_medium_max",
+      "filename": "obfuscii_test_20250612_095825_heavy_conservative_medium_max.txt",
+      "compression_ratio": 3.35,
+      "file_size_kb": 4.09,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_conservative_high_fast",
+      "filename": "obfuscii_test_20250612_095825_heavy_conservative_high_fast.txt",
+      "compression_ratio": 2.87,
+      "file_size_kb": 6.48,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_conservative_high_balanced",
+      "filename": "obfuscii_test_20250612_095825_heavy_conservative_high_balanced.txt",
+      "compression_ratio": 3.77,
+      "file_size_kb": 4.93,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_conservative_high_max",
+      "filename": "obfuscii_test_20250612_095825_heavy_conservative_high_max.txt",
+      "compression_ratio": 3.77,
+      "file_size_kb": 4.93,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": false,
+          "run_consolidation": true,
+          "spatial_coherence": false,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_balanced_low_fast",
+      "filename": "obfuscii_test_20250612_095825_heavy_balanced_low_fast.txt",
+      "compression_ratio": 2.45,
+      "file_size_kb": 3.86,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_balanced_low_balanced",
+      "filename": "obfuscii_test_20250612_095825_heavy_balanced_low_balanced.txt",
+      "compression_ratio": 3.1,
+      "file_size_kb": 3.06,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_balanced_low_max",
+      "filename": "obfuscii_test_20250612_095825_heavy_balanced_low_max.txt",
+      "compression_ratio": 3.1,
+      "file_size_kb": 3.06,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_balanced_medium_fast",
+      "filename": "obfuscii_test_20250612_095825_heavy_balanced_medium_fast.txt",
+      "compression_ratio": 2.74,
+      "file_size_kb": 5.01,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_balanced_medium_balanced",
+      "filename": "obfuscii_test_20250612_095825_heavy_balanced_medium_balanced.txt",
+      "compression_ratio": 3.46,
+      "file_size_kb": 3.96,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_balanced_medium_max",
+      "filename": "obfuscii_test_20250612_095825_heavy_balanced_medium_max.txt",
+      "compression_ratio": 3.46,
+      "file_size_kb": 3.96,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_balanced_high_fast",
+      "filename": "obfuscii_test_20250612_095825_heavy_balanced_high_fast.txt",
+      "compression_ratio": 2.99,
+      "file_size_kb": 6.21,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_balanced_high_balanced",
+      "filename": "obfuscii_test_20250612_095825_heavy_balanced_high_balanced.txt",
+      "compression_ratio": 3.87,
+      "file_size_kb": 4.81,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_balanced_high_max",
+      "filename": "obfuscii_test_20250612_095825_heavy_balanced_high_max.txt",
+      "compression_ratio": 3.87,
+      "file_size_kb": 4.81,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_aggressive_low_fast",
+      "filename": "obfuscii_test_20250612_095825_heavy_aggressive_low_fast.txt",
+      "compression_ratio": 2.44,
+      "file_size_kb": 3.88,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_aggressive_low_balanced",
+      "filename": "obfuscii_test_20250612_095825_heavy_aggressive_low_balanced.txt",
+      "compression_ratio": 3.08,
+      "file_size_kb": 3.07,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_aggressive_low_max",
+      "filename": "obfuscii_test_20250612_095825_heavy_aggressive_low_max.txt",
+      "compression_ratio": 3.08,
+      "file_size_kb": 3.07,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_aggressive_medium_fast",
+      "filename": "obfuscii_test_20250612_095825_heavy_aggressive_medium_fast.txt",
+      "compression_ratio": 2.72,
+      "file_size_kb": 5.04,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_aggressive_medium_balanced",
+      "filename": "obfuscii_test_20250612_095825_heavy_aggressive_medium_balanced.txt",
+      "compression_ratio": 3.44,
+      "file_size_kb": 3.99,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_aggressive_medium_max",
+      "filename": "obfuscii_test_20250612_095825_heavy_aggressive_medium_max.txt",
+      "compression_ratio": 3.44,
+      "file_size_kb": 3.99,
+      "resolution": 120,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 120,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_aggressive_high_fast",
+      "filename": "obfuscii_test_20250612_095825_heavy_aggressive_high_fast.txt",
+      "compression_ratio": 2.98,
+      "file_size_kb": 6.24,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 1,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_aggressive_high_balanced",
+      "filename": "obfuscii_test_20250612_095825_heavy_aggressive_high_balanced.txt",
+      "compression_ratio": 3.86,
+      "file_size_kb": 4.82,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    {
+      "test_name": "heavy_aggressive_high_max",
+      "filename": "obfuscii_test_20250612_095825_heavy_aggressive_high_max.txt",
+      "compression_ratio": 3.86,
+      "file_size_kb": 4.82,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 21,
+          "gaussian_kernel": 13,
+          "median_kernel": 7,
+          "clahe_clip_limit": 2.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.05
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 9,
+          "target_ratio": 10.0
+        }
+      }
+    }
+  ],
+  "analysis": {
+    "best_compression": {
+      "test_name": "light_balanced_high_balanced",
+      "filename": "obfuscii_test_20250612_095825_light_balanced_high_balanced.txt",
+      "compression_ratio": 4.02,
+      "file_size_kb": 4.63,
+      "resolution": 140,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 140,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    "smallest_file": {
+      "test_name": "light_balanced_low_balanced",
+      "filename": "obfuscii_test_20250612_095825_light_balanced_low_balanced.txt",
+      "compression_ratio": 3.22,
+      "file_size_kb": 2.94,
+      "resolution": 100,
+      "config": {
+        "smoothing": {
+          "bilateral_d": 9,
+          "gaussian_kernel": 5,
+          "median_kernel": 3,
+          "clahe_clip_limit": 1.0
+        },
+        "cleanup": {
+          "isolated_replacement": true,
+          "run_consolidation": true,
+          "spatial_coherence": true,
+          "spatial_threshold": 0.15
+        },
+        "conversion": {
+          "width": 100,
+          "hysteresis_threshold": 8
+        },
+        "compression": {
+          "lzma_preset": 6,
+          "target_ratio": 10.0
+        }
+      }
+    },
+    "compression_stats": {
+      "min": 2.34,
+      "max": 4.02,
+      "avg": 3.246049382716049
+    }
+  }
+}
