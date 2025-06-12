@@ -6,6 +6,7 @@ OBFUSCII - ASCII video codec for temporal portraits and responsive branding
 import argparse
 import sys
 from pathlib import Path
+import json
 
 def main():
     parser = argparse.ArgumentParser(
@@ -17,6 +18,7 @@ def main():
     parser.add_argument('input', help='Input video file (mp4, mov, avi, etc.) or .txv file')
     parser.add_argument('-o', '--output', help='Output .txv file (default: input name + .txv)')
     parser.add_argument('--resolution', help='Output resolution (WIDTHxHEIGHT, e.g. 140x80)')
+    parser.add_argument('--config', help='Configuration file (.json) - Available presets: light_balanced_high_max.json (default), config_high_quality.json, config_high_compression.json')
     
     # Behavior flags
     parser.add_argument('--info', action='store_true', help='Show .txv file information')
@@ -81,12 +83,29 @@ def convert_video_to_txv(args):
     """Convert video file to .txv format"""
     from obfuscii.vid import process_video_to_compressed, parse_resolution, play_ascii_video
     from obfuscii.txv import write_txv_file
+    from obfuscii.config import OBFUSCIIConfig
+    
+    # Load configuration
+    config_file = args.config or 'light_balanced_high_max.json'
+    if not Path(config_file).exists():
+        print(f"Error: Configuration file '{config_file}' not found", file=sys.stderr)
+        print("Available configurations:", file=sys.stderr)
+        print("  light_balanced_high_max.json (default, optimal)", file=sys.stderr)
+        print("  config_high_quality.json", file=sys.stderr)
+        print("  config_high_compression.json", file=sys.stderr)
+        print("  config_default.json", file=sys.stderr)
+        sys.exit(1)
+    
+    config = OBFUSCIIConfig.from_json(config_file)
     
     if args.verbose:
         print(f"Converting: {args.input} → {args.output}")
+        print(f"Using configuration: {config_file} ({config.description})")
     
-    # Parse resolution
+    # Parse resolution (override config default if specified)
     target_width, target_height = parse_resolution(args.resolution)
+    if not args.resolution:
+        target_width = config.conversion.default_width
     
     if args.verbose and args.resolution:
         print(f"Target resolution: {target_width}x{target_height}")
@@ -103,7 +122,8 @@ def convert_video_to_txv(args):
         target_width=target_width,
         target_height=target_height,
         max_frames=max_frames,
-        verbose=args.verbose
+        verbose=args.verbose,
+        config=config
     )
     
     # Export to .txv

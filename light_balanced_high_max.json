@@ -1,0 +1,37 @@
+{
+  "version": "1.0",
+  "description": "OBFUSCII light_balanced_high_max configuration - 4.02:1 compression benchmark (ZQ-2025 optimal)",
+  "smoothing": {
+    "bilateral_d": 9,
+    "bilateral_sigma_color": 80,
+    "bilateral_sigma_space": 80,
+    "gaussian_kernel_size": 5,
+    "median_kernel_size": 3,
+    "clahe_clip_limit": 1.0,
+    "clahe_tile_grid_size": [8, 8]
+  },
+  "conversion": {
+    "ascii_chars": [" ", ".", ":", "-", "=", "+", "*", "#", "%", "@"],
+    "hysteresis_threshold": 8,
+    "default_width": 140,
+    "aspect_compensation": 0.55
+  },
+  "cleanup": {
+    "enable_isolated_replacement": true,
+    "enable_run_consolidation": true,
+    "enable_temporal_smoothing": true,
+    "enable_spatial_coherence": true,
+    "spatial_coherence_threshold": 0.15,
+    "spatial_uniformity_threshold": 0.7,
+    "preserve_facial_features": true,
+    "facial_feature_chars": ["#", "*", "%", "@"]
+  },
+  "compression": {
+    "lzma_preset": 9,
+    "lzma_format": "alone",
+    "target_ratio": 10.0,
+    "acceptable_ratio": 5.0,
+    "excellent_ratio": 10.0,
+    "good_ratio": 7.0
+  }
+}
