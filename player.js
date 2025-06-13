@@ -111,16 +111,16 @@ class OBFUSCIIPlayer {
 
     async loadTestFile() {
         try {
-            console.log('🔍 Loading test.txv...');
-            this.updatePlaybackInfo('Loading test.txv...', 'loading');
+            console.log('🔍 Loading test_light.txv...');
+            this.updatePlaybackInfo('Loading test_light.txv...', 'loading');
             
-            const response = await fetch('test.txv');
+            const response = await fetch('test_light.txv');
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
             const arrayBuffer = await response.arrayBuffer();
-            console.log('🔍 test.txv loaded:', arrayBuffer.byteLength, 'bytes');
+            console.log('🔍 test_light.txv loaded:', arrayBuffer.byteLength, 'bytes');
             
             const result = await this.parseTxvFile(arrayBuffer);
             
@@ -129,7 +129,7 @@ class OBFUSCIIPlayer {
             this.metadata = result.metadata;
             this.currentFrame = 0;
             
-            this.updateFileInfo(`test.txv: ${result.width}x${result.height}, ${this.frames.length} frames, ${this.fps} FPS`);
+            this.updateFileInfo(`test_light.txv: ${result.width}x${result.height}, ${this.frames.length} frames, ${this.fps} FPS`);
             this.updatePlaybackInfo('Test file loaded successfully', 'success');
             this.displayFrame(0);
             this.enableControls();
