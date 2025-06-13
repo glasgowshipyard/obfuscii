@@ -1,7 +1,6 @@
 /**
  * OBFUSCII Player Library with Debug Logging
  * Real LZMA decompression and .txv playback
- * MINIMAL MODIFICATION: Only theme-aware file loading added
  */
 
 class OBFUSCIIPlayer {
@@ -96,54 +95,33 @@ class OBFUSCIIPlayer {
             console.log('✅ TXV parsing complete:', {
                 frameCount: this.frames.length,
                 fps: this.fps,
-                firstFrameLength: this.frames[0] ? this.frames[0].length : 0,
-                metadata: this.metadata
+                firstFrameLength: this.frames[0] ? this.frames[0].length : 0
             });
             
-            this.updateFileInfo(file.name, this.frames.length, this.fps);
-            this.updatePlaybackInfo('Ready to play', 'ready');
+            this.updateFileInfo(`${result.width}x${result.height}, ${this.frames.length} frames, ${this.fps} FPS`);
+            this.updatePlaybackInfo('File loaded successfully', 'success');
+            this.displayFrame(0);
             this.enableControls();
             
-            // Auto-scale based on content size
-            this.adjustResponsiveSize();
-            
         } catch (error) {
-            console.error('❌ File loading failed:', error);
-            this.updatePlaybackInfo(`Error: ${error.message}`, 'error');
-            this.disableControls();
+            console.error('❌ File load error:', error);
+            this.updatePlaybackInfo(`Load error: ${error.message}`, 'error');
         }
-    }
-
-    // THEME-AWARE TEST FILE LOADING - ONLY NEW ADDITION
-    detectDarkMode() {
-        if (document.documentElement.hasAttribute('data-theme')) {
-            return document.documentElement.getAttribute('data-theme') === 'dark';
-        }
-        return window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
 
     async loadTestFile() {
         try {
-            this.updatePlaybackInfo('Loading demo file...', 'loading');
-            this.disableControls();
+            console.log('🔍 Loading test.txv...');
+            this.updatePlaybackInfo('Loading test.txv...', 'loading');
             
-            // Theme-aware file selection with fallback
-            const isDarkMode = this.detectDarkMode();
-            const filename = isDarkMode ? 'text_dark.txv' : 'test_light.txv';
-            
-            let response = await fetch(filename);
-            
-            // Fallback to test_light.txv if themed version doesn't exist
-            if (!response.ok && filename !== 'test_light.txv') {
-                console.log(`${filename} not found, falling back to test_light.txv`);
-                response = await fetch('test_light.txv');
-            }
-            
+            const response = await fetch('test.txv');
             if (!response.ok) {
-                throw new Error('Demo file not found');
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
             const arrayBuffer = await response.arrayBuffer();
+            console.log('🔍 test.txv loaded:', arrayBuffer.byteLength, 'bytes');
+            
             const result = await this.parseTxvFile(arrayBuffer);
             
             this.frames = result.frames;
@@ -151,91 +129,107 @@ class OBFUSCIIPlayer {
             this.metadata = result.metadata;
             this.currentFrame = 0;
             
-            console.log('✅ Demo file loaded:', {
-                filename: filename,
-                frameCount: this.frames.length,
-                fps: this.fps
-            });
-            
-            this.updateFileInfo(`Demo (${filename})`, this.frames.length, this.fps);
-            this.updatePlaybackInfo('Ready to play', 'ready');
+            this.updateFileInfo(`test.txv: ${result.width}x${result.height}, ${this.frames.length} frames, ${this.fps} FPS`);
+            this.updatePlaybackInfo('Test file loaded successfully', 'success');
+            this.displayFrame(0);
             this.enableControls();
-            this.adjustResponsiveSize();
             
         } catch (error) {
-            console.error('❌ Demo loading failed:', error);
-            this.updatePlaybackInfo(`Error: ${error.message}`, 'error');
-            this.disableControls();
+            console.error('❌ Test file error:', error);
+            this.updatePlaybackInfo(`Test file error: ${error.message}`, 'error');
         }
     }
 
-    // ALL ORIGINAL METHODS BELOW - UNCHANGED
     async parseTxvFile(arrayBuffer) {
-        try {
-            console.log('🔍 Parsing TXV file:', arrayBuffer.byteLength, 'bytes');
-            
-            const view = new DataView(arrayBuffer);
-            let offset = 0;
+        const view = new DataView(arrayBuffer);
+        let offset = 0;
 
+        try {
+            console.log('🔍 Parsing TXV file structure...');
+            
             // Read magic header
             const magic = new TextDecoder().decode(new Uint8Array(arrayBuffer, offset, 8));
             console.log('🔍 Magic header:', magic);
-            
             if (magic !== 'OBFUSCII') {
-                throw new Error(`Invalid magic header: ${magic}`);
+                throw new Error('Invalid .txv file: bad magic header');
             }
             offset += 8;
 
             // Read version
             const version = view.getUint32(offset, true);
-            console.log('🔍 Version:', version);
+            console.log('🔍 TXV version:', version);
             offset += 4;
 
             // Read metadata
             const metadataLength = view.getUint32(offset, true);
-            console.log('🔍 Metadata length:', metadataLength);
             offset += 4;
+            console.log('🔍 Metadata length:', metadataLength, 'bytes');
             
             const metadataBytes = new Uint8Array(arrayBuffer, offset, metadataLength);
             const metadataJson = new TextDecoder().decode(metadataBytes);
             const metadata = JSON.parse(metadataJson);
-            console.log('🔍 Metadata:', metadata);
             offset += metadataLength;
+
+            console.log('✅ TXV metadata:', metadata);
 
             // Read frame count
             const frameCount = view.getUint32(offset, true);
-            console.log('🔍 Frame count:', frameCount);
             offset += 4;
+            console.log('✅ Frame count:', frameCount);
 
+            // Load ALL frames with detailed logging
             const frames = [];
             
-            // Progress tracking
-            console.log('🔍 Starting frame decompression...');
-            
-            // Read each frame
             for (let i = 0; i < frameCount; i++) {
-                const frameIndex = view.getUint32(offset, true);
-                offset += 4;
-                
-                const compressedLength = view.getUint32(offset, true);
-                offset += 4;
-                
-                const compressedData = new Uint8Array(arrayBuffer, offset, compressedLength);
-                offset += compressedLength;
-                
-                if (i === 0) {
-                    console.log('🔍 First frame details:', {
-                        frameIndex,
-                        compressedLength,
-                        compressedDataSample: Array.from(compressedData.slice(0, 20))
-                    });
-                }
-                
                 try {
-                    const decompressedFrame = await this.decompressFrame(compressedData, metadata.width, metadata.height, i);
-                    frames.push(decompressedFrame);
+                    // Read frame header (24 bytes)
+                    const frameIndex = view.getUint32(offset, true);
+                    offset += 4;
+                    const frameType = String.fromCharCode(view.getUint8(offset));
+                    offset += 1;
+                    offset += 3; // Skip padding
+                    const timestamp = view.getFloat64(offset, true);
+                    offset += 8;
+                    const rawSize = view.getUint32(offset, true);
+                    offset += 4;
+                    const compressedSize = view.getUint32(offset, true);
+                    offset += 4;
+                    
+                    if (i === 0 || i % 10 === 0) {
+                        console.log(`🔍 Frame ${i} header:`, {
+                            frameIndex, frameType, timestamp, rawSize, compressedSize
+                        });
+                    }
+                    
+                    // Read compressed frame data
+                    const compressedData = new Uint8Array(arrayBuffer, offset, compressedSize);
+                    offset += compressedSize;
+                    
+                    if (i === 0) {
+                        console.log('🔍 First frame compressed data:', {
+                            length: compressedData.length,
+                            firstBytes: Array.from(compressedData.slice(0, 10)),
+                            lastBytes: Array.from(compressedData.slice(-10))
+                        });
+                    }
+                    
+                    // Decompress frame with detailed logging
+                    const asciiFrame = await this.decompressFrame(compressedData, metadata.width, metadata.height, i);
+                    frames.push(asciiFrame);
+                    
+                    if (i === 0) {
+                        console.log('🔍 First frame decompressed:', {
+                            type: typeof asciiFrame,
+                            length: asciiFrame.length,
+                            hasNewlines: asciiFrame.includes('\n'),
+                            lineCount: asciiFrame.split('\n').length,
+                            firstLine: asciiFrame.split('\n')[0],
+                            preview: asciiFrame.substring(0, 100)
+                        });
+                    }
+                    
                 } catch (frameError) {
-                    console.error(`❌ Frame ${i} failed:`, frameError);
+                    console.warn(`❌ Frame ${i} decompression failed:`, frameError);
                     const fallbackFrame = this.createFallbackFrame(metadata.width, metadata.height, i);
                     frames.push(fallbackFrame);
                 }
@@ -344,105 +338,79 @@ class OBFUSCIIPlayer {
                             resultType: typeof result,
                             resultLength: result ? result.length : 0,
                             resultIsArray: Array.isArray(result),
-                            resultConstructor: result ? result.constructor.name : 'none'
+                            resultConstructor: result ? result.constructor.name : null
                         });
                     }
                     
                     if (error) {
                         reject(new Error(`LZMA decompression failed: ${error}`));
-                        return;
-                    }
-                    
-                    if (!result) {
-                        reject(new Error('LZMA returned null result'));
-                        return;
-                    }
-                    
-                    try {
-                        // Convert LZMA result to string
-                        let decompressedString;
-                        if (typeof result === 'string') {
-                            decompressedString = result;
-                        } else if (Array.isArray(result)) {
-                            decompressedString = new TextDecoder().decode(new Uint8Array(result));
-                        } else {
-                            throw new Error(`Unexpected LZMA result type: ${typeof result}`);
+                    } else {
+                        try {
+                            // Handle different return types from LZMA.decompress
+                            let jsonString;
+                            if (typeof result === 'string') {
+                                jsonString = result;
+                                if (frameIndex === 0) {
+                                    console.log('🔍 LZMA returned string directly');
+                                }
+                            } else if (Array.isArray(result)) {
+                                // Convert array of bytes to string
+                                jsonString = new TextDecoder().decode(new Uint8Array(result));
+                                if (frameIndex === 0) {
+                                    console.log('🔍 LZMA returned array, converted to string');
+                                }
+                            } else {
+                                // Try to decode as Uint8Array
+                                jsonString = new TextDecoder().decode(new Uint8Array(result));
+                                if (frameIndex === 0) {
+                                    console.log('🔍 LZMA returned unknown type, attempting decode');
+                                }
+                            }
+                            
+                            if (frameIndex === 0) {
+                                console.log('🔍 JSON string to parse:', {
+                                    length: jsonString.length,
+                                    preview: jsonString.substring(0, 200),
+                                    hasValidJson: jsonString.startsWith('[')
+                                });
+                            }
+                            
+                            const rleSegments = JSON.parse(jsonString);
+                            
+                            if (frameIndex === 0) {
+                                console.log('✅ RLE segments parsed:', {
+                                    segmentCount: rleSegments.length,
+                                    firstSegment: rleSegments[0],
+                                    lastSegment: rleSegments[rleSegments.length - 1],
+                                    totalCharacters: rleSegments.reduce((sum, [char, count]) => sum + count, 0)
+                                });
+                            }
+                            
+                            resolve(rleSegments);
+                        } catch (parseError) {
+                            console.error('❌ JSON parsing failed:', parseError);
+                            reject(new Error(`JSON parsing failed: ${parseError.message}`));
                         }
-                        
-                        if (frameIndex === 0) {
-                            console.log('🔍 LZMA decompressed string:', {
-                                length: decompressedString.length,
-                                firstChars: decompressedString.slice(0, 50),
-                                containsNewlines: decompressedString.includes('\n')
-                            });
-                        }
-                        
-                        // Parse RLE segments from decompressed string
-                        const rleSegments = this.parseRLESegments(decompressedString);
-                        
-                        if (frameIndex === 0) {
-                            console.log('✅ RLE segments parsed:', {
-                                segmentCount: rleSegments.length,
-                                firstSegments: rleSegments.slice(0, 5)
-                            });
-                        }
-                        
-                        resolve(rleSegments);
-                        
-                    } catch (parseError) {
-                        reject(new Error(`RLE parsing failed: ${parseError.message}`));
                     }
                 });
                 
             } catch (error) {
+                console.error('❌ LZMA setup failed:', error);
                 reject(error);
             }
         });
     }
 
-    parseRLESegments(rleString) {
-        const segments = [];
-        const lines = rleString.trim().split('\n');
-        
-        for (const line of lines) {
-            if (!line.trim()) continue;
-            
-            try {
-                const [char, countStr] = line.split(':');
-                const count = parseInt(countStr, 10);
-                
-                if (isNaN(count) || count <= 0) {
-                    console.warn('Invalid RLE segment:', line);
-                    continue;
-                }
-                
-                // Handle special characters
-                let actualChar = char;
-                if (char === '\\n') actualChar = '\n';
-                else if (char === '\\t') actualChar = '\t';
-                else if (char === '\\\\') actualChar = '\\';
-                
-                segments.push([actualChar, count]);
-                
-            } catch (error) {
-                console.warn('Failed to parse RLE segment:', line, error);
-            }
-        }
-        
-        return segments;
-    }
-
     createFallbackFrame(width, height, frameIndex) {
-        console.log(`🔧 Creating fallback frame ${frameIndex} (${width}x${height})`);
-        
-        // Create a simple pattern based on frame index
-        const chars = ' .:-=+*#%@';
+        console.log(`⚠️ Creating fallback frame ${frameIndex}`);
+        // Create fallback frame when decompression fails
+        const chars = [' ', '.', ':', '-', '=', '+', '*', '#', '%', '@'];
         let frame = '';
         
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
-                const charIndex = (x + y + frameIndex) % chars.length;
-                frame += chars[charIndex];
+                const charIndex = Math.floor((Math.sin(frameIndex * 0.1 + x * 0.05 + y * 0.05) + 1) * chars.length / 2);
+                frame += chars[Math.min(charIndex, chars.length - 1)];
             }
             if (y < height - 1) frame += '\n';
         }
@@ -450,104 +418,116 @@ class OBFUSCIIPlayer {
         return frame;
     }
 
-    play() {
-        if (this.frames.length === 0) {
-            this.updatePlaybackInfo('No frames to play', 'error');
+    displayFrame(frameIndex) {
+        if (frameIndex < 0 || frameIndex >= this.frames.length) {
+            console.warn('⚠️ Invalid frame index:', frameIndex, 'of', this.frames.length);
             return;
         }
         
+        const frameContent = this.frames[frameIndex];
+        
+        // Debug the content being displayed
+        if (frameIndex === 0) {
+            console.log('🔍 Displaying first frame:', {
+                frameIndex,
+                contentType: typeof frameContent,
+                contentLength: frameContent.length,
+                hasNewlines: frameContent.includes('\n'),
+                lineCount: frameContent.split('\n').length,
+                firstLine: frameContent.split('\n')[0],
+                firstLineLength: frameContent.split('\n')[0].length,
+                preview: frameContent.substring(0, 100)
+            });
+        }
+        
+        // Set the content using textContent (should preserve newlines with <pre> tag)
+        this.asciiContent.textContent = frameContent;
+        this.currentFrame = frameIndex;
+        
+        if (this.frames.length > 1) {
+            this.updatePlaybackInfo(`Frame ${frameIndex + 1}/${this.frames.length}`);
+        }
+        
+        // Debug what's actually in the DOM
+        if (frameIndex === 0) {
+            console.log('🔍 DOM after setting textContent:', {
+                elementTagName: this.asciiContent.tagName,
+                elementTextContent: this.asciiContent.textContent.substring(0, 100),
+                elementInnerHTML: this.asciiContent.innerHTML.substring(0, 100),
+                elementComputedStyle: window.getComputedStyle(this.asciiContent).whiteSpace
+            });
+        }
+    }
+
+    play() {
+        if (this.frames.length === 0) {
+            this.updatePlaybackInfo('No frames loaded', 'error');
+            return;
+        }
+
+        console.log('▶️ Starting playback');
         this.isPlaying = true;
         this.lastFrameTime = performance.now();
-        this.updatePlaybackInfo('Playing...', 'playing');
         this.animate();
-        
-        console.log('▶️ Playback started');
+        this.updatePlaybackInfo('Playing...');
     }
 
     pause() {
+        console.log('⏸️ Pausing playback');
         this.isPlaying = false;
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
-            this.animationId = null;
         }
-        this.updatePlaybackInfo('Paused', 'paused');
-        console.log('⏸️ Playback paused');
+        this.updatePlaybackInfo('Paused');
     }
 
     stop() {
+        console.log('⏹️ Stopping playback');
         this.isPlaying = false;
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
-            this.animationId = null;
         }
         this.currentFrame = 0;
         if (this.frames.length > 0) {
             this.displayFrame(0);
         }
-        this.updatePlaybackInfo('Stopped', 'stopped');
-        console.log('⏹️ Playback stopped');
+        this.updatePlaybackInfo('Stopped');
     }
 
     animate() {
         if (!this.isPlaying) return;
 
         const now = performance.now();
-        const frameInterval = 1000 / this.fps;
+        const frameDelta = 1000 / this.fps;
 
-        if (now - this.lastFrameTime >= frameInterval) {
-            this.displayFrame(this.currentFrame);
+        if (now - this.lastFrameTime >= frameDelta) {
             this.currentFrame = (this.currentFrame + 1) % this.frames.length;
+            this.displayFrame(this.currentFrame);
             this.lastFrameTime = now;
-            
-            // Update playback info with current frame
-            this.updatePlaybackInfo(`Playing frame ${this.currentFrame + 1}/${this.frames.length}`, 'playing');
         }
 
         this.animationId = requestAnimationFrame(() => this.animate());
     }
 
-    displayFrame(frameIndex) {
-        if (frameIndex < this.frames.length) {
-            this.asciiContent.textContent = this.frames[frameIndex];
-        }
-    }
-
     updateScale(scale) {
-        const percentage = Math.round(scale * 100);
-        this.scaleValue.textContent = `${percentage}%`;
-        
-        const fontSize = 6 * scale;
-        this.asciiContent.style.fontSize = `${fontSize}px`;
-        
-        console.log('🔧 Scale updated:', `${percentage}%`);
+        this.asciiContent.style.transform = `scale(${scale})`;
+        this.scaleValue.textContent = `${Math.round(scale * 100)}%`;
     }
 
     adjustResponsiveSize() {
-        // Auto-adjust font size based on container size and content
-        const container = this.asciiContent.parentElement;
-        const containerWidth = container.clientWidth;
-        const containerHeight = container.clientHeight;
+        const viewportWidth = window.innerWidth;
+        let autoScale = 1;
         
-        if (this.metadata && containerWidth && containerHeight) {
-            const scaleX = containerWidth / (this.metadata.width * 7); // ~7px per char
-            const scaleY = containerHeight / (this.metadata.height * 7); // ~7px per line
-            const optimalScale = Math.min(scaleX, scaleY, 3); // Cap at 3x
-            
-            if (optimalScale > 0.1) {
-                this.scaleSlider.value = optimalScale;
-                this.updateScale(optimalScale);
-            }
+        if (viewportWidth < 480) {
+            autoScale = 0.6;
+        } else if (viewportWidth < 768) {
+            autoScale = 0.8;
         }
-    }
-
-    updateFileInfo(filename, frameCount, fps) {
-        const duration = frameCount / fps;
-        this.fileInfo.textContent = `${filename} • ${frameCount} frames • ${fps} FPS • ${duration.toFixed(1)}s`;
-    }
-
-    updatePlaybackInfo(message, status = '') {
-        this.playbackInfo.textContent = message;
-        this.playbackInfo.className = `playback-info ${status}`;
+        
+        const manualScale = parseFloat(this.scaleSlider.value);
+        const totalScale = autoScale * manualScale;
+        
+        this.asciiContent.style.transform = `scale(${totalScale})`;
     }
 
     enableControls() {
@@ -561,10 +541,19 @@ class OBFUSCIIPlayer {
         this.pauseBtn.disabled = true;
         this.stopBtn.disabled = true;
     }
+
+    updateFileInfo(message) {
+        this.fileInfo.textContent = message;
+    }
+
+    updatePlaybackInfo(message, type = '') {
+        this.playbackInfo.textContent = message;
+        this.playbackInfo.className = `playback-info ${type}`;
+    }
 }
 
 // Initialize player when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.player = new OBFUSCIIPlayer();
-    console.log('🎬 OBFUSCII Player initialized');
+    window.obfusciiPlayer = new OBFUSCIIPlayer();
+    console.log('✅ OBFUSCII Player initialized with debugging');
 });

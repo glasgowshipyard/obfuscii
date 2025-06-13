@@ -11,316 +11,129 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #64748b;
-            --ascii-color: #1e293b;
-            --accent-from: #3b82f6;
-            --accent-to: #1d4ed8;
-            --accent-hover-from: #2563eb;
-            --accent-hover-to: #1e40af;
-            --secondary-from: #6b7280;
-            --secondary-to: #4b5563;
-            --secondary-hover-from: #374151;
-            --secondary-hover-to: #1f2937;
-            --border-color: #e2e8f0;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-
-        [data-theme='dark'] {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --ascii-color: #e2e8f0;
-            --accent-from: #10b981;
-            --accent-to: #059669;
-            --accent-hover-from: #34d399;
-            --accent-hover-to: #10b981;
-            --secondary-from: #475569;
-            --secondary-to: #334155;
-            --secondary-hover-from: #64748b;
-            --secondary-hover-to: #475569;
-            --border-color: #334155;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme]) {
-                --bg-primary: #0f172a;
-                --bg-secondary: #1e293b;
-                --text-primary: #f1f5f9;
-                --text-secondary: #cbd5e1;
-                --text-muted: #94a3b8;
-                --ascii-color: #e2e8f0;
-                --accent-from: #10b981;
-                --accent-to: #059669;
-                --accent-hover-from: #34d399;
-                --accent-hover-to: #10b981;
-                --secondary-from: #475569;
-                --secondary-to: #334155;
-                --secondary-hover-from: #64748b;
-                --secondary-hover-to: #475569;
-                --border-color: #334155;
-                --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-                --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-                --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-            }
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            color: #333;
             line-height: 1.6;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 2rem 1rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .theme-toggle {
-            position: fixed;
-            top: 1.5rem;
-            right: 1.5rem;
-            background: linear-gradient(135deg, var(--secondary-from) 0%, var(--secondary-to) 100%);
-            color: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            padding: 0.75rem;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 1.125rem;
-            box-shadow: var(--shadow-md);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(8px);
-            z-index: 100;
-        }
-
-        .theme-toggle:hover {
-            background: linear-gradient(135deg, var(--secondary-hover-from) 0%, var(--secondary-hover-to) 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            padding: 40px 20px;
         }
 
         .ascii-logo {
-            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Fira Code', monospace;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
             font-size: min(0.6vw, 0.6vh);
             line-height: 1;
             letter-spacing: 0;
             white-space: pre;
-            color: var(--ascii-color);
-            background: var(--bg-primary);
+            color: #212529;
+            background: #ffffff;
             width: fit-content;
             max-width: 100%;
-            margin: 0 auto 3rem auto;
+            margin: 0 auto 40px auto;
             cursor: pointer;
             user-select: text;
-            padding: 2rem;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg);
-            backdrop-filter: blur(8px);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ascii-logo::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .ascii-logo:hover::before {
-            left: 100%;
-        }
-
-        .ascii-logo:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg), 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            border-color: var(--accent-from);
-        }
-
-        .ascii-logo.loading {
-            opacity: 0.7;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.7; }
-            50% { opacity: 1; }
         }
 
         h1 {
-            font-size: 4rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
-            letter-spacing: -0.025em;
-            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #000;
+            letter-spacing: -0.02em;
         }
 
         .tagline {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-            font-weight: 500;
-            letter-spacing: -0.01em;
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+            font-weight: 400;
         }
 
         .description {
-            max-width: 42rem;
+            max-width: 600px;
             text-align: center;
-            font-size: 1.125rem;
-            color: var(--text-muted);
-            margin-bottom: 3rem;
-            line-height: 1.7;
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 40px;
         }
 
         .links {
             display: flex;
-            gap: 1rem;
+            gap: 20px;
             flex-wrap: wrap;
             justify-content: center;
         }
 
         .link {
-            display: inline-flex;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--accent-from) 0%, var(--accent-to) 100%);
+            display: inline-block;
+            padding: 12px 24px;
+            background: #007bff;
             color: white;
             text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1rem;
-            box-shadow: var(--shadow-md);
-            border: 1px solid transparent;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .link::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, var(--accent-hover-from) 0%, var(--accent-hover-to) 100%);
-            opacity: 0;
-            transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .link:hover::before {
-            opacity: 1;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background-color 0.2s;
         }
 
         .link:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .link span {
-            position: relative;
-            z-index: 1;
+            background: #0056b3;
         }
 
         .link.secondary {
-            background: linear-gradient(135deg, var(--secondary-from) 0%, var(--secondary-to) 100%);
+            background: #6c757d;
         }
 
-        .link.secondary::before {
-            background: linear-gradient(135deg, var(--secondary-hover-from) 0%, var(--secondary-hover-to) 100%);
+        .link.secondary:hover {
+            background: #545b62;
         }
 
         @media (max-width: 768px) {
             h1 {
-                font-size: 3rem;
+                font-size: 2.5rem;
             }
 
             .tagline {
-                font-size: 1.125rem;
+                font-size: 1rem;
             }
 
             .ascii-logo {
                 font-size: min(0.8vw, 0.8vh);
-                padding: 1.5rem;
             }
 
             .links {
                 flex-direction: column;
                 align-items: center;
-                width: 100%;
-                max-width: 20rem;
-            }
-
-            .link {
-                width: 100%;
-                justify-content: center;
             }
         }
 
         @media (max-width: 480px) {
             .ascii-logo {
                 font-size: min(1vw, 1vh);
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 2.5rem;
-            }
-
-            .description {
-                font-size: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span id="themeIcon">🌓</span>
-    </button>
-    
-    <pre class="ascii-logo loading" id="asciiLogo">Loading...</pre>
+    <pre class="ascii-logo" id="asciiLogo">Loading...</pre>
 
     <h1>OBFUSCII</h1>
     <p class="tagline">ASCII video codec for temporal portraits</p>
     
     <div class="description">
-        <p>Convert video into compressed ASCII animations that scale infinitely and exist as pure text. Responsive logos that breathe, move, and adapt to any visual context.</p>
+        <p>Convert video into compressed ASCII animations that scale infinitely and exist as pure text.</p>
     </div>
 
     <div class="links">
-        <a href="/" class="link">
-            <span>Try Player</span>
-        </a>
-        <a href="https://github.com/craigzielinski/obfuscii" class="link secondary">
-            <span>View Source</span>
-        </a>
+        <a href="/" class="link">Try Player</a>
+        <a href="https://github.com/glasgowshipyard/obfuscii" class="link secondary">View Source</a>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/lzma@2.3.2/src/lzma_worker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lzma@2.3.2/src/lzma_worker.js"></script>
     <script>
         class LogoPlayer {
             constructor() {
@@ -330,26 +143,13 @@
                 this.fps = 30;
                 this.animationId = null;
                 this.lastFrameTime = 0;
-                this.isDarkMode = this.detectDarkMode();
                 
                 this.asciiLogo = document.getElementById('asciiLogo');
-                this.themeToggle = document.getElementById('themeToggle');
-                this.themeIcon = document.getElementById('themeIcon');
-                
-                this.setupEventHandlers();
-                this.updateThemeIcon();
+                this.setupClickHandler();
                 this.loadLogo();
             }
 
-            detectDarkMode() {
-                if (document.documentElement.hasAttribute('data-theme')) {
-                    return document.documentElement.getAttribute('data-theme') === 'dark';
-                }
-                return window.matchMedia('(prefers-color-scheme: dark)').matches;
-            }
-
-            setupEventHandlers() {
-                // Logo click handler
+            setupClickHandler() {
                 this.asciiLogo.addEventListener('click', (e) => {
                     if (window.getSelection().toString().length === 0) {
                         this.togglePlayback();
@@ -362,39 +162,11 @@
                         this.togglePlayback();
                     }
                 });
-
-                // Theme toggle handler
-                this.themeToggle.addEventListener('click', () => {
-                    this.toggleTheme();
-                });
-
-                // Listen for system theme changes
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-                    if (!document.documentElement.hasAttribute('data-theme')) {
-                        this.isDarkMode = e.matches;
-                        this.updateThemeIcon();
-                        this.loadLogo();
-                    }
-                });
-            }
-
-            toggleTheme() {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                
-                document.documentElement.setAttribute('data-theme', newTheme);
-                this.isDarkMode = newTheme === 'dark';
-                this.updateThemeIcon();
-                this.loadLogo();
-            }
-
-            updateThemeIcon() {
-                this.themeIcon.textContent = this.isDarkMode ? '☀️' : '🌙';
             }
 
             togglePlayback() {
                 if (this.frames.length === 0) return;
-                    
+                
                 if (this.isPlaying) {
                     this.pause();
                 } else {
@@ -418,45 +190,11 @@
                 this.animate();
             }
 
-            animate() {
-                if (!this.isPlaying) return;
-
-                const now = performance.now();
-                const frameInterval = 1000 / this.fps;
-
-                if (now - this.lastFrameTime >= frameInterval) {
-                    this.displayFrame(this.currentFrame);
-                    this.currentFrame = (this.currentFrame + 1) % this.frames.length;
-                    this.lastFrameTime = now;
-                }
-
-                this.animationId = requestAnimationFrame(() => this.animate());
-            }
-
-            displayFrame(frameIndex) {
-                if (frameIndex < this.frames.length) {
-                    this.asciiLogo.textContent = this.frames[frameIndex];
-                    this.asciiLogo.classList.remove('loading');
-                }
-            }
-
             async loadLogo() {
                 try {
-                    this.asciiLogo.classList.add('loading');
-                    
-                    // Theme-based file selection with fallback
-                    const filename = this.isDarkMode ? 'text_dark.txv' : 'test_light.txv';
-                    
-                    let response = await fetch(filename);
-                    
-                    // Fallback to test_light.txv if themed version doesn't exist
-                    if (!response.ok && filename !== 'test_light.txv') {
-                        console.log(`${filename} not found, falling back to test_light.txv`);
-                        response = await fetch('test_light.txv');
-                    }
-                    
+                    const response = await fetch('light_test.txv');
                     if (!response.ok) {
-                        throw new Error('Could not load logo file');
+                        throw new Error('Could not load logo');
                     }
                     
                     const arrayBuffer = await response.arrayBuffer();
@@ -465,17 +203,14 @@
                     this.frames = result.frames;
                     this.fps = result.fps || 30;
                     
-                    this.asciiLogo.classList.remove('loading');
                     this.play();
                     
                 } catch (error) {
-                    console.log('Logo loading failed:', error);
-                    this.asciiLogo.classList.remove('loading');
                     this.asciiLogo.textContent = 'OBFUSCII';
+                    console.log('Logo loading failed');
                 }
             }
 
-            // ORIGINAL WORKING LZMA DECOMPRESSION - DO NOT MODIFY
             async parseTxvFile(arrayBuffer) {
                 const view = new DataView(arrayBuffer);
                 let offset = 0;
@@ -506,33 +241,95 @@
 
                 const frames = [];
                 
-                // Read each frame
                 for (let i = 0; i < frameCount; i++) {
+                    // Read frame header
                     const frameIndex = view.getUint32(offset, true);
                     offset += 4;
-                    
-                    const compressedLength = view.getUint32(offset, true);
+                    const frameType = String.fromCharCode(view.getUint8(offset));
+                    offset += 1;
+                    offset += 3; // Skip padding
+                    const timestamp = view.getFloat64(offset, true);
+                    offset += 8;
+                    const rawSize = view.getUint32(offset, true);
+                    offset += 4;
+                    const compressedSize = view.getUint32(offset, true);
                     offset += 4;
                     
-                    const compressedData = new Uint8Array(arrayBuffer, offset, compressedLength);
-                    offset += compressedLength;
+                    // Read compressed frame data
+                    const compressedData = new Uint8Array(arrayBuffer, offset, compressedSize);
+                    offset += compressedSize;
                     
-                    // Use original working decompression logic here
-                    // This is where the LZMA decompression would happen
-                    const decompressed = new TextDecoder().decode(compressedData);
-                    frames.push(decompressed);
+                    // Decompress frame
+                    const asciiFrame = await this.decompressFrame(compressedData, metadata.width, metadata.height);
+                    frames.push(asciiFrame);
                 }
 
                 return {
                     frames: frames,
-                    fps: metadata.fps || 30,
+                    fps: metadata.fps,
                     width: metadata.width,
                     height: metadata.height
                 };
             }
+
+            async decompressFrame(compressedData, width, height) {
+                return new Promise((resolve, reject) => {
+                    const dataArray = Array.from(compressedData);
+                    
+                    LZMA.decompress(dataArray, (result, error) => {
+                        if (error) {
+                            reject(new Error(`LZMA decompression failed: ${error}`));
+                        } else {
+                            try {
+                                let jsonString;
+                                if (typeof result === 'string') {
+                                    jsonString = result;
+                                } else {
+                                    jsonString = new TextDecoder().decode(new Uint8Array(result));
+                                }
+                                
+                                const rleSegments = JSON.parse(jsonString);
+                                
+                                // Reconstruct ASCII frame
+                                let frameString = '';
+                                let position = 0;
+                                
+                                for (const [char, runLength] of rleSegments) {
+                                    for (let i = 0; i < runLength; i++) {
+                                        frameString += char;
+                                        position++;
+                                        
+                                        if (position % width === 0 && position < width * height) {
+                                            frameString += '\n';
+                                        }
+                                    }
+                                }
+                                
+                                resolve(frameString);
+                            } catch (parseError) {
+                                reject(new Error(`Frame reconstruction failed: ${parseError.message}`));
+                            }
+                        }
+                    });
+                });
+            }
+
+            animate() {
+                if (!this.isPlaying || this.frames.length === 0) return;
+
+                const now = performance.now();
+                const frameDelta = 1000 / this.fps;
+
+                if (now - this.lastFrameTime >= frameDelta) {
+                    this.currentFrame = (this.currentFrame + 1) % this.frames.length;
+                    this.asciiLogo.textContent = this.frames[this.currentFrame];
+                    this.lastFrameTime = now;
+                }
+
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
         }
 
-        // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
             new LogoPlayer();
         });
