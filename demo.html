@@ -11,38 +11,10 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --bg-color: #ffffff;
-            --text-color: #1a1a1a;
-            --ascii-color: #000000;
-            --ascii-bg: transparent;
-            --accent-color: #007bff;
-            --accent-hover: #0056b3;
-            --secondary-color: #495057;
-            --secondary-hover: #343a40;
-            --muted-color: #6c757d;
-            --border-color: #e9ecef;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #0d1117;
-                --text-color: #e6edf3;
-                --ascii-color: #7d8590;
-                --ascii-bg: transparent;
-                --accent-color: #238636;
-                --accent-hover: #2ea043;
-                --secondary-color: #6e7681;
-                --secondary-hover: #8b949e;
-                --muted-color: #7d8590;
-                --border-color: #30363d;
-            }
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-color);
-            color: var(--text-color);
+            background: #ffffff;
+            color: #333;
             line-height: 1.6;
             min-height: 100vh;
             display: flex;
@@ -50,7 +22,6 @@
             align-items: center;
             justify-content: center;
             padding: 40px 20px;
-            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .ascii-logo {
@@ -59,31 +30,26 @@
             line-height: 1;
             letter-spacing: 0;
             white-space: pre;
-            color: var(--ascii-color);
-            background: var(--ascii-bg);
+            color: #212529;
+            background: #ffffff;
             width: fit-content;
             max-width: 100%;
             margin: 0 auto 40px auto;
             cursor: pointer;
             user-select: text;
-            transition: color 0.3s ease;
-        }
-
-        .ascii-logo:hover {
-            color: var(--accent-color);
         }
 
         h1 {
             font-size: 3rem;
             font-weight: 700;
             margin-bottom: 20px;
-            color: var(--text-color);
+            color: #000;
             letter-spacing: -0.02em;
         }
 
         .tagline {
             font-size: 1.2rem;
-            color: var(--muted-color);
+            color: #666;
             margin-bottom: 30px;
             font-weight: 400;
         }
@@ -92,7 +58,7 @@
             max-width: 600px;
             text-align: center;
             font-size: 1rem;
-            color: var(--muted-color);
+            color: #555;
             margin-bottom: 40px;
         }
 
@@ -106,55 +72,24 @@
         .link {
             display: inline-block;
             padding: 12px 24px;
-            background: var(--accent-color);
-            color: var(--bg-color);
+            background: #007bff;
+            color: white;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-weight: 500;
-            transition: background-color 0.2s, transform 0.1s;
-            border: 1px solid var(--border-color);
-        }
-
-        .link:hover {
-            background: var(--accent-hover);
-            transform: translateY(-1px);
-        }
-
-        .link.secondary {
-            background: var(--secondary-color);
-            color: var(--bg-color);
-        }
-
-        .link.secondary:hover {
-            background: var(--secondary-hover);
-        }
-
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--secondary-color);
-            color: var(--bg-color);
-            border: none;
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
             transition: background-color 0.2s;
         }
 
-        .theme-toggle:hover {
-            background: var(--secondary-hover);
+        .link:hover {
+            background: #0056b3;
         }
 
-        .loading-indicator {
-            opacity: 0.5;
-            animation: pulse 2s infinite;
+        .link.secondary {
+            background: #6c757d;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
+        .link.secondary:hover {
+            background: #545b62;
         }
 
         @media (max-width: 768px) {
@@ -184,9 +119,7 @@
     </style>
 </head>
 <body>
-    <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌓</button>
-    
-    <pre class="ascii-logo loading-indicator" id="asciiLogo">Loading...</pre>
+    <pre class="ascii-logo" id="asciiLogo">Loading...</pre>
 
     <h1>OBFUSCII</h1>
     <p class="tagline">ASCII video codec for temporal portraits</p>
@@ -210,24 +143,13 @@
                 this.fps = 30;
                 this.animationId = null;
                 this.lastFrameTime = 0;
-                this.isDarkMode = this.detectDarkMode();
                 
                 this.asciiLogo = document.getElementById('asciiLogo');
-                this.themeToggle = document.getElementById('themeToggle');
-                
-                this.setupEventHandlers();
+                this.setupClickHandler();
                 this.loadLogo();
             }
 
-            detectDarkMode() {
-                if (document.documentElement.hasAttribute('data-theme')) {
-                    return document.documentElement.getAttribute('data-theme') === 'dark';
-                }
-                return window.matchMedia('(prefers-color-scheme: dark)').matches;
-            }
-
-            setupEventHandlers() {
-                // Logo click handler
+            setupClickHandler() {
                 this.asciiLogo.addEventListener('click', (e) => {
                     if (window.getSelection().toString().length === 0) {
                         this.togglePlayback();
@@ -240,57 +162,11 @@
                         this.togglePlayback();
                     }
                 });
-
-                // Theme toggle handler
-                this.themeToggle.addEventListener('click', () => {
-                    this.toggleTheme();
-                });
-
-                // Listen for system theme changes
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-                    if (!document.documentElement.hasAttribute('data-theme')) {
-                        this.isDarkMode = e.matches;
-                        this.loadLogo();
-                    }
-                });
-            }
-
-            toggleTheme() {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                
-                document.documentElement.setAttribute('data-theme', newTheme);
-                this.isDarkMode = newTheme === 'dark';
-                
-                // Update CSS custom properties immediately
-                if (newTheme === 'dark') {
-                    document.documentElement.style.setProperty('--bg-color', '#0d1117');
-                    document.documentElement.style.setProperty('--text-color', '#e6edf3');
-                    document.documentElement.style.setProperty('--ascii-color', '#7d8590');
-                    document.documentElement.style.setProperty('--accent-color', '#238636');
-                    document.documentElement.style.setProperty('--accent-hover', '#2ea043');
-                    document.documentElement.style.setProperty('--secondary-color', '#6e7681');
-                    document.documentElement.style.setProperty('--secondary-hover', '#8b949e');
-                    document.documentElement.style.setProperty('--muted-color', '#7d8590');
-                    document.documentElement.style.setProperty('--border-color', '#30363d');
-                } else {
-                    document.documentElement.style.setProperty('--bg-color', '#ffffff');
-                    document.documentElement.style.setProperty('--text-color', '#1a1a1a');
-                    document.documentElement.style.setProperty('--ascii-color', '#000000');
-                    document.documentElement.style.setProperty('--accent-color', '#007bff');
-                    document.documentElement.style.setProperty('--accent-hover', '#0056b3');
-                    document.documentElement.style.setProperty('--secondary-color', '#495057');
-                    document.documentElement.style.setProperty('--secondary-hover', '#343a40');
-                    document.documentElement.style.setProperty('--muted-color', '#6c757d');
-                    document.documentElement.style.setProperty('--border-color', '#e9ecef');
-                }
-                
-                this.loadLogo();
             }
 
             togglePlayback() {
                 if (this.frames.length === 0) return;
-                    
+                
                 if (this.isPlaying) {
                     this.pause();
                 } else {
@@ -314,45 +190,11 @@
                 this.animate();
             }
 
-            animate() {
-                if (!this.isPlaying) return;
-
-                const now = performance.now();
-                const frameInterval = 1000 / this.fps;
-
-                if (now - this.lastFrameTime >= frameInterval) {
-                    this.displayFrame(this.currentFrame);
-                    this.currentFrame = (this.currentFrame + 1) % this.frames.length;
-                    this.lastFrameTime = now;
-                }
-
-                this.animationId = requestAnimationFrame(() => this.animate());
-            }
-
-            displayFrame(frameIndex) {
-                if (frameIndex < this.frames.length) {
-                    this.asciiLogo.textContent = this.frames[frameIndex];
-                    this.asciiLogo.classList.remove('loading-indicator');
-                }
-            }
-
             async loadLogo() {
                 try {
-                    this.asciiLogo.classList.add('loading-indicator');
-                    
-                    // Determine which file to load based on theme
-                    const filename = this.isDarkMode ? 'text_dark.txv' : 'test_light.txv';
-                    
-                    let response = await fetch(filename);
-                    
-                    // Fallback to test.txv if themed version doesn't exist
+                    const response = await fetch('test.txv');
                     if (!response.ok) {
-                        console.log(`${filename} not found, falling back to test.txv`);
-                        response = await fetch('test.txv');
-                    }
-                    
-                    if (!response.ok) {
-                        throw new Error('Could not load any logo file');
+                        throw new Error('Could not load logo');
                     }
                     
                     const arrayBuffer = await response.arrayBuffer();
@@ -361,13 +203,11 @@
                     this.frames = result.frames;
                     this.fps = result.fps || 30;
                     
-                    this.asciiLogo.classList.remove('loading-indicator');
                     this.play();
                     
                 } catch (error) {
-                    console.log('Logo loading failed:', error);
-                    this.asciiLogo.classList.remove('loading-indicator');
                     this.asciiLogo.textContent = 'OBFUSCII';
+                    console.log('Logo loading failed');
                 }
             }
 
@@ -391,8 +231,8 @@
                 offset += 4;
                 
                 const metadataBytes = new Uint8Array(arrayBuffer, offset, metadataLength);
-                const metadataString = new TextDecoder().decode(metadataBytes);
-                const metadata = JSON.parse(metadataString);
+                const metadataJson = new TextDecoder().decode(metadataBytes);
+                const metadata = JSON.parse(metadataJson);
                 offset += metadataLength;
 
                 // Read frame count
@@ -401,57 +241,95 @@
 
                 const frames = [];
                 
-                // Read each frame
                 for (let i = 0; i < frameCount; i++) {
+                    // Read frame header
                     const frameIndex = view.getUint32(offset, true);
                     offset += 4;
-                    
-                    const compressedLength = view.getUint32(offset, true);
+                    const frameType = String.fromCharCode(view.getUint8(offset));
+                    offset += 1;
+                    offset += 3; // Skip padding
+                    const timestamp = view.getFloat64(offset, true);
+                    offset += 8;
+                    const rawSize = view.getUint32(offset, true);
+                    offset += 4;
+                    const compressedSize = view.getUint32(offset, true);
                     offset += 4;
                     
-                    const compressedData = new Uint8Array(arrayBuffer, offset, compressedLength);
-                    offset += compressedLength;
+                    // Read compressed frame data
+                    const compressedData = new Uint8Array(arrayBuffer, offset, compressedSize);
+                    offset += compressedSize;
                     
-                    try {
-                        // Simple decompression - in real implementation would use LZMA
-                        const decompressed = this.simpleDecompress(compressedData, metadata.width, metadata.height);
-                        frames.push(decompressed);
-                    } catch (error) {
-                        console.log('Frame decompression failed, using raw data');
-                        frames.push(new TextDecoder().decode(compressedData));
-                    }
+                    // Decompress frame
+                    const asciiFrame = await this.decompressFrame(compressedData, metadata.width, metadata.height);
+                    frames.push(asciiFrame);
                 }
 
                 return {
                     frames: frames,
-                    fps: metadata.fps || 30,
+                    fps: metadata.fps,
                     width: metadata.width,
                     height: metadata.height
                 };
             }
 
-            simpleDecompress(compressedData, width, height) {
-                // This is a placeholder for LZMA decompression
-                // In a real implementation, you would use the LZMA library
-                try {
-                    return new TextDecoder().decode(compressedData);
-                } catch (error) {
-                    // Generate a fallback ASCII pattern if decompression fails
-                    const chars = '@#*+=-:. ';
-                    let result = '';
-                    for (let y = 0; y < height; y++) {
-                        for (let x = 0; x < width; x++) {
-                            const charIndex = (x + y + Date.now() / 1000) % chars.length | 0;
-                            result += chars[charIndex];
+            async decompressFrame(compressedData, width, height) {
+                return new Promise((resolve, reject) => {
+                    const dataArray = Array.from(compressedData);
+                    
+                    LZMA.decompress(dataArray, (result, error) => {
+                        if (error) {
+                            reject(new Error(`LZMA decompression failed: ${error}`));
+                        } else {
+                            try {
+                                let jsonString;
+                                if (typeof result === 'string') {
+                                    jsonString = result;
+                                } else {
+                                    jsonString = new TextDecoder().decode(new Uint8Array(result));
+                                }
+                                
+                                const rleSegments = JSON.parse(jsonString);
+                                
+                                // Reconstruct ASCII frame
+                                let frameString = '';
+                                let position = 0;
+                                
+                                for (const [char, runLength] of rleSegments) {
+                                    for (let i = 0; i < runLength; i++) {
+                                        frameString += char;
+                                        position++;
+                                        
+                                        if (position % width === 0 && position < width * height) {
+                                            frameString += '\n';
+                                        }
+                                    }
+                                }
+                                
+                                resolve(frameString);
+                            } catch (parseError) {
+                                reject(new Error(`Frame reconstruction failed: ${parseError.message}`));
+                            }
                         }
-                        result += '\n';
-                    }
-                    return result;
+                    });
+                });
+            }
+
+            animate() {
+                if (!this.isPlaying || this.frames.length === 0) return;
+
+                const now = performance.now();
+                const frameDelta = 1000 / this.fps;
+
+                if (now - this.lastFrameTime >= frameDelta) {
+                    this.currentFrame = (this.currentFrame + 1) % this.frames.length;
+                    this.asciiLogo.textContent = this.frames[this.currentFrame];
+                    this.lastFrameTime = now;
                 }
+
+                this.animationId = requestAnimationFrame(() => this.animate());
             }
         }
 
-        // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
             new LogoPlayer();
         });

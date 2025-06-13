@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OBFUSCII - ASCII Video Player</title>
+    <title>OBFUSCII Player</title>
     <style>
         * {
             margin: 0;
@@ -11,121 +11,76 @@
             box-sizing: border-box;
         }
 
-        /* Theme Variables */
-        :root {
-            --bg-color: #000;
-            --text-color: #00ff88;
-            --border-color: #333;
-            --panel-bg: #111;
-            --button-bg: #222;
-            --button-hover: #333;
-            --accent-color: #00ff88;
-        }
-
-        /* Light theme */
-        @media (prefers-color-scheme: light) {
-            :root {
-                --bg-color: #fff;
-                --text-color: #000;
-                --border-color: #ddd;
-                --panel-bg: #f9f9f9;
-                --button-bg: #f0f0f0;
-                --button-hover: #e0e0e0;
-                --accent-color: #007bff;
-            }
-        }
-
-        /* Manual theme overrides */
-        body.theme-dark {
-            --bg-color: #000;
-            --text-color: #00ff88;
-            --border-color: #333;
-            --panel-bg: #111;
-            --button-bg: #222;
-            --button-hover: #333;
-            --accent-color: #00ff88;
-        }
-
-        body.theme-light {
-            --bg-color: #fff;
-            --text-color: #000;
-            --border-color: #ddd;
-            --panel-bg: #f9f9f9;
-            --button-bg: #f0f0f0;
-            --button-hover: #e0e0e0;
-            --accent-color: #007bff;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-color);
-            color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
+            background: #ffffff;
+            color: #333;
+            line-height: 1.6;
+            padding: 40px 20px;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 20px;
         }
 
         h1 {
-            text-align: center;
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--accent-color);
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #000;
         }
 
         .subtitle {
-            text-align: center;
-            font-size: 1.2rem;
-            color: var(--text-color);
-            margin-bottom: 2rem;
-            opacity: 0.8;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
         }
 
         .player {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: background-color 0.3s, border-color 0.3s;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-height: 95vh;
+            display: flex;
+            flex-direction: column; 
         }
 
         .video-display {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
+            background: #ffffff;
             padding: 20px;
-            margin-bottom: 20px;
-            min-height: 400px;
+            min-height: 40vh;
+            border-bottom: 1px solid #e9ecef;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.3s, border-color 0.3s;
         }
 
         .ascii-content {
             font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-            font-size: min(1.2vw, 1.2vh);
+            font-size: calc(min(90vw / 140, 80vh / 80)); /* 140 chars wide, 80 lines tall */
             line-height: 1;
             letter-spacing: 0;
             white-space: pre;
-            color: var(--text-color);
-            text-align: center;
-            user-select: text;
-            transition: color 0.3s;
+            color: #212529;
+            background: #ffffff;
+            width: fit-content;
+            max-width: 100%;
+            max-height: 100%;
+            overflow: hidden;
         }
 
         .controls {
+            background: #ffffff;
+            padding: 20px;
             display: flex;
-            flex-wrap: wrap;
             align-items: center;
             gap: 15px;
-            margin-bottom: 20px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #e9ecef;
         }
 
         .file-input {
@@ -133,115 +88,135 @@
         }
 
         .file-label {
-            background: var(--accent-color);
-            color: var(--bg-color);
+            background: #007bff;
+            color: white;
             padding: 10px 20px;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 500;
-            transition: all 0.2s;
+            transition: background-color 0.2s;
         }
 
         .file-label:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
+            background: #0056b3;
         }
 
         .control-btn {
-            background: var(--button-bg);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            padding: 10px 20px;
-            border-radius: 4px;
+            background: #6c757d;
+            border: none;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 500;
-            transition: all 0.2s;
+            transition: background-color 0.2s;
         }
 
         .control-btn:hover:not(:disabled) {
-            background: var(--button-hover);
-            transform: translateY(-1px);
+            background: #545b62;
         }
 
         .control-btn:disabled {
-            opacity: 0.5;
+            background: #dee2e6;
+            color: #6c757d;
             cursor: not-allowed;
-            transform: none;
         }
 
         .scale-controls {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-left: auto;
+            color: #495057;
         }
 
         .scale-slider {
-            width: 100px;
+            width: 120px;
+            height: 6px;
+            border-radius: 3px;
+            background: #dee2e6;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .scale-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+        }
+
+        .scale-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+            border: none;
         }
 
         .info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-            color: var(--text-color);
-            opacity: 0.7;
+            background: #f8f9fa;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            font-size: 14px;
         }
 
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--button-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            font-size: 18px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            z-index: 1000;
+        .file-info {
+            color: #495057;
         }
 
-        .theme-toggle:hover {
-            background: var(--button-hover);
-            transform: translateY(-1px);
+        .playback-info {
+            text-align: right;
+            color: #495057;
+        }
+
+        .playback-info.loading {
+            color: #ffc107;
+        }
+
+        .playback-info.error {
+            color: #dc3545;
+        }
+
+        .playback-info.success {
+            color: #28a745;
         }
 
         @media (max-width: 768px) {
-            .container {
-                padding: 10px;
+            body {
+                padding: 20px 15px;
             }
 
             h1 {
-                font-size: 2.5rem;
+                font-size: 2rem;
             }
 
             .controls {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 12px;
             }
 
             .scale-controls {
-                margin-left: 0;
                 justify-content: center;
             }
 
-            .ascii-content {
-                font-size: min(2vw, 2vh);
+            .info {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 10px;
             }
 
-            .theme-toggle {
-                top: 10px;
-                right: 10px;
-                width: 36px;
-                height: 36px;
-                font-size: 16px;
+            .ascii-content {
+                font-size: 6px;
+            }
+
+            .video-display {
+                padding: 20px;
             }
         }
 
@@ -257,8 +232,6 @@
     </style>
 </head>
 <body>
-    <button class="theme-toggle" id="themeToggle">🌓</button>
-    
     <div class="container">
         <h1>OBFUSCII</h1>
         <p class="subtitle">ASCII video player for temporal portraits</p>
@@ -292,235 +265,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/lzma@2.3.2/src/lzma_worker.min.js"></script>
-    <script>
-        // Theme management
-        class ThemeManager {
-            constructor() {
-                this.currentTheme = this.detectTheme();
-                this.initializeTheme();
-                this.setupThemeToggle();
-            }
-
-            detectTheme() {
-                const saved = localStorage.getItem('obfuscii-theme');
-                if (saved) return saved;
-                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            }
-
-            initializeTheme() {
-                document.body.className = `theme-${this.currentTheme}`;
-            }
-
-            setupThemeToggle() {
-                document.getElementById('themeToggle').addEventListener('click', () => {
-                    this.currentTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
-                    localStorage.setItem('obfuscii-theme', this.currentTheme);
-                    document.body.className = `theme-${this.currentTheme}`;
-                    
-                    // Reload demo if it's currently loaded
-                    if (window.player && window.player.currentVideo && window.player.currentVideo.filename === 'test.txv') {
-                        window.player.loadDemo();
-                    }
-                });
-
-                // Handle system theme changes
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-                    if (!localStorage.getItem('obfuscii-theme')) {
-                        this.currentTheme = e.matches ? 'dark' : 'light';
-                        document.body.className = `theme-${this.currentTheme}`;
-                        
-                        // Reload demo if it's currently loaded
-                        if (window.player && window.player.currentVideo && window.player.currentVideo.filename === 'test.txv') {
-                            window.player.loadDemo();
-                        }
-                    }
-                });
-            }
-
-            getCurrentTheme() {
-                return this.currentTheme;
-            }
-        }
-
-        // Initialize theme manager
-        const themeManager = new ThemeManager();
-    </script>
-    <script>
-        // Modified player.js content with theme awareness
-        class TXVPlayer {
-            constructor() {
-                this.currentVideo = null;
-                this.currentFrame = 0;
-                this.isPlaying = false;
-                this.animationId = null;
-                this.fps = 30;
-                this.scale = 1;
-                
-                this.asciiContent = document.getElementById('asciiContent');
-                this.fileInput = document.getElementById('fileInput');
-                this.playBtn = document.getElementById('playBtn');
-                this.pauseBtn = document.getElementById('pauseBtn');
-                this.stopBtn = document.getElementById('stopBtn');
-                this.loadTestBtn = document.getElementById('loadTestBtn');
-                this.scaleSlider = document.getElementById('scaleSlider');
-                this.scaleValue = document.getElementById('scaleValue');
-                this.fileInfo = document.getElementById('fileInfo');
-                this.playbackInfo = document.getElementById('playbackInfo');
-                
-                this.bindEvents();
-            }
-
-            bindEvents() {
-                this.fileInput.addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (file) this.loadFile(file);
-                });
-
-                this.playBtn.addEventListener('click', () => this.play());
-                this.pauseBtn.addEventListener('click', () => this.pause());
-                this.stopBtn.addEventListener('click', () => this.stop());
-                this.loadTestBtn.addEventListener('click', () => this.loadDemo());
-
-                this.scaleSlider.addEventListener('input', (e) => {
-                    this.scale = parseFloat(e.target.value);
-                    this.scaleValue.textContent = Math.round(this.scale * 100) + '%';
-                    this.updateScale();
-                });
-            }
-
-            async loadFile(file) {
-                try {
-                    this.updateStatus('Loading...');
-                    
-                    const arrayBuffer = await file.arrayBuffer();
-                    const compressed = new Uint8Array(arrayBuffer);
-                    
-                    const decompressed = LZMA.decompress(compressed);
-                    const jsonString = new TextDecoder().decode(new Uint8Array(decompressed));
-                    const videoData = JSON.parse(jsonString);
-                    
-                    this.currentVideo = {
-                        ...videoData,
-                        filename: file.name
-                    };
-                    
-                    this.currentFrame = 0;
-                    this.enableControls();
-                    this.updateFileInfo();
-                    this.displayFrame();
-                    this.updateStatus('Ready');
-                    
-                } catch (error) {
-                    console.error('Failed to load file:', error);
-                    this.updateStatus('Error loading file');
-                }
-            }
-
-            async loadDemo() {
-                try {
-                    this.updateStatus('Loading demo...');
-                    
-                    // Try theme-specific version first
-                    const currentTheme = themeManager.getCurrentTheme();
-                    const themeFile = `test_${currentTheme}.txv`;
-                    const fallbackFile = 'test.txv';
-                    
-                    let response;
-                    try {
-                        response = await fetch(themeFile);
-                        if (!response.ok) throw new Error('Theme file not found');
-                    } catch {
-                        console.log(`${themeFile} not found, trying ${fallbackFile}`);
-                        response = await fetch(fallbackFile);
-                        if (!response.ok) throw new Error('Fallback file not found');
-                    }
-
-                    const arrayBuffer = await response.arrayBuffer();
-                    const compressed = new Uint8Array(arrayBuffer);
-                    
-                    const decompressed = LZMA.decompress(compressed);
-                    const jsonString = new TextDecoder().decode(new Uint8Array(decompressed));
-                    const videoData = JSON.parse(jsonString);
-                    
-                    this.currentVideo = {
-                        ...videoData,
-                        filename: 'test.txv'
-                    };
-                    
-                    this.currentFrame = 0;
-                    this.enableControls();
-                    this.updateFileInfo();
-                    this.displayFrame();
-                    this.updateStatus('Demo loaded');
-                    
-                } catch (error) {
-                    console.error('Failed to load demo:', error);
-                    this.updateStatus('Demo not available');
-                }
-            }
-
-            play() {
-                if (!this.currentVideo || this.isPlaying) return;
-                
-                this.isPlaying = true;
-                this.updateStatus('Playing');
-                this.animate();
-            }
-
-            pause() {
-                this.isPlaying = false;
-                if (this.animationId) {
-                    cancelAnimationFrame(this.animationId);
-                    this.animationId = null;
-                }
-                this.updateStatus('Paused');
-            }
-
-            stop() {
-                this.pause();
-                this.currentFrame = 0;
-                this.displayFrame();
-                this.updateStatus('Stopped');
-            }
-
-            animate = () => {
-                if (!this.isPlaying) return;
-                
-                this.displayFrame();
-                this.currentFrame = (this.currentFrame + 1) % this.currentVideo.frames.length;
-                
-                setTimeout(() => {
-                    this.animationId = requestAnimationFrame(this.animate);
-                }, 1000 / this.fps);
-            }
-
-            displayFrame() {
-                if (!this.currentVideo) return;
-                this.asciiContent.textContent = this.currentVideo.frames[this.currentFrame];
-            }
-
-            updateScale() {
-                this.asciiContent.style.fontSize = `${this.scale}em`;
-            }
-
-            enableControls() {
-                this.playBtn.disabled = false;
-                this.pauseBtn.disabled = false;
-                this.stopBtn.disabled = false;
-            }
-
-            updateFileInfo() {
-                if (!this.currentVideo) return;
-                this.fileInfo.textContent = `${this.currentVideo.filename} (${this.currentVideo.frames.length} frames)`;
-            }
-
-            updateStatus(status) {
-                this.playbackInfo.textContent = status;
-            }
-        }
-
-        // Initialize player
-        window.player = new TXVPlayer();
-    </script>
+    <script src="player.js"></script>
 </body>
 </html>
