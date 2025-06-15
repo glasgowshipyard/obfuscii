@@ -2,133 +2,104 @@
 
 ASCII video codec for temporal portraits and responsive branding.
 
-## WTF is OBFUSCII?
+## Overview
 
-OBFUSCII converts video into compressed ASCII animations that scale infinitely, load instantly, and adapt to any visual context. Responsive logos that move, breathe, and exist as pure text.
+OBFUSCII converts video into compressed ASCII animations that scale infinitely, load instantly, and adapt to any visual context. Perfect for temporal portraits, living logos, and ASCII cinema.
 
-**Key Innovation:** Temporal portraits as ASCII loops—faces scanning left to right, subtle movements, living branding that works from mobile headers to desktop displays through CSS scaling.
+**Key Innovation:** Character-based video that exists as pure text—copy/paste friendly, infinitely scalable, context-adaptive.
+
+## Quick Start
+
+```bash
+# Install dependencies
+pip install opencv-python numpy
+
+# Basic conversion  
+python3 obfuscii.py video.mp4
+
+# Quick preview
+python3 obfuscii.py video.mp4 --preview
+
+# Custom resolution
+python3 obfuscii.py video.mp4 --resolution 80x40
+
+# Play existing .txv file
+python3 obfuscii.py output.txv
+```
 
 ## Core Features
 
-- **Middle-out Compression:** Custom algorithm attempting to achieve 10:1 compression ratios vs gigantic raw ASCII video
-- **Infinite Scaling:** CSS responsive from tiny mobile headers to full desktop displays  
-- **Context Adaptation:** "Transparent" backgrounds through character substitution
-- **Copy/Paste Distribution:** Text-based format enables old school sharing
-- **Web Native:** No special software required, works in any browser
-- **Lightning Fast:** Optimized for speed over visual perfection
+- **10:1+ Compression:** Middle-out algorithm with LZMA
+- **Infinite Scaling:** CSS responsive from mobile to desktop  
+- **Context Adaptation:** Spaces create "transparent" backgrounds
+- **Copy/Paste Distribution:** Text-based sharing
+- **Web Native:** Works in any browser, no plugins
+- **Progressive Smoothing:** Bilateral → Gaussian → Median filtering
 
-## The Copy/Paste Revolution
+## File Format (.txv)
 
-Traditional logos require multiple versions for different contexts. OBFUSCII portraits adapt automatically:
+- **I-frames:** Full ASCII grids at keypoints
+- **P-frames:** Delta compression for motion
+- **LZMA:** Final compression layer
+- **Metadata:** FPS, dimensions, loop info
 
-- **Light backgrounds:** Characters appear dark
-- **Dark backgrounds:** Characters appear light  
-- **Any context:** Background spaces adapt seamlessly
-- **Sharing:** Copying becomes promotion since content is personalized
+## Character Set
 
-## File Format
+`[' ', '.', ':', '-', '=', '+', '*', '#', '%', '@']` - Linear brightness progression with space for transparency
 
-`.txv` (Text Video) files contain:
-- **I-frames:** Full ASCII grids every few seconds
-- **P-frames:** Delta changes for efficient motion encoding  
-- **LZMA compression:** Applied to delta patterns
-- **Metadata:** Timing, dimensions, loop points
+## Configuration Presets
+
+- **`light_balanced_high_max.json`** (default) - Optimal balance of quality and compression
+- **`config_high_quality.json`** - Maximum visual fidelity, larger files
+- **`config_high_compression.json`** - Smallest file size, acceptable quality  
+- **`config_default.json`** - Basic settings
+
+## Web Player
+
+Open `index.html` to play `.txv` files in browser with scaling controls.
+
+## Optimization Studio
+
+Open `studio.html` for real-time parameter tuning and compression optimization.
 
 ## Use Cases
 
-### Temporal Portraits
-```
-Portrait scanning: looking left → centre → right → centre
-140x80 character resolution, 3-4 frame loop
-Website headers, business cards, social media
-```
+**Temporal Portraits:** 140x80 character resolution, 3-4 frame loops for website headers  
+**ASCII Cinema:** Full-length films as text-based video  
+**Living Logos:** Behavioral branding that exists as copy/paste text
 
-### ASCII Cinema
-Convert full-length films to text-based video. Export to social media or embed as web experiences.
+## Technical Details
 
-### Living Logos
-Moving company branding that exists as behaviour rather than static imagery. Copying becomes potentially viral distribution since personalised content is worthless to steal.
+**Progressive Smoothing Pipeline:**
+1. Bilateral filter (edge preservation)
+2. Gaussian blur (texture removal)  
+3. Median filter (noise cleanup)
+4. CLAHE contrast enhancement
 
-## Technical Foundation
+**Compression Algorithm:**
+- RLE encoding of character runs
+- Temporal delta compression  
+- LZMA final compression
+- Target: 10:1+ compression ratios
 
-**Built from scratch** with focused architecture:
-- **Greyscale processing:** Eliminates color complexity for maximum speed
-- **8-character mapping:** Optimized character set for compression efficiency
-- **Simple algorithms:** Based on decent, simple GPT ASCII conversion approach
-- **Clean codebase:** No legacy bumf, every line has purpose
+## Documentation
 
-**Character Set:** `[' ', '-', '#', '=', '+', '*', '%', '@']`
-- 98.5% visual fidelity with minimal compression overhead
-- Space character enables background transparency
-- Linear brightness progression
-
-## Installation & Usage
-
-```bash
-# Basic conversion
-python3 obfuscii.py input.mp4
-
-# Custom output and resolution  
-python3 obfuscii.py input.mp4 -o portrait.txv --resolution 140x80
-
-# Preview in terminal
-python3 obfuscii.py input.mp4 --preview
-
-# Verbose output
-python3 obfuscii.py input.mp4 --verbose
-```
+- `docs/` - Technical guides and advanced usage
+- Use `--help` for complete CLI reference
 
 ## Development Status
 
-🚧 **Phase 1 (Current):** Core video-to-ASCII conversion with middle-out compression  
-🔜 **Phase 2:** Web player and responsive scaling  
-🔜 **Phase 3:** Social media export and advanced features
+✅ **Core conversion** - Video to ASCII with compression  
+✅ **Web player** - Browser-based .txv playback  
+✅ **Optimization tools** - Real-time parameter tuning  
+🔜 **Export tools** - Social media integration
 
 ## Philosophy
 
-Traditional media is fixed and static, requiring multiple versions for different contexts. OBFUSCII media is temporal, scalable, and context-adaptive. 
+*"Temporal logos that exist as behavioral systems rather than static symbols."*
 
-ASCII video works best through stylization rather than photorealistic conversion. We target specific resolution sweet spots that preserve recognition while maintaining practical file sizes for web distribution.
-
-**Core Principle:** Lightning speed + outlandish compression > visual perfection
-
-## Technical Innovation
-
-**Middle-out Compression Algorithm:**
-- Analyzes character position changes between frames
-- Encodes only differences, not full frames
-- Achieves 10:1+ compression ratios
-- Enables practical file sizes for temporal portraits
-
-**Background Transparency:**
-- Space characters adapt to any context
-- No alpha channels or color matching needed
-- Perfect integration with any website theme
-- Copy/paste maintains transparency
-
-## Repository Structure
-
-```
-obfuscii.py              # Main CLI interface
-obfuscii/               # Core modules
-  video.py              # Video loading and processing
-  ascii.py              # Character conversion algorithms  
-  compress.py           # Middle-out compression engine
-  txv.py                # File format handling
-fork/                   # Original video-to-ascii reference code
-test.mp4                # Test video file
-```
-
-## Contributing
-
-Early development phase. Core compression algorithm takes priority, followed by web player implementation.
-
-**Current Focus:** Building clean video-to-ASCII conversion with GPT's off the cuff algorithm.
+Lightning speed + compression > visual perfection. Text-based media that adapts to any context.
 
 ## License
 
 MIT
-
----
-
-*"Temporal logos that exist as behavioral systems rather than static symbols."*

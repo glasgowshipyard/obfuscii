@@ -29,9 +29,13 @@ class ParameterTestEngine:
     Uses SMART GRID DESIGN to keep combinations manageable (~50-100 total)
     """
     
-    def __init__(self, output_dir: str = "parameter_tests"):
+    def __init__(self, output_dir: str = "parameter_tests", clean: bool = False):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
+        
+        # Clean existing results if requested
+        if clean:
+            self.clean_existing_results()
         
         # STRATEGIC PARAMETER GRID - carefully chosen for max impact with min combinations
         # Focus on parameters that most affect compression ratio and visual quality
@@ -390,6 +394,28 @@ class ParameterTestEngine:
         guide_path.unlink()
         
         return zip_path
+    
+    def clean_existing_results(self) -> None:
+        """Clean existing test results from output directory"""
+        cleaned_count = 0
+        
+        # Remove .txt files (test results)
+        for txt_file in self.output_dir.glob("obfuscii_test_*.txt"):
+            txt_file.unlink()
+            cleaned_count += 1
+        
+        # Remove .zip files (result packages)
+        for zip_file in self.output_dir.glob("obfuscii_test_*.zip"):
+            zip_file.unlink()
+            cleaned_count += 1
+            
+        # Remove .json files (analysis results)
+        for json_file in self.output_dir.glob("obfuscii_test_*.json"):
+            json_file.unlink()
+            cleaned_count += 1
+        
+        if cleaned_count > 0:
+            print(f"🧹 Cleaned {cleaned_count} existing test files")
 
 
 def main():
@@ -400,11 +426,12 @@ def main():
     parser.add_argument('video', help='Input video file')
     parser.add_argument('--frame', type=int, default=30, help='Frame number to extract (default: 30)')
     parser.add_argument('--output', default='parameter_tests', help='Output directory (default: parameter_tests)')
+    parser.add_argument('--clean', action='store_true', help='Clean existing test results before running')
     
     args = parser.parse_args()
     
     # Create test engine
-    engine = ParameterTestEngine(args.output)
+    engine = ParameterTestEngine(args.output, clean=args.clean)
     
     # Run parameter sweep
     try:

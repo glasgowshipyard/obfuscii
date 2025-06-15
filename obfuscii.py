@@ -12,20 +12,35 @@ def main():
     parser = argparse.ArgumentParser(
         prog='obfuscii',
         description='Convert video to compressed ASCII animation (.txv format)',
-        epilog='OBFUSCII: Temporal logos that exist as behavioral systems'
+        epilog='''Examples:
+  python3 obfuscii.py video.mp4                    # Basic conversion
+  python3 obfuscii.py video.mp4 --preview          # Quick 30-frame preview
+  python3 obfuscii.py video.mp4 --resolution 80x40 # Smaller output
+  python3 obfuscii.py video.mp4 --config config_high_quality.json
+  python3 obfuscii.py output.txv --info            # Show file details
+  python3 obfuscii.py output.txv                   # Play .txv file
+
+Available configs:
+  light_balanced_high_max.json (default) - Optimal balance
+  config_high_quality.json               - Maximum visual fidelity  
+  config_high_compression.json           - Smallest file size
+  config_default.json                    - Basic settings
+
+OBFUSCII: Temporal logos that exist as behavioral systems''',
+        formatter_class=argparse.RawDescriptionHelpFormatter
     )
     
     parser.add_argument('input', help='Input video file (mp4, mov, avi, etc.) or .txv file')
     parser.add_argument('-o', '--output', help='Output .txv file (default: input name + .txv)')
-    parser.add_argument('--resolution', help='Output resolution (WIDTHxHEIGHT, e.g. 140x80)')
-    parser.add_argument('--config', help='Configuration file (.json) - Available presets: light_balanced_high_max.json (default), config_high_quality.json, config_high_compression.json')
+    parser.add_argument('--resolution', help='Output resolution (WIDTHxHEIGHT, e.g. 140x80, default: 140x~80)')
+    parser.add_argument('--config', help='Configuration preset (.json file, see Available configs below)')
     
     # Behavior flags
-    parser.add_argument('--info', action='store_true', help='Show .txv file information')
-    parser.add_argument('--validate', action='store_true', help='Validate .txv file integrity')
-    parser.add_argument('--preview', action='store_true', help='Convert and play short clip (first 30 frames)')
-    parser.add_argument('--verbose', action='store_true', help='Show compression performance and detailed stats')
-    parser.add_argument('--force', action='store_true', help='Overwrite existing files without asking')
+    parser.add_argument('--info', action='store_true', help='Show .txv file metadata (frames, size, compression ratio)')
+    parser.add_argument('--validate', action='store_true', help='Validate .txv file integrity and structure')
+    parser.add_argument('--preview', action='store_true', help='Convert and play first 30 frames only (fast preview)')
+    parser.add_argument('--verbose', action='store_true', help='Show detailed compression stats and processing info')
+    parser.add_argument('--force', action='store_true', help='Overwrite existing files without confirmation prompt')
     
     args = parser.parse_args()
     
@@ -152,23 +167,28 @@ def convert_video_to_txv(args):
     if args.preview:
         print(f"\nPreview complete. Use 'python obfuscii.py {args.output}' to play full .txv file")
     else:
-        print(f"\nPlaying result...")
-        # Get decompressed frames for playback
-        from obfuscii.txv import read_txv_file, decompress_txv_frame
-        
-        # Load and decompress for playback
-        compressed_video = read_txv_file(args.output)
-        ascii_frames = []
-        
-        print("Decompressing for playback...")
-        for frame_idx in range(len(compressed_video.frames)):
-            ascii_frame = decompress_txv_frame(compressed_video, frame_idx)
-            ascii_frames.append(ascii_frame)
+        # Ask user if they want to play
+        response = input(f"\nPlay result now? (y/N): ")
+        if response.lower() in ['y', 'yes']:
+            print("Playing result...")
+            # Get decompressed frames for playback
+            from obfuscii.txv import read_txv_file, decompress_txv_frame
             
-            if frame_idx % 30 == 0:
-                print(f"Decompressed frame {frame_idx}/{len(compressed_video.frames)}")
-        
-        play_ascii_video(ascii_frames, compressed_video.fps)
+            # Load and decompress for playback
+            compressed_video = read_txv_file(args.output)
+            ascii_frames = []
+            
+            print("Decompressing for playback...")
+            for frame_idx in range(len(compressed_video.frames)):
+                ascii_frame = decompress_txv_frame(compressed_video, frame_idx)
+                ascii_frames.append(ascii_frame)
+                
+                if frame_idx % 30 == 0:
+                    print(f"Decompressed frame {frame_idx}/{len(compressed_video.frames)}")
+            
+            play_ascii_video(ascii_frames, compressed_video.fps)
+        else:
+            print(f"Conversion complete. Use 'python obfuscii.py {args.output}' to play later.")
 
 if __name__ == '__main__':
     main()
