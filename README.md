@@ -14,8 +14,14 @@ OBFUSCII converts video into compressed ASCII animations that scale infinitely, 
 # Install dependencies
 pip install opencv-python numpy
 
-# Basic conversion  
+# Basic conversion (light theme - default)
 python3 obfuscii.py video.mp4
+
+# Dark theme (inverted characters for dark backgrounds)
+python3 obfuscii.py video.mp4 --dark
+
+# Both light and dark versions
+python3 obfuscii.py video.mp4 --both
 
 # Quick preview
 python3 obfuscii.py video.mp4 --preview
@@ -31,6 +37,7 @@ python3 obfuscii.py output.txv
 
 - **10:1+ Compression:** Middle-out algorithm with LZMA
 - **Infinite Scaling:** CSS responsive from mobile to desktop  
+- **Light/Dark Themes:** Automatic character inversion for any background
 - **Context Adaptation:** Spaces create "transparent" backgrounds
 - **Copy/Paste Distribution:** Text-based sharing
 - **Web Native:** Works in any browser, no plugins
@@ -43,9 +50,12 @@ python3 obfuscii.py output.txv
 - **LZMA:** Final compression layer
 - **Metadata:** FPS, dimensions, loop info
 
-## Character Set
+## Character Set & Themes
 
-`[' ', '.', ':', '-', '=', '+', '*', '#', '%', '@']` - Linear brightness progression with space for transparency
+**Light Theme (default):** `[' ', '.', ':', '-', '=', '+', '*', '#', '%', '@']`  
+**Dark Theme:** `['@', '%', '#', '*', '+', '=', '-', ':', '.', ' ']` (inverted)
+
+Linear brightness progression with space character creating transparency on any background.
 
 ## Configuration Presets
 

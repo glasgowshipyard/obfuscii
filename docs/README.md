@@ -4,6 +4,7 @@
 
 - **[Technical Guide](TECHNICAL_GUIDE.md)** - Detailed technical implementation, configuration parameters, file format specs
 - **[Workflows](WORKFLOWS.md)** - Step-by-step guides for common use cases and optimization
+- **[Theme System](THEMES.md)** - Complete guide to light/dark theme generation and web integration
 
 ## Development Documentation
 
@@ -22,7 +23,9 @@
 ### CLI Usage
 ```bash
 python3 obfuscii.py --help          # Complete command reference
-python3 obfuscii.py video.mp4       # Basic conversion
+python3 obfuscii.py video.mp4       # Basic conversion (light theme)
+python3 obfuscii.py video.mp4 --dark     # Dark theme version
+python3 obfuscii.py video.mp4 --both     # Both light and dark versions
 python3 obfuscii.py video.mp4 --preview  # Quick test
 ```
 

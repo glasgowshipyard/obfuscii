@@ -4,7 +4,10 @@
 
 1. **Test with preview:** `python3 obfuscii.py video.mp4 --preview`
 2. **Check results:** If quality good, run full conversion
-3. **Full conversion:** `python3 obfuscii.py video.mp4`
+3. **Choose theme:** 
+   - Light backgrounds: `python3 obfuscii.py video.mp4` (default)
+   - Dark backgrounds: `python3 obfuscii.py video.mp4 --dark`
+   - Both versions: `python3 obfuscii.py video.mp4 --both`
 4. **Play result:** Answer 'y' to play prompt or `python3 obfuscii.py output.txv`
 
 ## Portrait Creation Workflow
@@ -89,37 +92,82 @@ python3 obfuscii.py video.mp4 --preview --config light_balanced_high_max.json
 python3 obfuscii.py video.mp4 --preview --config config_high_compression.json
 ```
 
+## Theme Selection Workflow
+
+### Choosing the Right Theme
+
+**Light Theme (default):**
+- Best for: Light backgrounds, white/cream websites, documentation
+- Characters: Space (transparent) → @ (darkest)
+- Usage: `python3 obfuscii.py video.mp4` or `python3 obfuscii.py video.mp4 --light`
+
+**Dark Theme:**
+- Best for: Dark backgrounds, dark mode websites, terminals
+- Characters: @ (darkest) → Space (transparent) 
+- Usage: `python3 obfuscii.py video.mp4 --dark`
+
+**Both Themes:**
+- Best for: Responsive websites supporting light/dark modes
+- Generates: `video_light.txv` and `video_dark.txv`
+- Usage: `python3 obfuscii.py video.mp4 --both`
+
+### Theme Testing
+```bash
+# Test both themes quickly
+python3 obfuscii.py video.mp4 --both --preview
+python3 obfuscii.py video_light.txv  # Test light version
+python3 obfuscii.py video_dark.txv   # Test dark version
+```
+
 ## Web Integration Workflow
 
 ### Player Setup
 1. **Copy files:** `index.html`, `player.js`, LZMA library
-2. **Upload .txv:** Place in same directory
+2. **Upload .txv:** Place in same directory (choose appropriate theme)
 3. **Test locally:** Open in browser
 4. **Deploy:** Upload to web server
 
-### Responsive Design
+### Theme-Aware Responsive Design
 ```html
-<!-- Responsive ASCII video -->
-<pre class="ascii-video" style="
+<!-- Light theme ASCII video -->
+<pre class="ascii-video light-theme" style="
   font-family: monospace;
   font-size: min(1vw, 1vh);
   line-height: 1;
   white-space: pre;
+  color: #000;
+  background: #fff;
 ">
-  <!-- ASCII content here -->
+  <!-- Light theme ASCII content -->
+</pre>
+
+<!-- Dark theme ASCII video -->
+<pre class="ascii-video dark-theme" style="
+  font-family: monospace;
+  font-size: min(1vw, 1vh);
+  line-height: 1;
+  white-space: pre;
+  color: #fff;
+  background: #000;
+">
+  <!-- Dark theme ASCII content -->
 </pre>
 ```
 
-### Direct Embedding
+### Direct Embedding with Theme Support
 ```html
-<!-- Copy/paste ASCII directly -->
+<!-- Responsive theme switching -->
+<style>
+  @media (prefers-color-scheme: light) {
+    .ascii-content { color: #000; background: #fff; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .ascii-content { color: #fff; background: #000; }
+  }
+</style>
+
 <pre class="ascii-content">
-@@@@@@@@@@@@@@
-@            @
-@   ASCII    @
-@   VIDEO    @
-@            @
-@@@@@@@@@@@@@@
+<!-- Use appropriate theme .txv content here -->
 </pre>
 ```
 
@@ -127,9 +175,9 @@ python3 obfuscii.py video.mp4 --preview --config config_high_compression.json
 
 ### Multiple Files
 ```bash
-# Process all MP4 files
+# Process all MP4 files with both themes
 for file in *.mp4; do
-  python3 obfuscii.py "$file" --config light_balanced_high_max.json
+  python3 obfuscii.py "$file" --both --config light_balanced_high_max.json
 done
 ```
 
@@ -149,8 +197,20 @@ done
 1. **Source quality:** Check input video resolution and clarity
 2. **Config choice:** Try different presets
 3. **Resolution:** Test higher/lower resolutions
-4. **Preview mode:** Quick iteration without full processing
-5. **Studio tuning:** Real-time parameter adjustment
+4. **Theme selection:** Try opposite theme for better contrast
+5. **Preview mode:** Quick iteration without full processing
+6. **Studio tuning:** Real-time parameter adjustment
+
+### Theme Issues
+```bash
+# If ASCII appears too dark/light
+python3 obfuscii.py video.mp4 --dark   # Try opposite theme
+python3 obfuscii.py video.mp4 --both   # Generate both for comparison
+
+# Test in different contexts
+python3 obfuscii.py light_version.txv  # Test on terminal (usually dark)
+python3 obfuscii.py dark_version.txv   # Test on white background
+```
 
 ### File Issues
 ```bash
@@ -170,14 +230,16 @@ python3 obfuscii.py source.mp4 --verbose    # Debug processing
 ### Content Creation Pipeline
 1. **Shoot/Edit:** Create source video with optimization in mind
 2. **Preview:** Quick quality check with OBFUSCII
-3. **Optimize:** Use studio for parameter tuning if needed
-4. **Process:** Full conversion with optimized settings
-5. **Deploy:** Integrate into web/app with player
-6. **Test:** Verify playback across devices/browsers
+3. **Choose theme:** Select appropriate theme for target context
+4. **Optimize:** Use studio for parameter tuning if needed
+5. **Process:** Full conversion with optimized settings
+6. **Deploy:** Integrate into web/app with appropriate theme
+7. **Test:** Verify playback across devices/browsers and color schemes
 
 ### Quality Assurance
 - **Compression target:** Aim for 7:1+ ratio
 - **File size limits:** <100KB for portraits, <1MB for short clips
 - **Visual quality:** Maintain recognition at target display size
+- **Theme compatibility:** Test on both light and dark backgrounds
 - **Cross-platform:** Test on mobile and desktop
 - **Performance:** Ensure smooth playback at target FPS

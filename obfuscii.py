@@ -13,7 +13,9 @@ def main():
         prog='obfuscii',
         description='Convert video to compressed ASCII animation (.txv format)',
         epilog='''Examples:
-  python3 obfuscii.py video.mp4                    # Basic conversion
+  python3 obfuscii.py video.mp4                    # Basic conversion (light theme)
+  python3 obfuscii.py video.mp4 --dark             # Dark theme (inverted chars)
+  python3 obfuscii.py video.mp4 --both             # Both light and dark versions
   python3 obfuscii.py video.mp4 --preview          # Quick 30-frame preview
   python3 obfuscii.py video.mp4 --resolution 80x40 # Smaller output
   python3 obfuscii.py video.mp4 --config config_high_quality.json
@@ -42,6 +44,12 @@ OBFUSCII: Temporal logos that exist as behavioral systems''',
     parser.add_argument('--verbose', action='store_true', help='Show detailed compression stats and processing info')
     parser.add_argument('--force', action='store_true', help='Overwrite existing files without confirmation prompt')
     
+    # Theme options
+    theme_group = parser.add_mutually_exclusive_group()
+    theme_group.add_argument('--light', action='store_true', help='Optimize for light backgrounds (default)')
+    theme_group.add_argument('--dark', action='store_true', help='Optimize for dark backgrounds (inverted characters)')
+    theme_group.add_argument('--both', action='store_true', help='Generate both light and dark versions')
+    
     args = parser.parse_args()
     
     # Handle .txv file operations
@@ -57,7 +65,11 @@ OBFUSCII: Temporal logos that exist as behavioral systems''',
     # Default output filename
     if not args.output:
         input_base = Path(args.input).stem
-        args.output = f"{input_base}.txv"
+        if args.both:
+            # Will generate both _light.txv and _dark.txv
+            args.output = input_base  # Base name without extension
+        else:
+            args.output = f"{input_base}.txv"
     
     # Check for existing output file
     if Path(args.output).exists() and not args.force:
@@ -67,7 +79,10 @@ OBFUSCII: Temporal logos that exist as behavioral systems''',
             sys.exit(0)
     
     try:
-        convert_video_to_txv(args)
+        if args.both:
+            convert_both_themes(args)
+        else:
+            convert_video_to_txv(args)
     except FileNotFoundError:
         print(f"Error: Input file '{args.input}' not found", file=sys.stderr)
         sys.exit(1)
@@ -94,6 +109,44 @@ def handle_txv_file(args):
             print(f"Error playing .txv file: {e}", file=sys.stderr)
             sys.exit(1)
 
+def invert_ascii_chars(chars):
+    """Invert ASCII character set for dark backgrounds"""
+    return list(reversed(chars))
+
+def convert_both_themes(args):
+    """Convert video to both light and dark versions"""
+    # Generate light version
+    light_output = f"{args.output}_light.txv"
+    dark_output = f"{args.output}_dark.txv"
+    
+    print(f"Converting both themes: {light_output} and {dark_output}")
+    
+    # Create light version (default)
+    light_args = args.__dict__.copy()
+    light_args = type('Args', (), light_args)()
+    light_args.output = light_output
+    light_args.light = True
+    light_args.dark = False
+    light_args.both = False
+    
+    print("\n🌞 Creating light theme version...")
+    convert_video_to_txv(light_args)
+    
+    # Create dark version (inverted)
+    dark_args = args.__dict__.copy()
+    dark_args = type('Args', (), dark_args)()
+    dark_args.output = dark_output
+    dark_args.light = False
+    dark_args.dark = True
+    dark_args.both = False
+    
+    print("\n🌙 Creating dark theme version...")
+    convert_video_to_txv(dark_args)
+    
+    print(f"\n✅ Both versions created:")
+    print(f"   Light: {light_output}")
+    print(f"   Dark:  {dark_output}")
+
 def convert_video_to_txv(args):
     """Convert video file to .txv format"""
     from obfuscii.vid import process_video_to_compressed, parse_resolution, play_ascii_video
@@ -113,9 +166,17 @@ def convert_video_to_txv(args):
     
     config = OBFUSCIIConfig.from_json(config_file)
     
+    # Apply theme modifications
+    if args.dark:
+        config.conversion.ascii_chars = invert_ascii_chars(config.conversion.ascii_chars)
+        theme_name = "dark theme"
+    else:
+        theme_name = "light theme"  # Default
+    
     if args.verbose:
         print(f"Converting: {args.input} → {args.output}")
         print(f"Using configuration: {config_file} ({config.description})")
+        print(f"Theme: {theme_name}")
     
     # Parse resolution (override config default if specified)
     target_width, target_height = parse_resolution(args.resolution)
@@ -167,6 +228,11 @@ def convert_video_to_txv(args):
     if args.preview:
         print(f"\nPreview complete. Use 'python obfuscii.py {args.output}' to play full .txv file")
     else:
+        # Don't prompt for playback if we're in --both mode (too many files)
+        if hasattr(args, 'both') and args.both:
+            print(f"Conversion complete. Use 'python obfuscii.py filename.txv' to play either version.")
+            return
+            
         # Ask user if they want to play
         response = input(f"\nPlay result now? (y/N): ")
         if response.lower() in ['y', 'yes']:

@@ -51,6 +51,15 @@
 }
 ```
 
+### Theme Support
+OBFUSCII supports automatic character inversion for different backgrounds:
+
+**Light Theme (default):** Characters progress from light (space) to dark (@)  
+**Dark Theme (--dark):** Characters are inverted - dark (@) to light (space)  
+**Both Themes (--both):** Generates separate `_light.txv` and `_dark.txv` files
+
+The inversion works by reversing the ASCII character array, making dark backgrounds show light characters and vice versa.
+
 ### Cleanup Config
 ```json
 {
