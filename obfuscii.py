@@ -32,7 +32,7 @@ OBFUSCII: Temporal logos that exist as behavioral systems''',
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     
-    parser.add_argument('input', help='Input video file (mp4, mov, avi, etc.) or .txv file')
+    parser.add_argument('input', nargs='?', help='Input video file (mp4, mov, avi, etc.) or .txv file')
     parser.add_argument('-o', '--output', help='Output .txv file (default: input name + .txv)')
     parser.add_argument('--resolution', help='Output resolution (WIDTHxHEIGHT, e.g. 140x80, default: 140x~80)')
     parser.add_argument('--config', help='Configuration preset (.json file, see Available configs below)')
@@ -49,14 +49,59 @@ OBFUSCII: Temporal logos that exist as behavioral systems''',
     theme_group.add_argument('--light', action='store_true', help='Optimize for light backgrounds (default)')
     theme_group.add_argument('--dark', action='store_true', help='Optimize for dark backgrounds (inverted characters)')
     theme_group.add_argument('--both', action='store_true', help='Generate both light and dark versions')
-    
+
+    # Audio options (v2.0)
+    audio_group = parser.add_argument_group('audio', 'Audio extraction and synchronization (v2.0)')
+    audio_group.add_argument('--with-audio', action='store_true',
+                             help='Extract and include audio track from video (creates companion audio file)')
+    audio_group.add_argument('--audio-format', default='mp3', choices=['mp3', 'aac', 'ogg'],
+                             help='Audio format for extraction (default: mp3)')
+    audio_group.add_argument('--audio-bitrate', default='192k',
+                             help='Audio bitrate (default: 192k, options: 128k, 192k, 256k, 320k)')
+    audio_group.add_argument('--no-audio', action='store_true',
+                             help='Strip audio from video (even if present in source)')
+
+    # Export options (v2.0)
+    export_group = parser.add_argument_group('export', 'Video export for social media (v2.0)')
+    export_group.add_argument('--export', metavar='PROFILE',
+                              choices=['reels', 'tiktok', 'youtube_shorts', 'youtube', 'youtube_4k',
+                                      'instagram_square', 'twitter'],
+                              help='Export .txv to platform-optimized MP4 (reels, youtube, instagram_square, etc.)')
+    export_group.add_argument('--export-output', metavar='FILE',
+                              help='Output MP4 file path (default: input_name_PROFILE.mp4)')
+    export_group.add_argument('--export-theme', choices=['light', 'dark'], default='light',
+                              help='Rendering theme for export (default: light)')
+    export_group.add_argument('--export-font', metavar='PATH',
+                              help='Path to custom monospace font (.ttf)')
+    export_group.add_argument('--list-profiles', action='store_true',
+                              help='List available export profiles and exit')
+
+    # Live mode options (v2.0)
+    parser.add_argument('--live', action='store_true',
+                       help='Launch live webcam ASCII filter in browser')
+
     args = parser.parse_args()
-    
-    # Handle .txv file operations
+
+    # Handle --live mode (v2.0)
+    if args.live:
+        launch_live_mode()
+        return
+
+    # Handle --list-profiles (v2.0)
+    if args.list_profiles:
+        list_export_profiles()
+        return
+
+    # Check for input file (required for all other operations)
+    if not args.input:
+        parser.print_help()
+        sys.exit(1)
+
+    # Handle .txv file operations (includes --export)
     if args.input.endswith('.txv'):
         handle_txv_file(args)
         return
-    
+
     # Handle video conversion
     if not Path(args.input).exists():
         print(f"Error: Input file '{args.input}' not found", file=sys.stderr)
@@ -91,9 +136,14 @@ OBFUSCII: Temporal logos that exist as behavioral systems''',
         sys.exit(1)
 
 def handle_txv_file(args):
-    """Handle .txv file operations (info, validate, play)"""
+    """Handle .txv file operations (info, validate, play, export)"""
     from obfuscii.txv import txv_info_command, validate_txv_file, play_txv_file
-    
+
+    # Handle export (v2.0)
+    if args.export:
+        export_txv_to_video(args)
+        return
+
     if args.info:
         txv_info_command(args.input)
     elif args.validate:
@@ -152,7 +202,8 @@ def convert_video_to_txv(args):
     from obfuscii.vid import process_video_to_compressed, parse_resolution, play_ascii_video
     from obfuscii.txv import write_txv_file
     from obfuscii.config import OBFUSCIIConfig
-    
+    from obfuscii.audio import extract_audio_from_video, has_audio_stream  # NEW: v2.0
+
     # Load configuration
     config_file = args.config or 'light_balanced_high_max.json'
     if not Path(config_file).exists():
@@ -163,20 +214,43 @@ def convert_video_to_txv(args):
         print("  config_high_compression.json", file=sys.stderr)
         print("  config_default.json", file=sys.stderr)
         sys.exit(1)
-    
+
     config = OBFUSCIIConfig.from_json(config_file)
-    
+
     # Apply theme modifications
     if args.dark:
         config.conversion.ascii_chars = invert_ascii_chars(config.conversion.ascii_chars)
         theme_name = "dark theme"
     else:
         theme_name = "light theme"  # Default
-    
+
     if args.verbose:
         print(f"Converting: {args.input} → {args.output}")
         print(f"Using configuration: {config_file} ({config.description})")
         print(f"Theme: {theme_name}")
+
+    # NEW: Extract audio if requested (v2.0)
+    audio_track = None
+    if args.with_audio and not args.no_audio:
+        if has_audio_stream(args.input):
+            try:
+                print(f"\n🎵 Extracting audio from video...")
+                audio_output = f"{Path(args.output).stem}_audio.{args.audio_format}"
+                audio_track = extract_audio_from_video(
+                    args.input,
+                    audio_output,
+                    format=args.audio_format,
+                    bitrate=args.audio_bitrate,
+                    verbose=args.verbose
+                )
+                print(f"✅ Audio extracted: {audio_output} ({audio_track.duration_seconds:.1f}s)")
+            except Exception as e:
+                print(f"⚠️  Audio extraction failed: {e}")
+                print("Continuing without audio...")
+                audio_track = None
+        else:
+            print(f"⚠️  No audio stream detected in {args.input}")
+            print("Continuing without audio...")
     
     # Parse resolution (override config default if specified)
     target_width, target_height = parse_resolution(args.resolution)
@@ -202,10 +276,10 @@ def convert_video_to_txv(args):
         config=config
     )
     
-    # Export to .txv
+    # Export to .txv (with audio metadata if audio was extracted)
     print(f"\nExporting to .txv format...")
     original_filename = Path(args.input).name
-    write_txv_file(compressed_result, args.output, original_filename)
+    write_txv_file(compressed_result, args.output, original_filename, audio_track=audio_track)
     
     # Show results
     if compressed_result.stats:
@@ -255,6 +329,135 @@ def convert_video_to_txv(args):
             play_ascii_video(ascii_frames, compressed_video.fps)
         else:
             print(f"Conversion complete. Use 'python obfuscii.py {args.output}' to play later.")
+
+
+def list_export_profiles():
+    """List available export profiles (v2.0)"""
+    from obfuscii.export import EXPORT_PROFILES
+
+    print("\n=== AVAILABLE EXPORT PROFILES ===\n")
+
+    # Group by tier
+    print("TIER 1: Vertical Formats (9:16)")
+    print("-" * 60)
+    for key in ['reels', 'tiktok', 'youtube_shorts']:
+        profile = EXPORT_PROFILES[key]
+        print(f"  {key:20s} {profile.width}x{profile.height} @ {profile.fps}fps")
+        print(f"  {' '*20} {profile.description}")
+        print()
+
+    print("\nTIER 2: Traditional Formats")
+    print("-" * 60)
+    for key in ['youtube', 'youtube_4k', 'instagram_square', 'twitter']:
+        profile = EXPORT_PROFILES[key]
+        print(f"  {key:20s} {profile.width}x{profile.height} @ {profile.fps}fps")
+        print(f"  {' '*20} {profile.description}")
+        print()
+
+    print("\nUsage:")
+    print("  python3 obfuscii.py video.txv --export reels")
+    print("  python3 obfuscii.py video.txv --export youtube --export-theme dark")
+    print()
+
+
+def export_txv_to_video(args):
+    """Export .txv file to social media video (v2.0)"""
+    from obfuscii.export import export_video_from_txv
+
+    if not args.export:
+        print("Error: --export requires a profile name", file=sys.stderr)
+        sys.exit(1)
+
+    # Determine output path
+    if not args.export_output:
+        input_stem = Path(args.input).stem
+        args.export_output = f"{input_stem}_{args.export}.mp4"
+
+    # Check for overwrite
+    if Path(args.export_output).exists() and not args.force:
+        response = input(f"'{args.export_output}' exists. Overwrite? (y/N): ")
+        if response.lower() not in ['y', 'yes']:
+            print("Aborted")
+            return
+
+    try:
+        export_video_from_txv(
+            txv_path=args.input,
+            output_path=args.export_output,
+            profile=args.export,
+            theme=args.export_theme,
+            custom_font=args.export_font,
+            verbose=args.verbose
+        )
+
+        # Show success message
+        file_size = Path(args.export_output).stat().st_size / (1024 * 1024)
+        print(f"\n✅ Export complete: {args.export_output} ({file_size:.1f} MB)")
+
+    except Exception as e:
+        print(f"❌ Export failed: {e}", file=sys.stderr)
+        if args.verbose:
+            import traceback
+            traceback.print_exc()
+        sys.exit(1)
+
+
+def launch_live_mode():
+    """Launch live webcam ASCII filter in browser (v2.0)"""
+    import webbrowser
+    import http.server
+    import socketserver
+    import threading
+    import time
+
+    # Determine path to live.html
+    script_dir = Path(__file__).parent
+    live_html = script_dir / "live.html"
+
+    if not live_html.exists():
+        print("Error: live.html not found", file=sys.stderr)
+        print(f"Expected at: {live_html}", file=sys.stderr)
+        sys.exit(1)
+
+    # Start local web server
+    PORT = 8000
+
+    class Handler(http.server.SimpleHTTPRequestHandler):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, directory=str(script_dir), **kwargs)
+
+        def log_message(self, format, *args):
+            # Suppress server logs
+            pass
+
+    def start_server():
+        with socketserver.TCPServer(("", PORT), Handler) as httpd:
+            httpd.serve_forever()
+
+    # Start server in background thread
+    server_thread = threading.Thread(target=start_server, daemon=True)
+    server_thread.start()
+
+    # Give server time to start
+    time.sleep(0.5)
+
+    # Open browser
+    url = f"http://localhost:{PORT}/live.html"
+    print(f"\n🎥 OBFUSCII Live Mode")
+    print(f"   Server running at {url}")
+    print(f"   Opening browser...")
+    print(f"   Press Ctrl+C to stop\n")
+
+    webbrowser.open(url)
+
+    # Keep main thread alive
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n\n🛑 Stopping live mode...")
+        sys.exit(0)
+
 
 if __name__ == '__main__':
     main()

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBFUSCII Live - Webcam ASCII Filter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .live-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .video-container {
+            position: relative;
+            width: 90vw;
+            max-width: 1200px;
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #sourceVideo {
+            display: none;
+        }
+
+        #asciiOutput {
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            font-size: 8px;
+            line-height: 1;
+            letter-spacing: 0;
+            white-space: pre;
+            color: #fff;
+            background: #000;
+            padding: 20px;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 30px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: #007bff;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .control-btn:hover {
+            background: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .control-btn:disabled {
+            background: #333;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .control-btn.active {
+            background: #28a745;
+        }
+
+        .control-btn.recording {
+            background: #dc3545;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        select.control-btn {
+            padding: 12px 16px;
+            cursor: pointer;
+        }
+
+        .stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: monospace;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-line {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .stat-label {
+            color: #888;
+        }
+
+        .stat-value {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            max-width: 500px;
+            padding: 40px;
+        }
+
+        .welcome-screen h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .welcome-screen p {
+            color: #888;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="live-container">
+        <div class="header">
+            <h1>OBFUSCII Live</h1>
+            <p>Real-time webcam ASCII filter</p>
+        </div>
+
+        <div class="welcome-screen" id="welcomeScreen">
+            <h2>Welcome to OBFUSCII Live</h2>
+            <p>This app converts your webcam feed to ASCII art in real-time. Click "Start Camera" to grant camera access and begin.</p>
+            <button class="control-btn active" id="startBtnWelcome" style="font-size: 16px; padding: 15px 40px;">Start Camera</button>
+        </div>
+
+        <div class="video-container hidden" id="videoContainer">
+            <video id="sourceVideo" autoplay playsinline></video>
+            <pre id="asciiOutput"></pre>
+
+            <div class="stats">
+                <div class="stat-line">
+                    <span class="stat-label">FPS:</span>
+                    <span class="stat-value" id="fpsDisplay">0</span>
+                </div>
+                <div class="stat-line">
+                    <span class="stat-label">Latency:</span>
+                    <span class="stat-value" id="latencyDisplay">0ms</span>
+                </div>
+                <div class="stat-line">
+                    <span class="stat-label">Resolution:</span>
+                    <span class="stat-value" id="resDisplay">0x0</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="stopBtn" class="control-btn">Stop</button>
+                <button id="screenshotBtn" class="control-btn">Screenshot</button>
+                <select id="resolutionSelect" class="control-btn">
+                    <option value="60">60 chars</option>
+                    <option value="80">80 chars</option>
+                    <option value="120" selected>120 chars</option>
+                    <option value="160">160 chars</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class OBFUSCIILive {
+            constructor() {
+                this.video = document.getElementById('sourceVideo');
+                this.asciiOutput = document.getElementById('asciiOutput');
+                this.isRunning = false;
+
+                this.targetWidth = 120;
+                this.asciiChars = [' ', '.', ':', '-', '=', '+', '*', '#', '%', '@'];
+
+                // Performance tracking
+                this.frameCount = 0;
+                this.lastFpsUpdate = performance.now();
+                this.fps = 0;
+                this.processingTime = 0;
+
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                document.getElementById('startBtnWelcome').addEventListener('click', () => this.startCamera());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stopCamera());
+                document.getElementById('screenshotBtn').addEventListener('click', () => this.takeScreenshot());
+                document.getElementById('resolutionSelect').addEventListener('change', (e) => {
+                    this.targetWidth = parseInt(e.target.value);
+                });
+            }
+
+            async startCamera() {
+                try {
+                    // Request camera access
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 },
+                            facingMode: 'user'
+                        },
+                        audio: false
+                    });
+
+                    this.video.srcObject = stream;
+                    this.video.onloadedmetadata = () => {
+                        this.video.play();
+                        this.isRunning = true;
+
+                        // Hide welcome, show video
+                        document.getElementById('welcomeScreen').classList.add('hidden');
+                        document.getElementById('videoContainer').classList.remove('hidden');
+
+                        this.processFrame();
+                    };
+
+                } catch (error) {
+                    console.error('Camera access denied:', error);
+                    alert('Camera access denied. Please allow camera access and try again.');
+                }
+            }
+
+            stopCamera() {
+                this.isRunning = false;
+
+                if (this.video.srcObject) {
+                    this.video.srcObject.getTracks().forEach(track => track.stop());
+                }
+
+                // Show welcome, hide video
+                document.getElementById('welcomeScreen').classList.remove('hidden');
+                document.getElementById('videoContainer').classList.add('hidden');
+
+                // Reset stats
+                this.fps = 0;
+                this.frameCount = 0;
+                this.updateStats();
+            }
+
+            processFrame() {
+                if (!this.isRunning) return;
+
+                const startTime = performance.now();
+
+                try {
+                    // Capture frame from video
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = this.video.videoWidth;
+                    canvas.height = this.video.videoHeight;
+                    ctx.drawImage(this.video, 0, 0);
+
+                    // Convert to grayscale and resize
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const grayscale = this.convertToGrayscale(imageData);
+                    const resized = this.resizeImageData(grayscale, this.targetWidth);
+
+                    // Convert to ASCII
+                    const asciiFrame = this.imageDataToASCII(resized);
+
+                    // Display
+                    this.asciiOutput.textContent = asciiFrame;
+
+                    // Update stats
+                    this.processingTime = performance.now() - startTime;
+                    this.updateStats();
+
+                } catch (error) {
+                    console.error('Frame processing error:', error);
+                }
+
+                // Continue loop
+                requestAnimationFrame(() => this.processFrame());
+            }
+
+            convertToGrayscale(imageData) {
+                const data = imageData.data;
+                const gray = new Uint8ClampedArray(data.length);
+
+                for (let i = 0; i < data.length; i += 4) {
+                    // Weighted grayscale conversion
+                    const grayValue = Math.round(
+                        0.299 * data[i] +
+                        0.587 * data[i + 1] +
+                        0.114 * data[i + 2]
+                    );
+                    gray[i] = grayValue;
+                    gray[i + 1] = grayValue;
+                    gray[i + 2] = grayValue;
+                    gray[i + 3] = data[i + 3];
+                }
+
+                return new ImageData(gray, imageData.width, imageData.height);
+            }
+
+            resizeImageData(imageData, targetWidth) {
+                const aspectRatio = imageData.height / imageData.width;
+                const targetHeight = Math.floor(targetWidth * aspectRatio * 0.55); // ASCII aspect correction
+
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = imageData.width;
+                canvas.height = imageData.height;
+                ctx.putImageData(imageData, 0, 0);
+
+                const resizeCanvas = document.createElement('canvas');
+                const resizeCtx = resizeCanvas.getContext('2d');
+                resizeCanvas.width = targetWidth;
+                resizeCanvas.height = targetHeight;
+                resizeCtx.drawImage(canvas, 0, 0, targetWidth, targetHeight);
+
+                return resizeCtx.getImageData(0, 0, targetWidth, targetHeight);
+            }
+
+            imageDataToASCII(imageData) {
+                const { data, width, height } = imageData;
+                let asciiFrame = '';
+
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const i = (y * width + x) * 4;
+                        const pixel = data[i]; // Grayscale value (0-255)
+
+                        // Map pixel brightness to ASCII character
+                        const charIndex = Math.floor(
+                            (pixel / 255) * (this.asciiChars.length - 1)
+                        );
+                        asciiFrame += this.asciiChars[charIndex];
+                    }
+                    asciiFrame += '\n';
+                }
+
+                return asciiFrame;
+            }
+
+            updateStats() {
+                this.frameCount++;
+                const now = performance.now();
+
+                // Update FPS every second
+                if (now - this.lastFpsUpdate >= 1000) {
+                    this.fps = this.frameCount;
+                    this.frameCount = 0;
+                    this.lastFpsUpdate = now;
+
+                    document.getElementById('fpsDisplay').textContent = this.fps;
+                    document.getElementById('latencyDisplay').textContent =
+                        Math.round(this.processingTime) + 'ms';
+                    document.getElementById('resDisplay').textContent =
+                        `${this.targetWidth}x${Math.floor(this.targetWidth * 0.55)}`;
+
+                    // Auto-adjust resolution if performance is poor
+                    if (this.fps < 10 && this.targetWidth > 60) {
+                        this.targetWidth = Math.max(60, this.targetWidth - 20);
+                        document.getElementById('resolutionSelect').value = this.targetWidth;
+                        console.log(`Performance: Reducing resolution to ${this.targetWidth} chars`);
+                    }
+                }
+            }
+
+            takeScreenshot() {
+                // Save current ASCII frame as text file
+                const asciiContent = this.asciiOutput.textContent;
+                const blob = new Blob([asciiContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `obfuscii_live_${Date.now()}.txt`;
+                a.click();
+
+                URL.revokeObjectURL(url);
+
+                console.log('Screenshot saved');
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            window.obfusciiLive = new OBFUSCIILive();
+        });
+    </script>
+</body>
+</html>

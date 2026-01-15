@@ -12,7 +12,12 @@ class OBFUSCIIPlayer {
         this.animationId = null;
         this.lastFrameTime = 0;
         this.metadata = null;
-        
+
+        // Audio support (v2.0)
+        this.audioElement = null;
+        this.audioLoaded = false;
+        this.audioSyncOffset = 0;
+
         this.initializeElements();
         this.bindEvents();
         this.initializeLZMA();
@@ -241,7 +246,17 @@ class OBFUSCIIPlayer {
             }
 
             console.log('✅ All frames loaded:', frames.length);
-            
+
+            // Check for audio metadata (v2.0)
+            if (metadata.has_audio && metadata.audio_file) {
+                console.log('✅ Audio track detected:', metadata.audio_file);
+                try {
+                    await this.loadAudio(metadata.audio_file, metadata.audio_sync_offset_ms || 0);
+                } catch (error) {
+                    console.warn('⚠️  Audio loading failed:', error);
+                }
+            }
+
             return {
                 frames: frames,
                 fps: metadata.fps,
@@ -459,6 +474,51 @@ class OBFUSCIIPlayer {
         }
     }
 
+    async loadAudio(audioFileName, syncOffsetMs = 0) {
+        /**
+         * Load companion audio file (v2.0)
+         * Assumes audio file is in same directory as .txv file
+         */
+        try {
+            // Create audio element
+            this.audioElement = new Audio();
+            this.audioSyncOffset = syncOffsetMs / 1000; // Convert to seconds
+
+            // Construct audio URL (relative path)
+            const audioUrl = audioFileName;
+
+            console.log('🔊 Loading audio:', audioUrl);
+            this.audioElement.src = audioUrl;
+            this.audioElement.preload = 'auto';
+
+            // Wait for audio to be ready
+            await new Promise((resolve, reject) => {
+                this.audioElement.oncanplaythrough = () => {
+                    console.log('✅ Audio loaded successfully');
+                    this.audioLoaded = true;
+                    resolve();
+                };
+                this.audioElement.onerror = (e) => {
+                    console.warn('⚠️  Audio load failed:', e);
+                    this.audioLoaded = false;
+                    resolve(); // Don't block playback if audio fails
+                };
+
+                // Timeout after 5 seconds
+                setTimeout(() => {
+                    if (!this.audioLoaded) {
+                        console.warn('⚠️  Audio load timeout');
+                        resolve();
+                    }
+                }, 5000);
+            });
+
+        } catch (error) {
+            console.error('❌ Audio setup failed:', error);
+            this.audioLoaded = false;
+        }
+    }
+
     play() {
         if (this.frames.length === 0) {
             this.updatePlaybackInfo('No frames loaded', 'error');
@@ -468,6 +528,15 @@ class OBFUSCIIPlayer {
         console.log('▶️ Starting playback');
         this.isPlaying = true;
         this.lastFrameTime = performance.now();
+
+        // Start audio playback with sync offset (v2.0)
+        if (this.audioLoaded && this.audioElement) {
+            this.audioElement.currentTime = Math.max(0, this.audioSyncOffset);
+            this.audioElement.play().catch(e => {
+                console.warn('⚠️  Audio playback failed:', e);
+            });
+        }
+
         this.animate();
         this.updatePlaybackInfo('Playing...');
     }
@@ -478,6 +547,12 @@ class OBFUSCIIPlayer {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
         }
+
+        // Pause audio (v2.0)
+        if (this.audioElement) {
+            this.audioElement.pause();
+        }
+
         this.updatePlaybackInfo('Paused');
     }
 
@@ -488,6 +563,13 @@ class OBFUSCIIPlayer {
             cancelAnimationFrame(this.animationId);
         }
         this.currentFrame = 0;
+
+        // Stop audio (v2.0)
+        if (this.audioElement) {
+            this.audioElement.pause();
+            this.audioElement.currentTime = 0;
+        }
+
         if (this.frames.length > 0) {
             this.displayFrame(0);
         }
@@ -504,6 +586,19 @@ class OBFUSCIIPlayer {
             this.currentFrame = (this.currentFrame + 1) % this.frames.length;
             this.displayFrame(this.currentFrame);
             this.lastFrameTime = now;
+
+            // Check audio sync every 30 frames (~1 second) (v2.0)
+            if (this.audioLoaded && this.currentFrame % 30 === 0) {
+                const expectedAudioTime = (this.currentFrame / this.fps) + this.audioSyncOffset;
+                const actualAudioTime = this.audioElement.currentTime;
+                const drift = Math.abs(expectedAudioTime - actualAudioTime);
+
+                // Resync if drift > 500ms
+                if (drift > 0.5) {
+                    console.log(`🔄 Resyncing audio (drift: ${drift.toFixed(2)}s)`);
+                    this.audioElement.currentTime = expectedAudioTime;
+                }
+            }
         }
 
         this.animationId = requestAnimationFrame(() => this.animate());

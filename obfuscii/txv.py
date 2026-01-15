@@ -32,7 +32,7 @@ FRAME_HEADER_SIZE = 24  # frame_index(4) + frame_type(1) + padding(3) + timestam
 @dataclass
 class TxvMetadata:
     """Metadata structure for .txv files"""
-    version: str = "1.0"
+    version: str = "2.0"
     width: int = 0
     height: int = 0
     fps: float = 30.0
@@ -44,33 +44,63 @@ class TxvMetadata:
     original_file: Optional[str] = None
     compression_ratio: Optional[float] = None
 
-def write_txv_file(compressed_video: CompressedVideo, output_path: str, 
-                   original_filename: Optional[str] = None) -> None:
+    # Audio metadata (v2.0 additions)
+    has_audio: bool = False
+    audio_file: Optional[str] = None  # Relative path to audio file (e.g., "video_audio.mp3")
+    audio_format: Optional[str] = None  # "mp3", "aac", "ogg"
+    audio_codec: Optional[str] = None  # Actual codec name (e.g., "libmp3lame", "aac")
+    audio_sample_rate: Optional[int] = None  # Sample rate in Hz (e.g., 44100, 48000)
+    audio_duration_seconds: Optional[float] = None  # Audio duration in seconds
+    audio_bitrate: Optional[int] = None  # Audio bitrate in bps
+    audio_channels: Optional[int] = None  # Number of audio channels (1=mono, 2=stereo)
+    audio_sync_offset_ms: int = 0  # Manual sync adjustment in milliseconds (can be negative)
+
+def write_txv_file(compressed_video: CompressedVideo, output_path: str,
+                   original_filename: Optional[str] = None,
+                   audio_track = None) -> None:
     """
     Write CompressedVideo to .txv file format
-    
+
     Args:
         compressed_video: Compressed video data from moc.py
         output_path: Output .txv file path
         original_filename: Original video filename for metadata
+        audio_track: Optional AudioTrack object from audio.py (v2.0 feature)
     """
-    
+
     from datetime import datetime
-    
+
     # Create metadata
     duration = len(compressed_video.frames) / compressed_video.fps
     compression_ratio = compressed_video.stats.overall_ratio if compressed_video.stats else None
-    
-    metadata = TxvMetadata(
-        width=compressed_video.width,
-        height=compressed_video.height,
-        fps=compressed_video.fps,
-        total_frames=len(compressed_video.frames),
-        duration_seconds=duration,
-        creation_timestamp=datetime.now().isoformat(),
-        original_file=original_filename,
-        compression_ratio=compression_ratio
-    )
+
+    # Build metadata with optional audio info
+    metadata_kwargs = {
+        'width': compressed_video.width,
+        'height': compressed_video.height,
+        'fps': compressed_video.fps,
+        'total_frames': len(compressed_video.frames),
+        'duration_seconds': duration,
+        'creation_timestamp': datetime.now().isoformat(),
+        'original_file': original_filename,
+        'compression_ratio': compression_ratio
+    }
+
+    # Add audio metadata if audio track provided (v2.0)
+    if audio_track is not None:
+        metadata_kwargs.update({
+            'has_audio': True,
+            'audio_file': Path(audio_track.file_path).name,  # Store only filename, not full path
+            'audio_format': audio_track.format,
+            'audio_codec': audio_track.codec,
+            'audio_sample_rate': audio_track.sample_rate,
+            'audio_duration_seconds': audio_track.duration_seconds,
+            'audio_bitrate': audio_track.bitrate,
+            'audio_channels': audio_track.channels,
+            'audio_sync_offset_ms': 0  # Default to 0, user can adjust later
+        })
+
+    metadata = TxvMetadata(**metadata_kwargs)
     
     # Serialize metadata to JSON
     metadata_dict = asdict(metadata)
