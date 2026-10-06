@@ -182,7 +182,9 @@ Features:
 - Screenshot capture (saves as .txt)
 - Auto-performance adjustment
 
-Access on mobile: `http://YOUR_IP:8000/live.html`
+While it runs, `--live` serves this folder on port 8000 to your local network.
+
+On a phone, use the hosted version at https://obfuscii.pages.dev/live instead: browsers only allow camera access over HTTPS or on localhost, so `http://<your IP>:8000` won't work.
 
 ### Playback
 
@@ -191,7 +193,7 @@ Access on mobile: `http://YOUR_IP:8000/live.html`
 python3 obfuscii.py video.txv
 ```
 
-Or open `index.html` in browser and load the file.
+Or open `index.html` in browser and load the file. The browser player looks for a companion audio file next to the page, not next to the `.txv`, so audio only plays when `index.html`, `player.js`, the `.txv` and its audio are served from the same folder (for example with `python3 -m http.server`).
 
 **File info:**
 ```bash
@@ -212,9 +214,8 @@ python3 obfuscii.py video.txv --validate
 python3 obfuscii.py myvideo.mp4 --with-audio
 # → Creates: myvideo.txv + myvideo_audio.mp3
 
-# 2. Preview in browser
+# 2. Preview in the terminal (or load it in index.html for the browser player)
 python3 obfuscii.py myvideo.txv
-# → Opens index.html, loads .txv, plays with audio
 
 # 3. Export for Reels (vertical)
 python3 obfuscii.py myvideo.txv --export reels
@@ -237,24 +238,11 @@ python3 obfuscii.py --live
 
 ## Architecture
 
-### .TXV File Format (v2.0)
+### .TXV File Format
 
-Binary format:
-```
-[8 bytes]  Magic: b'OBFUSCII'
-[4 bytes]  Version: uint32
-[4 bytes]  Metadata length: uint32
-[N bytes]  Metadata: JSON (UTF-8)
-[4 bytes]  Frame count: uint32
-[Frames]   Compressed frame data
-```
-
-**Metadata fields (v2.0):**
-- Video: width, height, fps, duration, compression ratio
-- Audio: has_audio, audio_file, format, codec, sample_rate, bitrate, channels
-- Sync: audio_sync_offset_ms (manual adjustment)
-
-**Backward compatible:** v1.0 files still work (no audio)
+A binary container: magic `OBFUSCII`, a version number, JSON metadata (size, fps, optional audio
+details), then one LZMA-compressed frame after another. Files from before audio support still load.
+The byte-level spec is in [docs/FORMAT.md](docs/FORMAT.md).
 
 ### Processing Pipeline
 
@@ -301,9 +289,13 @@ obfuscii/
 │   └── export.py            # MP4 export (v2.0)
 ├── player.js                # Web player with audio sync
 ├── index.html               # Web player UI
+├── demo.html                # Animated landing page
 ├── live.html                # Live mode web app (v2.0)
-├── studio.html              # Parameter optimizer
-└── docs/                    # Technical documentation
+├── studio.html              # Parameter optimizer (single-frame preview)
+├── tests/                   # pytest regression tests
+└── docs/
+    ├── FORMAT.md            # .txv byte layout and metadata
+    └── STATUS.md            # What works, known issues, what's next
 ```
 
 ---
@@ -326,17 +318,18 @@ Create JSON config with:
 - **Conversion:** ASCII character set, width, hysteresis threshold
 - **Cleanup:** isolated char, run consolidation, temporal smoothing, spatial coherence
 - **Compression:** LZMA preset (0-9)
-- **Audio:** format, bitrate, sample rate (v2.0)
-- **Export:** theme, profiles (v2.0)
+
+Audio and export settings are command-line flags, not config fields. Any section you leave out
+uses the defaults; field names must match `obfuscii/config.py` exactly or loading fails.
 
 Example:
 ```json
 {
-  "version": "2.0",
+  "version": "1.0",
   "smoothing": {
     "bilateral_d": 15,
-    "gaussian_kernel": 9,
-    "median_kernel": 5
+    "gaussian_kernel_size": 9,
+    "median_kernel_size": 5
   },
   "conversion": {
     "ascii_chars": [" ", ".", ":", "-", "=", "+", "*", "#", "%", "@"],
@@ -357,8 +350,8 @@ Example:
 Typical: 5-10:1 for most videos
 
 ### Export Speed
-- 30s video (900 frames): ~30-60 seconds
-- Parallel rendering: 4-8 cores used
+- Measured: 60 frames at 1080x1920 in about 7 s on 4 cores, so roughly 1.5–2 minutes for a 30 s clip
+- Parallel rendering: up to 8 cores used
 - Depends on resolution and CPU
 
 ### Live Mode FPS
@@ -382,30 +375,19 @@ choco install ffmpeg      # Windows
 ### Audio doesn't load in browser
 
 **Check:**
-1. Audio file exists in same directory as .txv
-2. Browser console for errors (F12)
-3. Audio file format supported (MP3/AAC/OGG)
-
-**Solution:** Re-extract audio with different format:
-```bash
-python3 obfuscii.py video.mp4 --with-audio --audio-format aac
-```
+1. The page is served over HTTP, not opened with the file picker; the player can't reach local audio files
+2. The audio file is in the same folder as `index.html` (the player resolves it relative to the page)
+3. Browser console for errors (F12)
 
 ### Audio out of sync
 
-**Solution:** Adjust sync offset in .txv metadata:
-```json
-"audio_sync_offset_ms": -100  // Negative = audio earlier
-```
-
-Or re-extract audio:
-```bash
-python3 obfuscii.py video.mp4 --with-audio --verbose
-```
+Pausing and resuming the browser player restarts the audio from the beginning; reload the page to
+resync. This is a known player bug (see [docs/STATUS.md](docs/STATUS.md)). There is no command yet
+for setting `audio_sync_offset_ms`.
 
 ### Export is slow
 
-**Expected:** 30-60s for 30s video
+**Expected:** roughly 1.5–2 minutes for a 30 s clip on 4 cores
 
 **Speed up:**
 - Uses all CPU cores automatically
@@ -435,11 +417,12 @@ python3 obfuscii.py video.mp4 --with-audio --verbose
 3. Video codec is H.264 (should be automatic)
 4. File size not too large
 
-**Platform requirements:**
-- Instagram Reels: 1080x1920 (9:16), max 90s
-- TikTok: 1080x1920 (9:16), max 60s
-- YouTube: 1920x1080 (16:9), any length
-- Instagram Feed: 1080x1080 (1:1), max 60s
+**Platform formats:**
+- Instagram Reels / TikTok / YouTube Shorts: 1080x1920 (9:16)
+- YouTube: 1920x1080 (16:9)
+- Instagram Feed: 1080x1080 (1:1)
+
+Length limits change often, so check each platform's current rules.
 
 ---
 
@@ -447,13 +430,11 @@ python3 obfuscii.py video.mp4 --with-audio --verbose
 
 ### Instagram Reels
 - Use `--export reels`
-- Keep under 90 seconds
 - Light theme recommended
 - Audio is critical
 
 ### TikTok
 - Use `--export tiktok` (same as Reels)
-- Keep under 60 seconds for feed
 - Vertical format essential
 
 ### YouTube
@@ -464,12 +445,10 @@ python3 obfuscii.py video.mp4 --with-audio --verbose
 
 ### Instagram Feed
 - Use `--export instagram_square` (1:1)
-- Keep under 60 seconds
 - Square format for feed posts
 
 ### Twitter/X
 - Use `--export twitter` (16:9)
-- Keep under 2:20
 - 720p acceptable
 
 ---
@@ -491,11 +470,14 @@ python3 obfuscii.py video.mp4 --with-audio --verbose
 
 ### ASCII Character Set
 Default: `[' ', '.', ':', '-', '=', '+', '*', '#', '%', '@']`
-- Space = darkest
-- @ = brightest
+- Black pixels map to space, white pixels to `@`
 - 10 density levels
 
-Dark theme: Inverted character set
+Dark theme: inverted character set.
+
+**Known issue:** on a light page `@` is the darkest glyph, so the default light theme currently
+renders a negative image (and `--dark` does the same on a dark page). See
+[docs/STATUS.md](docs/STATUS.md).
 
 ---
 
@@ -578,6 +560,9 @@ obfuscii.py <input> [options]
 ### Testing
 
 ```bash
+# Automated tests (needs pytest; export test also needs ffmpeg)
+python3 -m pytest tests
+
 # Test conversion
 python3 obfuscii.py test.mp4 --preview
 
@@ -616,7 +601,7 @@ python3 obfuscii.py --live
 
 ## License
 
-See LICENSE file.
+No license file yet.
 
 ---
 
