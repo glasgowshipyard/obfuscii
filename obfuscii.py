@@ -207,6 +207,11 @@ def convert_video_to_txv(args):
     # Load configuration
     config_file = args.config or 'light_balanced_high_max.json'
     if not Path(config_file).exists():
+        # Fall back to the presets that ship next to this script
+        bundled_config = Path(__file__).parent / config_file
+        if bundled_config.exists():
+            config_file = str(bundled_config)
+    if not Path(config_file).exists():
         print(f"Error: Configuration file '{config_file}' not found", file=sys.stderr)
         print("Available configurations:", file=sys.stderr)
         print("  light_balanced_high_max.json (default, optimal)", file=sys.stderr)

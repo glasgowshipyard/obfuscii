@@ -557,7 +557,7 @@ obfuscii.py <input> [options]
 **obfuscii/moc.py** - Compression
 - `encode_frame_rle()` - Run-length encoding
 - `compress_video_rle()` - Full video compression
-- `decompress_video_rle()` - Decompression
+- `decompress_frame_rle()` - Decompression
 
 **obfuscii/txv.py** - File format
 - `write_txv_file()` - Write .txv with metadata

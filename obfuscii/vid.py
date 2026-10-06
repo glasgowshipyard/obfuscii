@@ -150,8 +150,9 @@ def frame_to_ascii_with_hysteresis(frame: np.ndarray, target_width: Optional[int
                         
                         # Check for adjacent character boundary
                         if abs(char_index - prev_index) == 1:
-                            boundary_pixel = (prev_index + 0.5) * (256 // len(ascii_chars))
-                            pixel_distance = abs(pixel - boundary_pixel)
+                            # Bin k spans [256k/n, 256(k+1)/n), so adjacent bins meet at 256*max(k)/n
+                            boundary_pixel = max(char_index, prev_index) * 256 / len(ascii_chars)
+                            pixel_distance = abs(int(pixel) - boundary_pixel)
                             
                             # Apply configured hysteresis threshold
                             if pixel_distance < config.conversion.hysteresis_threshold:

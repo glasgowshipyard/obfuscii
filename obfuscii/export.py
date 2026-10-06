@@ -200,8 +200,8 @@ def render_ascii_frame_to_image(
     Returns:
         PIL Image object
     """
-    # Parse ASCII frame into lines
-    lines = ascii_frame.strip().split('\n')
+    # Parse ASCII frame into lines (spaces are content, so only trailing newlines are trimmed)
+    lines = ascii_frame.rstrip('\n').split('\n')
     ascii_height = len(lines)
     ascii_width = max(len(line) for line in lines) if lines else 0
 
@@ -477,8 +477,7 @@ def export_video_from_txv(
         4. Use ffmpeg to encode PNG sequence + audio to MP4
         5. Clean up temp files
     """
-    from obfuscii.txv import read_txv_file
-    from obfuscii.moc import decompress_video_rle
+    from obfuscii.txv import read_txv_file, decompress_txv_frame
 
     # Validate inputs
     if not os.path.exists(txv_path):
@@ -527,13 +526,9 @@ def export_video_from_txv(
         print(f"\n🗜️  Decompressing frames...")
 
     ascii_frames = []
-    for i, frame_result in enumerate(compressed_video.frames):
-        ascii_frame = decompress_video_rle(
-            [frame_result],
-            compressed_video.width,
-            compressed_video.height
-        )[0]
-        ascii_frames.append(ascii_frame)
+    for i in range(len(compressed_video.frames)):
+        ascii_frame = decompress_txv_frame(compressed_video, i)
+        ascii_frames.append('\n'.join(''.join(row) for row in ascii_frame))
 
         if verbose and i % 30 == 0:
             progress = (i + 1) / len(compressed_video.frames) * 100

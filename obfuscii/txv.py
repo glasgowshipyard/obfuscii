@@ -299,10 +299,8 @@ def validate_txv_file(input_path: str, verbose: bool = True) -> bool:
         
         # Try to read first few frames to validate structure
         with open(input_path, 'rb') as f:
-            # Skip to frame data
-            f.seek(8 + 4 + 4)  # Magic + version + metadata_length
-            metadata_length = struct.unpack('<I', f.read(4))[0]
-            f.seek(8 + 4 + 4 + metadata_length + 4)  # Skip to frame data
+            # Skip header (magic + version + metadata length + metadata + frame count)
+            f.seek(info['header_size_bytes'])
             
             # Validate first 3 frames (or all if fewer)
             frames_to_check = min(3, info['frame_count_actual'])
