@@ -11,7 +11,7 @@ Clean video-to-ASCII conversion optimized for compression:
 import cv2
 import numpy as np
 import time
-import os
+import shutil
 import sys
 from typing import List, Tuple, Optional
 from . import moc
@@ -435,93 +435,60 @@ def find_contextual_replacement(char: str, context_chars: List[str]) -> str:
     return char
 
 def play_ascii_video(ascii_frames: List[List[List[str]]], fps: float = 30.0) -> None:
-    """Play ASCII video in terminal"""
+    """Play ASCII video in terminal, scaled to fit the window"""
     if not ascii_frames:
         return
-        
-    time_delta = 1.0 / fps
-    
+
     print("Press Ctrl+C to stop")
     input("Press Enter to start playback...")
-    
-    # Clear screen
-    sys.stdout.write('\033[2J')
-    sys.stdout.flush()
-    
+
+    frame_interval = 1.0 / fps
+    terminal_size = None
+    row_indices: List[int] = []
+    col_indices: List[int] = []
+    next_frame_time = time.perf_counter()
+
+    sys.stdout.write('\033[?25l')  # Hide cursor
     try:
-        for frame_idx, ascii_frame in enumerate(ascii_frames):
-            t0 = time.process_time()
-            
-            # Get terminal size
-            try:
-                rows, cols = os.popen('stty size', 'r').read().split()
-                cols, rows = int(cols), int(rows)
-            except:
-                cols, rows = 80, 24
-            
-            # Move cursor to home
-            sys.stdout.write('\u001b[0;0H')
-            
-            # Resize frame to fit terminal
-            resized_frame = resize_frame_to_terminal(ascii_frame, (cols, rows))
-            
-            # Convert to string
-            msg = ''
-            for row in resized_frame:
-                for char in row:
-                    msg += char
-                msg += '\r\n'
-            
-            # Frame rate limiting
-            t1 = time.process_time()
-            delta = time_delta - (t1 - t0)
-            if delta > 0:
-                time.sleep(delta)
-                
-            # Display frame
-            sys.stdout.write(msg)
+        for ascii_frame in ascii_frames:
+            # Recompute the sampling grid only when the terminal is resized
+            size = shutil.get_terminal_size()
+            if size != terminal_size:
+                terminal_size = size
+                row_indices, col_indices = terminal_sample_indices(
+                    len(ascii_frame), len(ascii_frame[0]), size.columns, size.lines - 1
+                )
+                sys.stdout.write('\033[2J')
+
+            text = '\n'.join(''.join([ascii_frame[r][c] for c in col_indices]) for r in row_indices)
+
+            # Pace against wall-clock time; if we fall behind, carry on without bursting
+            delay = next_frame_time - time.perf_counter()
+            if delay > 0:
+                time.sleep(delay)
+            next_frame_time = max(next_frame_time + frame_interval, time.perf_counter())
+
+            sys.stdout.write('\033[H' + text)
             sys.stdout.flush()
-            
+
     except KeyboardInterrupt:
         print("\n\nPlayback stopped")
+    finally:
+        sys.stdout.write('\033[?25h\n')  # Restore cursor
         sys.stdout.flush()
 
-def resize_frame_to_terminal(ascii_frame: List[List[str]], dimensions: Tuple[int, int]) -> List[List[str]]:
-    """Resize ASCII frame to fit terminal dimensions"""
-    cols, rows = dimensions
-    frame_height = len(ascii_frame)
-    frame_width = len(ascii_frame[0]) if ascii_frame else 0
-    
-    if frame_height == 0 or frame_width == 0:
-        return ascii_frame
-    
-    # Calculate scaling
-    height_ratio = (rows - 1) / frame_height
-    width_ratio = cols / frame_width
-    scale_factor = min(height_ratio, width_ratio)
-    
-    # Calculate new dimensions
-    new_height = int(frame_height * scale_factor)
-    new_width = int(frame_width * scale_factor)
-    
-    # Sample original frame
-    resized = []
-    for new_row in range(new_height):
-        orig_row = int(new_row / scale_factor)
-        if orig_row >= len(ascii_frame):
-            break
-            
-        row_chars = []
-        for new_col in range(new_width):
-            orig_col = int(new_col / scale_factor)
-            if orig_col < len(ascii_frame[orig_row]):
-                row_chars.append(ascii_frame[orig_row][orig_col])
-            else:
-                row_chars.append(' ')
-        
-        resized.append(row_chars)
-    
-    return resized
+def terminal_sample_indices(frame_height: int, frame_width: int,
+                            cols: int, rows: int) -> Tuple[List[int], List[int]]:
+    """Row and column indices that scale a frame to fit cols x rows, keeping its aspect ratio"""
+    cols, rows = max(1, cols), max(1, rows)
+    scale = min(rows / frame_height, cols / frame_width)
+
+    new_height = max(1, int(frame_height * scale))
+    new_width = max(1, int(frame_width * scale))
+
+    row_indices = [min(int(r / scale), frame_height - 1) for r in range(new_height)]
+    col_indices = [min(int(c / scale), frame_width - 1) for c in range(new_width)]
+    return row_indices, col_indices
 
 def process_video_to_compressed(input_file: str, target_width: Optional[int] = None, 
                                target_height: Optional[int] = None, 

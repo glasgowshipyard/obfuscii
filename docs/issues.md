@@ -112,7 +112,6 @@ Full video-to-ASCII-to-.txv pipeline working end-to-end with acceptable quality.
 1. **Time each pipeline stage** - conversion, cleanup, compression, decompression, display
 2. **Memory usage analysis** - identify allocation patterns
 3. **Terminal rendering measurement** - pure display overhead
-4. **Comparison with reference implementation** - video-to-ascii baseline
 
 **Expected outcome:** Targeted optimization approach
 

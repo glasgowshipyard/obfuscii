@@ -1,14 +1,19 @@
-.pyc
-.env
-.DS_Store
+# Python
+__pycache__/
 *.pyc
-videos
-.vscode
-dist
-video_to_ascii.egg-info
-build/
-test.py
+.pytest_cache/
+.venv/
+venv/
 env/
+.env
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Source videos and rendered frames
+videos/
 *.mp4
 *.mov
 *.avi
